@@ -63,3 +63,51 @@ Boş oluşturulan dokümantasyon dosyaları gerekli içeriklerle doldurulmak üz
 FRIDA veri setinin dokümantasyonu incelenecek; veri setinin görüntü yapısı, sis senaryoları, derinlik bilgisi ve sürekli görüş mesafesi regresyon etiketi üretimi açısından projeye uygunluğu araştırılacaktır.
 
 Literatür notları, araştırma önerisinde yer alan ilgili temel çalışmalar incelenerek doldurulacaktır.
+
+---
+
+# Gün 2 — Veri Seti Araştırması ve Envanter Çalışması
+
+## Tamamlanan Görevler
+
+- FRIDA2 veri setinin teknik dokümantasyonu incelendi.
+- FVEI veri setinin yapısı, etiketleme yöntemi ve erişilebilirliği araştırıldı.
+- FHVI veri setinin yapısı, görünürlük etiketi yaklaşımı ve proje açısından kullanılabilirliği değerlendirildi.
+- FRIDA, FRIDA2, FVEI ve FHVI veri setleri teknik açıdan karşılaştırıldı.
+- Veri seti seçim kriterleri belirlendi.
+- Veri stratejisini özetleyen **veri_seti_envanteri.md** dokümanı hazırlandı.
+
+## Bugün Öğrendiklerim
+
+FRIDA ve FRIDA2 veri setleri sentetik olmalarına rağmen kontrollü deney ortamı sağlamaları nedeniyle temel model eğitimi ve VGG16–ResNet50 karşılaştırması için uygun görünmektedir.
+
+FVEI veri seti gerçek otoyol görüntülerinden oluşmakta ve görüş mesafesi bilgisi içermesi nedeniyle gerçek dünya ince ayarı (fine-tuning) için önemli bir adaydır.
+
+FHVI veri seti de gerçek yol görüntüleri içermektedir; ancak temel olarak görünürlük seviyeleri üzerine odaklandığından sürekli görüş mesafesi regresyonu açısından FVEI'den farklı değerlendirilmektedir.
+
+## Alınan Teknik Kararlar
+
+- Başlangıç eğitiminde FRIDA ve FRIDA2 kullanılacaktır.
+- Model karşılaştırması tamamlandıktan sonra gerçek dünya değerlendirmesi için öncelikli olarak FVEI kullanılacaktır.
+- FHVI, erişim ve uygunluk durumuna bağlı olarak ek doğrulama veri seti olarak değerlendirilecektir.
+- Veri setlerinin projedeki rolleri **veri_seti_envanteri.md** dosyasında standartlaştırılmıştır.
+
+## Karşılaşılan Sorunlar
+
+Literatür incelemesi sırasında gerçek dünya veri setlerinin tamamının doğrudan indirilebilir olmadığı görüldü.
+
+Bazı veri setlerine erişim için yayın yazarlarıyla iletişim kurulması gerekebileceği belirlendi.
+
+## Uygulanan Çözümler
+
+Araştırma önerisinde belirtilen risk yönetimi yaklaşımı doğrultusunda, erişim problemi yaşanması durumunda veri seti sahipleri ile iletişime geçilmesi ve sentetik veri setleri üzerinde temel model geliştirme çalışmalarının kesintisiz sürdürülmesi planlandı.
+
+## Oluşturulan Dosyalar
+
+- `docs/research_notes/veri_seti_envanteri.md`
+
+## Sonraki Adım
+
+FRIDA veri seti indirilecek, dosya yapısı incelenecek ve veri bütünlüğü doğrulanacaktır.
+
+Görüntüler, derinlik haritaları ve klasör yapısı analiz edilerek veri hazırlama sürecine başlanacaktır.

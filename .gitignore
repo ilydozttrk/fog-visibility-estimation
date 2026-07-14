@@ -1,0 +1,50 @@
+# Python sanal ortamı
+.venv/
+venv/
+env/
+
+# Python önbellekleri
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Ortam değişkenleri
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+
+# Veri setleri
+data/raw/*
+data/interim/*
+data/processed/*
+
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Modeller ve checkpointler
+models/*
+!models/.gitkeep
+*.h5
+*.keras
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Deney çıktıları
+logs/
+runs/
+wandb/
+
+# Geçici dosyalar
+*.tmp
+*.log

@@ -111,3 +111,67 @@ Araştırma önerisinde belirtilen risk yönetimi yaklaşımı doğrultusunda, e
 FRIDA veri seti indirilecek, dosya yapısı incelenecek ve veri bütünlüğü doğrulanacaktır.
 
 Görüntüler, derinlik haritaları ve klasör yapısı analiz edilerek veri hazırlama sürecine başlanacaktır.
+
+---
+
+# Gün 3 — FRIDA Veri Setinin İndirilmesi ve Teknik Analizi
+
+## Tamamlanan Görevler
+
+- FRIDA veri seti resmî kaynağından indirildi.
+- Arşiv dosyası başarıyla çıkarıldı.
+- Veri setinin klasör ve dosya yapısı incelendi.
+- PNG görüntüleri ve FDD derinlik dosyaları tespit edildi.
+- Örnek görüntüler açılarak görsel kontrol gerçekleştirildi.
+- Etiket ve metadata yapısı incelendi.
+- `dataset_analysis.ipynb` notebook'u oluşturuldu ve çalıştırıldı.
+- Veri seti bütünlüğü otomatik kontrollerle doğrulandı.
+
+## Teknik Bulgular
+
+- Toplam dosya sayısı: 112
+- PNG görüntü sayısı: 90
+- FDD dosyası sayısı: 18
+- TXT dosyası sayısı: 3
+- MATLAB dosyası sayısı: 1
+- Görüntü çözünürlüğü: 640 × 480
+- Renk modu: RGB
+- Bozuk veya okunamayan PNG görüntüsü: 0
+- Çözünürlük ve renk modu dağılımları tutarlıdır.
+
+## Etiket Yapısı
+
+FRIDA veri setinde doğrudan kullanılabilecek `labels.csv` veya `annotations.json` benzeri bir sürekli görüş mesafesi etiketi bulunmadığı doğrulandı.
+
+`ImageOwners.txt` dosyasının yalnızca veri seti sahipliği, araştırma amaçlı kullanım koşulları ve iletişim bilgilerini içerdiği görüldü.
+
+Derinlik bilgileri `.fdd` formatındaki dosyalarda tutulmaktadır. Bu dosyaların yapısı ilerleyen veri hazırlama aşamalarında ayrıntılı olarak incelenecektir.
+
+## Alınan Teknik Kararlar
+
+- Ham veri üzerinde değişiklik yapılmayacaktır.
+- FRIDA dosyaları `data/raw/frida` altında korunacaktır.
+- Ham veri GitHub deposuna yüklenmeyecektir.
+- `dataset_analysis.ipynb`, veri setinin ilk teknik referans notebook'u olarak kullanılacaktır.
+- Regresyon hedeflerinin oluşturulması, araştırma önerisindeki yönteme bağlı olarak sonraki aşamalarda ele alınacaktır.
+
+## Sonuç
+
+FRIDA veri setinin eksiksiz ve okunabilir olduğu doğrulandı.
+
+Tüm otomatik kontroller uygun sonuç verdi:
+
+- Beklenen dosya dağılımı: UYGUN
+- Beklenen çözünürlük dağılımı: UYGUN
+- Beklenen renk modu dağılımı: UYGUN
+- Görüntü bütünlüğü: UYGUN
+
+Veri seti sonraki veri hazırlama çalışmalarına geçmek için teknik olarak hazırdır.
+
+## Oluşturulan Dosya
+
+- `notebooks/dataset_analysis.ipynb`
+
+## Sonraki Adım
+
+FRIDA veri setindeki görüntü, sahne ve derinlik dosyası ilişkileri ayrıntılı biçimde incelenecek; veri hazırlama ve regresyon hedefi oluşturma süreci için gerekli teknik yapı belirlenecektir.

@@ -175,3 +175,42 @@ Veri seti sonraki veri hazırlama çalışmalarına geçmek için teknik olarak 
 ## Sonraki Adım
 
 FRIDA veri setindeki görüntü, sahne ve derinlik dosyası ilişkileri ayrıntılı biçimde incelenecek; veri hazırlama ve regresyon hedefi oluşturma süreci için gerekli teknik yapı belirlenecektir.
+
+---
+
+# Gün 4 — Ön İşleme Pipeline Tasarımı
+
+## Tamamlanan Görevler
+
+- Görüntü ön işleme süreci literatür doğrultusunda incelendi.
+- VGG16 ve ResNet50 modelleri için ortak giriş boyutu değerlendirildi.
+- Görüntü yeniden boyutlandırma (resize) stratejisi belirlendi.
+- Model uyumlu normalizasyon yaklaşımı seçildi.
+- Veri hazırlama iş akışı (workflow) tasarlandı.
+- Eğitim, doğrulama ve test veri bölme stratejisi planlandı.
+- Ön işleme sürecini açıklayan `preprocessing_pipeline_taslagi.md` dokümanı oluşturuldu.
+
+## Bugün Öğrendiklerim
+
+Transfer öğrenme projelerinde ön işleme adımları model performansını doğrudan etkilemektedir.
+
+Görüntü boyutlandırma, normalizasyon ve veri bölme stratejilerinin model eğitiminden önce belirlenmesi deneylerin tekrarlanabilirliği ve adil model karşılaştırması açısından önem taşımaktadır.
+
+Ayrıca aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunmasının veri sızıntısına neden olabileceği görüldü.
+
+## Alınan Teknik Kararlar
+
+- Ham görüntüler korunacaktır.
+- Görüntüler ortak giriş boyutuna dönüştürülecektir.
+- Modele uygun resmi preprocessing yöntemi kullanılacaktır.
+- Veri bölme işlemi sahne bazlı gerçekleştirilecektir.
+- Veri artırma yalnızca eğitim kümesine uygulanacaktır.
+- Aynı ön işleme süreci hem VGG16 hem de ResNet50 modelleri için kullanılacaktır.
+
+## Oluşturulan Dosya
+
+- `docs/research_notes/preprocessing_pipeline_taslagi.md`
+
+## Sonraki Adım
+
+FRIDA veri seti için gerçek ön işleme kodu geliştirilecek ve `preprocessing.py` dosyasında görüntü okuma, yeniden boyutlandırma ve normalizasyon işlemleri uygulanacaktır.

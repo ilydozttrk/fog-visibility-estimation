@@ -48,3 +48,15 @@ wandb/
 # Geçici dosyalar
 *.tmp
 *.log
+
+# Processed datasets
+data/processed/
+
+# Dataset splits
+data/splits/
+
+# Model checkpoints
+checkpoints/
+
+# Training outputs
+results/

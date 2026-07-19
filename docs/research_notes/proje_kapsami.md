@@ -35,7 +35,11 @@ MAE değeri, metre cinsinden görüş mesafesi tahmin hatasını değerlendirmek
 - FVEI
 - FHVI
 
-FRIDA ve FRIDA2 sentetik veri setleri model geliştirme ve başlangıç eğitim sürecinde kullanılacaktır.
+FRIDA ve FRIDA2 veri setleri kullanılarak derinlik haritaları üzerinden farklı görüş mesafelerini temsil eden sentetik görüntüler oluşturulmuştur.
+
+Oluşturulan veri kümesi toplam **84 sahne** ve **672 sentetik görüntüden** oluşmaktadır. Bu veri kümesi model geliştirme ve başlangıç eğitim sürecinde kullanılacaktır.
+
+FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk durumları araştırılacaktır. Uygun gerçek dünya verileri modelin ince ayar (Fine-Tuning) ve gerçek dünya koşullarındaki performans değerlendirmesinde kullanılacaktır.
 
 FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk durumları araştırılacaktır. Uygun gerçek dünya verileri, modelin ince ayar ve gerçek dünya koşullarındaki değerlendirme süreçlerinde kullanılacaktır.
 
@@ -50,7 +54,7 @@ Modellerin orijinal sınıflandırma katmanları kaldırılacak ve sürekli bir 
 
 ## Model Karşılaştırma Yaklaşımı
 
-VGG16 ve ResNet50 modelleri mümkün olduğunca aynı veri seti, veri ayrımı ve eğitim koşulları altında değerlendirilecektir.
+VGG16 ve ResNet50 modelleri aynı sentetik veri kümesi, aynı sahne bazlı eğitim/doğrulama/test ayrımı ve aynı eğitim parametreleri altında değerlendirilecektir.
 
 Modellerin temel performans karşılaştırması test veri seti üzerinde elde edilen MAE değerleri kullanılarak gerçekleştirilecektir.
 
@@ -89,6 +93,7 @@ Tahmin edilen görüş mesafesi sonucu kullanıcı arayüzünde gösterilecektir
 - Web prototipi basit ve fonksiyonel tutulacaktır.
 - Flask API, model tahmininin web tabanlı kullanımını göstermek amacıyla kullanılacaktır.
 - Proje uygulaması onaylanan TÜBİTAK 2209-A araştırma önerisinin bilimsel kapsamı dışına çıkmayacaktır.
+- Eğitim sürecinde veri sızıntısını önlemek amacıyla eğitim, doğrulama ve test ayrımı sahne bazlı gerçekleştirilecektir.
 
 ## Proje Uygulama İlkesi
 

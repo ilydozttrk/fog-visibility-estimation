@@ -198,6 +198,8 @@ Görüntü boyutlandırma, normalizasyon ve veri bölme stratejilerinin model e�
 
 Ayrıca aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunmasının veri sızıntısına neden olabileceği görüldü.
 
+Bu nedenle eğitim, doğrulama ve test ayrımının sahne bazlı yapılmasına karar verildi.
+
 ## Alınan Teknik Kararlar
 
 - Ham görüntüler korunacaktır.
@@ -209,8 +211,91 @@ Ayrıca aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunm
 
 ## Oluşturulan Dosya
 
-- `docs/research_notes/preprocessing_pipeline_taslagi.md`
+- `docs/research_notes/preprocessing_pipeline.md`
 
 ## Sonraki Adım
 
 FRIDA veri seti için gerçek ön işleme kodu geliştirilecek ve `preprocessing.py` dosyasında görüntü okuma, yeniden boyutlandırma ve normalizasyon işlemleri uygulanacaktır.
+
+# Gün 5 – Sentetik Veri Kümesinin Oluşturulması
+
+## Bugün Öğrendiklerim
+
+FRIDA ve FRIDA2 veri setleri doğrudan sürekli görüş mesafesi regresyonu için yeterli çeşitlilikte etiket içermemektedir. Bu nedenle derinlik haritalarından yararlanılarak farklı görüş mesafelerini temsil eden sentetik görüntüler üretilebileceği öğrenildi.
+
+Atmosferik saçılım modeli kullanılarak açık hava görüntülerinden farklı sis yoğunluklarında yeni görüntüler üretilebilmekte ve her görüntüye karşılık gelen görüş mesafesi değeri doğrudan etiket olarak kullanılabilmektedir. Böylece regresyon problemi için sürekli etiketlere sahip bir veri kümesi oluşturulabilmektedir.
+
+Ayrıca veri üretim sürecinin doğrulanmasının, model eğitimine geçmeden önce olası veri hatalarının erken tespit edilmesi açısından önemli olduğu görüldü.
+
+---
+
+## Alınan Teknik Kararlar
+
+- FRIDA ve FRIDA2 veri setleri birlikte kullanılmasına karar verildi.
+- Görüş mesafesi seviyeleri **50, 80, 100, 150, 200, 300, 500 ve 800 metre** olarak belirlendi.
+- Atmosferik saçılım modeli kullanılarak sentetik sis görüntüleri üretildi.
+- Üretilen görüntülere ait görüş mesafesi etiketleri `labels.csv` dosyasında saklandı.
+- Veri kümesinin doğruluğunu kontrol etmek amacıyla ayrı bir doğrulama betiği geliştirildi. (verify_generated_dataset.py)
+
+---
+
+## Karşılaşılan Durumlar
+
+İlk veri üretim denemesinde FRIDA veri setindeki `.fdd` dosyalarının başında bulunan MATLAB yorum satırları nedeniyle okuma hatası oluştu. Derinlik haritaları okunurken yorum satırlarının göz ardı edilmesi sağlanarak problem giderildi.
+
+Düzeltmenin ardından FRIDA ve FRIDA2 veri setleri başarıyla işlendi. FRIDA ve FRIDA2 veri setlerinde yer alan toplam 84 temel sahne kullanılarak, her sahne için sekiz farklı görüş mesafesi oluşturulmuş ve toplam 672 sentetik görüntü üretilmiştir. Veri doğrulama sürecinde eksik dosya veya hatalı etiket bulunmadığı doğrulandı.
+
+---
+
+## Gün Sonu Değerlendirmesi
+
+Bugün proje kapsamında kullanılacak sentetik veri kümesi başarıyla oluşturuldu ve doğrulandı. Elde edilen veri kümesi sürekli görüş mesafesi etiketleriyle birlikte model eğitimine hazır hâle getirildi. Bir sonraki aşamada bu veri kümesini PyTorch tabanlı veri yükleme altyapısına entegre ederek model eğitim sürecine geçilecektir.
+
+---
+
+## Oluşturulan Dosyalar
+
+- src/data/generate_visibility_dataset.py
+- src/data/verify_generated_dataset.py
+- data/generated/labels.csv
+
+# Gün 6 – Veri Yükleme Altyapısı
+
+## Bugün Öğrendiklerim
+
+Transfer öğrenme tabanlı derin öğrenme modellerinde veri yükleme süreci, model eğitiminin temel bileşenlerinden biridir. Görüntülerin standart bir boyuta dönüştürülmesi, uygun normalizasyon işlemlerinin uygulanması ve etiketlerle birlikte doğru şekilde modele aktarılması, eğitim sürecinin güvenilir ve tekrarlanabilir olmasını sağlamaktadır.
+
+PyTorch'un `Dataset` ve `DataLoader` yapıları sayesinde büyük veri kümeleri bellek kullanımını optimize edecek şekilde yönetilebilmekte, veriler eğitim sırasında batch'ler hâlinde modele aktarılabilmektedir.
+
+Ayrıca regresyon problemlerinde etiketlerin `float32` veri tipinde tutulmasının, modelin sürekli görüş mesafesi değerlerini doğru şekilde öğrenebilmesi açısından önemli olduğu görüldü.
+
+---
+
+## Alınan Teknik Kararlar
+
+- PyTorch tabanlı özel bir `FogVisibilityDataset` sınıfı geliştirildi.
+- Görüntüler eğitim öncesinde **224×224** piksel boyutuna yeniden ölçeklendirildi.
+- VGG16 ve ResNet50 ile uyumluluk sağlamak amacıyla **ImageNet normalizasyonu** kullanıldı.
+- Görüş mesafesi etiketleri `float32` veri tipinde tutuldu.
+- DataLoader için başlangıç aşamasında `batch_size=16` ve `num_workers=0` değerleri tercih edildi. `batch_size=16` başlangıç değeri olarak seçilmiş olup deneysel sonuçlara göre ilerleyen aşamalarda güncellenebilecektir.
+- Veri kümesi `labels.csv` dosyası üzerinden okunacak şekilde yapılandırıldı.
+
+---
+
+## Karşılaşılan Durumlar
+
+DataLoader testleri sırasında veri kümesindeki **672 görüntünün** tamamının başarıyla yüklendiği doğrulandı. Oluşturulan veri paketlerinin `(16, 3, 224, 224)` boyutunda olduğu ve görüş mesafesi etiketlerinin **50 m ile 800 m** arasında doğru şekilde modele aktarıldığı görüldü.
+
+PyTorch tarafından verilen `pin_memory` uyarısının hata olmadığı, yalnızca sistemde CUDA destekli bir GPU bulunmadığı için belleğin sabitlenmediğini ifade ettiği belirlendi. Bu nedenle mevcut CPU tabanlı geliştirme ortamında herhangi bir değişiklik yapılmasına gerek görülmedi.
+
+---
+
+## Gün Sonu Değerlendirmesi
+
+Bugün geliştirilen veri yükleme altyapısı sayesinde sentetik veri kümesi PyTorch modelleri tarafından doğrudan kullanılabilecek duruma getirildi. Böylece veri hazırlama süreci tamamlanmış oldu. Bir sonraki aşamada oluşturulan DataLoader kullanılarak VGG16 tabanlı temel modelin eğitilmesine başlanacaktır.
+
+---
+
+## Oluşturulan Dosyalar
+
+- src/training/dataloader.py

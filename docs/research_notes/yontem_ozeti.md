@@ -1,63 +1,96 @@
 # Yöntem Özeti
 
-## Aşama 1 — Veri Seti Hazırlığı ve Normalizasyon
+## Aşama 1 — Veri Seti Analizi ve Hazırlığı
 
-FRIDA ve FRIDA2 sentetik veri setleri incelenecek ve veri havuzuna dahil edilecektir.
+Proje kapsamında öncelikle FRIDA ve FRIDA2 sentetik veri setleri detaylı olarak analiz edilmiştir.
 
-Veri setlerinin klasör yapısı, görüntü formatları ve derinlik bilgileri analiz edilecektir.
+Her iki veri setindeki açık hava görüntüleri, derinlik haritaları ve klasör yapıları incelenmiş; model eğitiminde kullanılacak görüntüler doğrulanmıştır.
 
-Derinlik haritalarından sürekli görüş mesafesi regresyon etiketlerinin türetilmesi planlanmaktadır.
+FRIDA veri setinden **18**, FRIDA2 veri setinden **66** temel sahne olmak üzere toplam **84 sahne** belirlenmiştir.
 
-Görüntüler için gerekli veri ön işleme ve normalizasyon adımları belirlenecektir.
+Hazır sürekli görüş mesafesi etiketleri bulunmadığından, araştırma önerisinde planlandığı şekilde derinlik haritaları kullanılarak yeni regresyon hedefleri oluşturulmuştur.
 
-## Aşama 2 — Eğitim, Doğrulama ve Test Veri Ayrımı
+Atmosferik saçılım modeli uygulanarak her sahne için aşağıdaki görüş mesafelerini temsil eden sentetik görüntüler üretilmiştir.
 
-Hazırlanan veri seti üç ana bölüme ayrılacaktır.
+- 50 m
+- 80 m
+- 100 m
+- 150 m
+- 200 m
+- 300 m
+- 500 m
+- 800 m
 
-- Eğitim kümesi: Veri setinin yaklaşık %70–80'i.
-- Doğrulama kümesi: Veri setinin yaklaşık %10–15'i.
-- Test kümesi: Kalan veri örnekleri.
+Bu süreç sonunda toplam **672 sentetik görüntüden** oluşan yeni bir veri kümesi hazırlanmış ve tüm etiketler `labels.csv` dosyasında saklanmıştır.
 
-Eğitim kümesi modellerin öğrenme sürecinde kullanılacaktır.
+Üretilen veri kümesi doğrulanmış, eksik dosya ve hatalı etiket kontrolü başarıyla tamamlanmıştır.
 
-Doğrulama kümesi model performansının takibi ve hiperparametre ayarlarında kullanılacaktır.
+---
 
-Test kümesi yalnızca eğitim ve optimizasyon tamamlandıktan sonra modellerin genelleme yeteneğinin objektif olarak değerlendirilmesi amacıyla kullanılacaktır.
+## Aşama 2 — Veri Ön İşleme ve Veri Yükleme
 
-## Aşama 3 — Transfer Öğrenme ile Model Adaptasyonu
+Üretilen veri kümesi model eğitimine uygun hâle getirilmiştir.
+
+Bu kapsamda;
+
+- görüntüler **224×224** piksel boyutuna yeniden ölçeklendirilmiştir,
+- RGB formatına dönüştürülmüştür,
+- ImageNet ortalama ve standart sapma değerleri kullanılarak normalize edilmiştir.
+
+Model eğitiminde kullanılmak üzere PyTorch tabanlı özel bir `FogVisibilityDataset` sınıfı geliştirilmiş ve veri kümesinin batch'ler hâlinde yüklenmesini sağlayan `DataLoader` altyapısı hazırlanmıştır.
+
+Bu yapı ilerleyen aşamalarda VGG16, ResNet50 ve Attention tabanlı modeller tarafından ortak olarak kullanılacaktır.
+
+---
+
+## Aşama 3 — Eğitim, Doğrulama ve Test Veri Ayrımı
+
+Hazırlanan veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılacaktır.
+
+Planlanan veri dağılımı aşağıdaki şekildedir.
+
+- Eğitim kümesi: %70–80
+- Doğrulama kümesi: %10–15
+- Test kümesi: %10–15
+
+Sahne bazlı ayrım uygulanarak aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunması engellenecek ve veri sızıntısının önüne geçilecektir.
+
+---
+
+## Aşama 4 — Transfer Öğrenme ile Model Adaptasyonu
 
 VGG16 ve ResNet50 modelleri ImageNet üzerinde önceden eğitilmiş ağırlıklarla yüklenecektir.
 
-Modellerin evrişimsel özellik çıkarıcı katmanları başlangıç aşamasında dondurulacaktır.
+Başlangıç aşamasında evrişimsel katmanlar korunacak, son sınıflandırma katmanları kaldırılarak tek çıkışlı regresyon başlığı eklenecektir.
 
-Orijinal sınıflandırma katmanları kaldırılacaktır.
+Modeller oluşturulan sentetik veri kümesi üzerinde eğitilecek ve kayıp fonksiyonu olarak Ortalama Mutlak Hata (MAE) kullanılacaktır.
 
-Modellere sürekli bir görüş mesafesi değeri tahmin eden tek çıkışlı regresyon başlığı eklenecektir.
+---
 
-Modeller FRIDA ve FRIDA2 veri setlerinden elde edilen regresyon etiketleri kullanılarak eğitilecektir.
+## Aşama 5 — Model Karşılaştırması ve Attention Mekanizması
 
-Kayıp fonksiyonu olarak MAE kullanılacaktır.
+VGG16 ve ResNet50 modellerinin performansı test veri kümesi üzerinde MAE metriği kullanılarak karşılaştırılacaktır.
 
-## Aşama 4 — Model Karşılaştırması ve Dikkat Mekanizması
+En başarılı temel model seçildikten sonra modele Attention mekanizması entegre edilecektir.
 
-VGG16 ve ResNet50 modellerinin performansı test veri seti üzerinde MAE metriği kullanılarak karşılaştırılacaktır.
+Attention mekanizmasının görüntü içerisindeki önemli bölgeleri daha etkili şekilde öğrenmesi ve görüş mesafesi tahmin doğruluğunu artırması hedeflenmektedir.
 
-En düşük MAE değerini sağlayan model nihai temel mimari olarak seçilecektir.
+Elde edilen sonuçlar temel model ile karşılaştırılarak raporlanacaktır.
 
-Seçilen modele bir Dikkat Mekanizması entegre edilecektir.
+---
 
-Dikkat Mekanizmasının modelin görüntülerdeki kritik uzamsal bölgelere odaklanması ve MAE değerini iyileştirmesi hedeflenmektedir.
+## Aşama 6 — Gerçek Dünya Değerlendirmesi
 
-Dikkat Mekanizmasının MAE üzerindeki etkisi temel model ile karşılaştırılarak raporlanacaktır.
+Gerçek dünya veri setlerine erişim sağlanması durumunda model FVEI ve/veya FHVI veri setleri üzerinde Fine-Tuning işlemine tabi tutulacaktır.
 
-## Aşama 5 — Web Tabanlı Prototip
+Bu aşamada modelin sentetik veriden gerçek yol görüntülerine genelleme başarısı değerlendirilecektir.
 
-Optimize edilen nihai model Flask API kullanılarak bir web sunucusuna entegre edilecektir.
+---
 
-HTML ve CSS kullanılarak basit bir kullanıcı arayüzü geliştirilecektir.
+## Aşama 7 — Web Tabanlı Prototip
 
-Kullanıcı sisteme bir görüntü yükleyebilecektir.
+En başarılı model Flask tabanlı web uygulamasına entegre edilecektir.
 
-Model yüklenen görüntü üzerinden görüş mesafesi tahmini gerçekleştirecektir.
+HTML ve CSS kullanılarak geliştirilecek kullanıcı arayüzü üzerinden kullanıcı sisteme görüntü yükleyebilecek ve model ilgili görüntü için görüş mesafesi tahminini gerçekleştirecektir.
 
-Tahmin sonucu kullanıcı arayüzünde gösterilecektir.
+Tahmin edilen görüş mesafesi kullanıcı arayüzünde gösterilecek ve böylece proje çıktılarının uygulamalı olarak gösterilebildiği işlevsel bir prototip elde edilecektir.

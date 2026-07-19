@@ -60,3 +60,6 @@ checkpoints/
 
 # Training outputs
 results/
+
+# Generated synthetic dataset
+data/generated/images/

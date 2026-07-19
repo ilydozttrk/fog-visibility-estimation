@@ -2,11 +2,11 @@
 
 ## 1. Amaç
 
-Bu doküman, TÜBİTAK 2209-A projesi kapsamında kullanılacak veri setlerinin teknik özelliklerini, projedeki rollerini ve seçim gerekçelerini özetlemek amacıyla hazırlanmıştır.
+Bu doküman, TÜBİTAK 2209-A projesi kapsamında kullanılan veri setlerinin teknik özelliklerini, projedeki rollerini, seçim gerekçelerini ve veri hazırlama sürecini özetlemek amacıyla hazırlanmıştır.
 
-Projenin temel amacı; sisli hava koşullarında görüntü tabanlı sürekli görüş mesafesi tahmini gerçekleştirmek için transfer öğrenme tabanlı VGG16 ve ResNet50 mimarilerini karşılaştırmak ve en başarılı modele dikkat (Attention) mekanizması entegre etmektir.
+Projenin temel amacı; sisli hava koşullarında görüntü tabanlı sürekli görüş mesafesi tahmini gerçekleştirmek için transfer öğrenme tabanlı VGG16 ve ResNet50 mimarilerini karşılaştırmak ve en başarılı modele Attention (Dikkat) mekanizması entegre etmektir.
 
-Bu doğrultuda kullanılacak veri setlerinin hem bilimsel hem de teknik açıdan değerlendirilmesi gerekmektedir.
+Bu doğrultuda kullanılacak veri setlerinin hem bilimsel hem de teknik açıdan değerlendirilmesi, veri hazırlama sürecinin belgelenmesi ve model eğitimine uygun veri yapısının oluşturulması hedeflenmiştir.
 
 ---
 
@@ -14,36 +14,35 @@ Bu doğrultuda kullanılacak veri setlerinin hem bilimsel hem de teknik açıdan
 
 Projede iki aşamalı veri stratejisi benimsenmiştir.
 
-## Aşama 1
+## Aşama 1 — Sentetik Veri ile Temel Model Eğitimi
 
-Sentetik veri kullanılarak temel model eğitimi.
-
-Kullanılacak veri setleri:
+Kullanılan veri setleri
 
 - FRIDA
 - FRIDA2
 
-Amaç:
+Amaç
 
-- modellerin sis etkisini öğrenmesi
-- kontrollü karşılaştırma yapılması
-- VGG16 ve ResNet50'nin aynı koşullarda eğitilmesi
+- Kontrollü eğitim ortamı oluşturmak
+- VGG16 ve ResNet50 modellerini aynı koşullarda karşılaştırmak
+- Sürekli görüş mesafesi regresyonu için etiketlenmiş sentetik veri kümesi oluşturmak
+
+Bu aşamada FRIDA ve FRIDA2 veri setlerinde bulunan açık hava görüntüleri ve derinlik haritaları kullanılarak farklı görüş mesafelerini temsil eden yeni sentetik görüntüler oluşturulmuştur.
 
 ---
 
-## Aşama 2
+## Aşama 2 — Gerçek Dünya Verileri ile Fine-Tuning
 
-Gerçek dünya verileri ile ince ayar (Fine-Tuning) ve değerlendirme.
-
-Kullanılacak veri setleri:
+Kullanılması planlanan veri setleri
 
 - FVEI
-- FHVI (erişim ve uygunluk durumuna bağlı)
+- FHVI (erişilebilirlik durumuna bağlı)
 
-Amaç:
+Amaç
 
-- gerçek yol görüntülerinde model performansını değerlendirmek
-- sentetik veriden gerçek dünyaya geçiş başarısını ölçmek
+- Gerçek yol görüntülerinde model performansını değerlendirmek
+- Sentetik veriden gerçek dünyaya geçiş başarısını analiz etmek
+- Modelin genelleme yeteneğini artırmak
 
 ---
 
@@ -57,30 +56,30 @@ Sentetik
 
 ### Kullanım Amacı
 
-Sis giderme, görünürlük iyileştirme ve görüntü işleme algoritmalarının değerlendirilmesi.
+Sisli ortamların kontrollü olarak modellenmesi ve temel eğitim verisinin oluşturulması.
 
 ### İçerik
 
 - 18 temel yol sahnesi
-- yaklaşık 90 görüntü
-- depth map
-- farklı sis türleri
+- RGB görüntüler
+- Derinlik haritaları (.fdd)
+- Açık hava referans görüntüleri
 
 ### Avantajları
 
-- kontrollü ortam
-- depth map
-- farklı sis senaryoları
+- Kontrollü ortam
+- Derinlik haritası içermesi
+- Fiziksel sis modeli uygulanabilmesi
 
 ### Dezavantajları
 
-- küçük veri seti
-- gerçek dünya değildir
-- hazır görüş mesafesi etiketi içermez
+- Küçük veri seti
+- Gerçek dünya verisi değildir
+- Hazır sürekli görüş mesafesi etiketi içermez
 
 ### Projedeki Rolü
 
-Başlangıç eğitimi.
+Sentetik veri üretiminin başlangıç veri seti.
 
 ---
 
@@ -92,29 +91,29 @@ Sentetik
 
 ### Kullanım Amacı
 
-FRIDA'nın geliştirilmiş sürümü.
+Ana sentetik eğitim veri seti.
 
 ### İçerik
 
-- 66 temel sahne
-- yaklaşık 330 görüntü
-- depth map
-- dört farklı sis türü
+- 66 temel yol sahnesi
+- RGB görüntüler
+- Derinlik haritaları
+- Açık hava referans görüntüleri
 
 ### Avantajları
 
-- daha büyük
-- daha çeşitli
-- daha fazla eğitim örneği
+- Daha fazla sahne
+- Daha çeşitli yol görüntüleri
+- Derinlik haritası desteği
 
 ### Dezavantajları
 
-- sentetik veri
-- hazır sürekli görüş mesafesi etiketi içermez
+- Gerçek dünya verisi değildir
+- Hazır sürekli görüş mesafesi etiketi içermez
 
 ### Projedeki Rolü
 
-Ana sentetik eğitim veri seti.
+Sentetik veri kümesinin büyük bölümünü oluşturmaktadır.
 
 ---
 
@@ -126,32 +125,17 @@ Gerçek Dünya
 
 ### Kullanım Amacı
 
-Görüntü tabanlı görüş mesafesi tahmini.
-
-### İçerik
-
-Yaklaşık 15.000 gerçek otoyol görüntüsü.
-
-Her görüntü için
-
-- sis seviyesi
-- görüş mesafesi
-
-etiketi bulunmaktadır.
+Fine-Tuning ve gerçek dünya performans değerlendirmesi.
 
 ### Avantajları
 
-- gerçek veri
-- büyük veri seti
-- uzman etiketleme
+- Gerçek yol görüntüleri
+- Sürekli görüş mesafesi bilgisi
+- Gerçek trafik koşulları
 
 ### Dezavantajları
 
-- erişim kısıtlı olabilir
-
-### Projedeki Rolü
-
-Fine-Tuning ve gerçek dünya değerlendirmesi.
+- Erişim kısıtlı olabilir
 
 ---
 
@@ -163,59 +147,94 @@ Gerçek Dünya
 
 ### Kullanım Amacı
 
-Gerçek otoyol görüntülerinde görünürlük seviyesi tahmini.
-
-### İçerik
-
-Meteoroloji istasyonları ile ilişkilendirilmiş gerçek yol görüntüleri.
+Alternatif gerçek dünya doğrulama veri seti.
 
 ### Avantajları
 
-- gerçek veri
-- meteorolojik doğrulama
-- uzman etiketleme
+- Gerçek meteorolojik koşullar
+- Gerçek trafik görüntüleri
 
 ### Dezavantajları
 
-- sürekli görüş mesafesi yerine görünürlük seviyesi kullanmaktadır.
-
-### Projedeki Rolü
-
-Alternatif gerçek dünya doğrulama veri seti.
+- Sürekli regresyon etiketi sınırlıdır
+- Erişim durumu değişken olabilir
 
 ---
 
-# 4. Veri Setlerinin Karşılaştırılması
+# 4. Oluşturulan Sentetik Veri Kümesi
+
+FRIDA ve FRIDA2 veri setlerinde doğrudan sürekli görüş mesafesi etiketleri bulunmadığından proje kapsamında yeni bir sentetik veri kümesi oluşturulmuştur.
+
+Veri üretim sürecinde
+
+- açık hava görüntüleri
+- derinlik haritaları
+- atmosferik saçılım modeli
+
+birlikte kullanılmıştır.
+
+Her temel sahne için aşağıdaki görüş mesafeleri oluşturulmuştur.
+
+- 50 m
+- 80 m
+- 100 m
+- 150 m
+- 200 m
+- 300 m
+- 500 m
+- 800 m
+
+### Toplam Sahne Sayısı
+
+| Veri Seti | Sahne |
+|-----------|------:|
+| FRIDA | 18 |
+| FRIDA2 | 66 |
+| **Toplam** | **84** |
+
+### Üretilen Görüntü Sayısı
+
+84 sahne × 8 görüş mesafesi
+
+= **672 sentetik görüntü**
+
+---
+
+# 5. Etiket Yapısı
+
+Üretilen veri kümesine ait bilgiler `labels.csv` dosyasında tutulmaktadır.
+
+Dosya aşağıdaki alanlardan oluşmaktadır.
+
+| Alan | Açıklama |
+|------|----------|
+| filename | Görüntü yolu |
+| visibility_m | Görüş mesafesi (metre) |
+| scene_id | Sahne numarası |
+| source_dataset | FRIDA / FRIDA2 |
+| beta | Atmosferik saçılım katsayısı |
+| clear_image | Kullanılan açık hava görüntüsü |
+| depth_map | Kullanılan derinlik haritası |
+
+Bu yapı sayesinde veri kümesi doğrudan PyTorch DataLoader tarafından okunabilmektedir.
+
+---
+
+# 6. Veri Setlerinin Karşılaştırılması
 
 | Özellik | FRIDA | FRIDA2 | FVEI | FHVI |
 |----------|--------|---------|---------|---------|
 | Veri Türü | Sentetik | Sentetik | Gerçek | Gerçek |
-| Yol Görüntüsü | ✓ | ✓ | ✓ | ✓ |
+| RGB Görüntü | ✓ | ✓ | ✓ | ✓ |
 | Depth Map | ✓ | ✓ | ✗ | ✗ |
 | Hazır Visibility Etiketi | ✗ | ✗ | ✓ | Kısmen |
-| Sürekli Regresyon | Etiket üretilecek | Etiket üretilecek | ✓ | Sınırlı |
+| Sürekli Regresyon | Projede üretildi | Projede üretildi | ✓ | Sınırlı |
 | Fine-Tuning | ✗ | ✗ | ✓ | Kısmen |
 | Başlangıç Eğitimi | ✓ | ✓ | ✗ | ✗ |
 
 ---
 
-# 5. Veri Seti Seçim Kriterleri
-
-Veri setleri aşağıdaki kriterlere göre değerlendirilmiştir.
-
-- Araştırma problemine uygunluk
-- Sürekli görüş mesafesi tahmini yapılabilmesi
-- Transfer öğrenme için uygunluk
-- Veri çeşitliliği
-- Görüntü kalitesi
-- Etiket güvenilirliği
-- Gerçek dünya temsil gücü
-- Akademik çalışmalarda yaygın kullanımı
-- Erişilebilirlik
-
----
-
-# 6. Projede Kullanım Sırası
+# 7. Projede Kullanım Sırası
 
 ```
 FRIDA
@@ -224,7 +243,22 @@ FRIDA
 FRIDA2
       │
       ▼
-Veri Hazırlama
+Sahne Eşleştirme
+      │
+      ▼
+Derinlik Haritaları
+      │
+      ▼
+Sentetik Veri Üretimi
+      │
+      ▼
+labels.csv
+      │
+      ▼
+PyTorch Dataset
+      │
+      ▼
+DataLoader
       │
       ▼
 VGG16 Eğitimi
@@ -239,10 +273,10 @@ Model Karşılaştırması
 Attention
       │
       ▼
-FVEI
+FVEI / FHVI
       │
       ▼
-Gerçek Dünya Fine-Tuning
+Fine-Tuning
       │
       ▼
 Flask Prototipi
@@ -250,44 +284,42 @@ Flask Prototipi
 
 ---
 
-# 7. Olası Riskler
+# 8. Olası Riskler
 
 ## Risk 1
 
 Gerçek dünya veri setlerine erişimin kısıtlı olması.
 
-Çözüm:
+**Çözüm**
 
-Araştırma önerisinde belirtildiği gibi yayın yazarları ile iletişime geçilebilir.
+Araştırma önerisinde belirtildiği şekilde veri seti sahipleriyle iletişime geçilecek veya erişilebilir alternatif veri setleri değerlendirilecektir.
 
 ---
 
 ## Risk 2
 
-Sentetik veriden gerçek dünyaya geçişte performans kaybı.
+Sentetik veriden gerçek dünyaya geçişte performans kaybı yaşanması.
 
-Çözüm:
+**Çözüm**
 
-Fine-Tuning uygulanacaktır.
+Fine-Tuning uygulanarak model gerçek dünya görüntülerine adapte edilecektir.
 
 ---
 
 ## Risk 3
 
-FRIDA ve FRIDA2 veri setlerinde doğrudan sürekli görüş mesafesi etiketi bulunmaması.
+FRIDA ve FRIDA2 veri setlerinde hazır sürekli görüş mesafesi etiketi bulunmaması.
 
-Çözüm:
+**Çözüm**
 
-Araştırma önerisinde planlandığı şekilde derinlik haritaları kullanılarak uygun regresyon hedefleri oluşturulacaktır.
+Derinlik haritaları kullanılarak atmosferik saçılım modeli uygulanmış ve sürekli görüş mesafesi etiketlerine sahip sentetik veri kümesi oluşturulmuştur.
 
 ---
 
-# 8. Sonuç
+# 9. Sonuç
 
-Mevcut incelemeler doğrultusunda proje veri stratejisi bilimsel olarak uygun görünmektedir.
+Proje kapsamında oluşturulan veri stratejisi araştırma önerisiyle uyumludur.
 
-FRIDA ve FRIDA2 veri setleri kontrollü başlangıç eğitimi için yeterli altyapıyı sağlamaktadır.
+FRIDA ve FRIDA2 veri setlerinden yararlanılarak toplam **84 sahneden oluşan**, **672 görüntü içeren** sürekli görüş mesafesi etiketli sentetik veri kümesi hazırlanmıştır. Bu veri kümesi PyTorch tabanlı veri yükleme altyapısına entegre edilmiş olup VGG16 ve ResNet50 modellerinin eğitiminde kullanılmaya hazır durumdadır.
 
-Gerçek dünya genellemesi ise FVEI ve gerektiğinde FHVI veri setleri ile desteklenecektir.
-
-Bu yaklaşım, araştırma önerisinde tanımlanan proje metodolojisi ile uyumludur.
+İlerleyen aşamada gerçek dünya veri setleri kullanılarak fine-tuning ve performans değerlendirme çalışmaları gerçekleştirilecektir.

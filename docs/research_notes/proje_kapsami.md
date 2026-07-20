@@ -37,9 +37,15 @@ MAE değeri, metre cinsinden görüş mesafesi tahmin hatasını değerlendirmek
 
 FRIDA ve FRIDA2 veri setleri kullanılarak derinlik haritaları üzerinden farklı görüş mesafelerini temsil eden sentetik görüntüler oluşturulmuştur.
 
-Oluşturulan veri kümesi toplam **84 sahne** ve **672 sentetik görüntüden** oluşmaktadır. Bu veri kümesi model geliştirme ve başlangıç eğitim sürecinde kullanılacaktır.
+Oluşturulan veri kümesi toplam **84 sahne** ve **672 sentetik görüntüden** oluşmaktadır. Bu veri kümesi model geliştirme ve başlangıç eğitim sürecinde kullanılmaktadır.
 
-FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk durumları araştırılacaktır. Uygun gerçek dünya verileri modelin ince ayar (Fine-Tuning) ve gerçek dünya koşullarındaki performans değerlendirmesinde kullanılacaktır.
+Hazırlanan sentetik veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılmıştır. Aynı temel sahneye ait tüm görüş mesafesi varyasyonları aynı alt kümede tutulmuş ve böylece veri sızıntısının önüne geçilmiştir.
+
+Uygulanan veri dağılımı aşağıdaki şekildedir:
+
+- Eğitim kümesi: **464 görüntü**
+- Doğrulama kümesi: **96 görüntü**
+- Test kümesi: **112 görüntü**
 
 FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk durumları araştırılacaktır. Uygun gerçek dünya verileri, modelin ince ayar ve gerçek dünya koşullarındaki değerlendirme süreçlerinde kullanılacaktır.
 
@@ -52,9 +58,19 @@ Her iki model de ImageNet üzerinde önceden eğitilmiş ağırlıklarla transfe
 
 Modellerin orijinal sınıflandırma katmanları kaldırılacak ve sürekli bir görüş mesafesi değeri tahmin eden regresyon çıkışı kullanılacaktır.
 
+VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir. Modelin evrişimsel backbone katmanları dondurulmuş ve orijinal sınıflandırma başlığı, tek bir görüş mesafesi değeri üreten regresyon başlığı ile değiştirilmiştir.
+
+VGG16 için eğitim, doğrulama ve checkpoint kayıt süreçlerini içeren temel eğitim altyapısı geliştirilmiş ve bir epoch'luk başlangıç testi başarıyla tamamlanmıştır.
+
+Aynı transfer öğrenme ve regresyon yaklaşımı ilerleyen aşamada ResNet50 mimarisi için de uygulanacaktır.
+
 ## Model Karşılaştırma Yaklaşımı
 
 VGG16 ve ResNet50 modelleri aynı sentetik veri kümesi, aynı sahne bazlı eğitim/doğrulama/test ayrımı ve aynı eğitim parametreleri altında değerlendirilecektir.
+
+Adil ve tekrarlanabilir bir karşılaştırma sağlamak amacıyla modellerde aynı görüntü boyutu, normalizasyon yaklaşımı, batch büyüklüğü, veri ayrımı, rastgelelik tohumu ve temel değerlendirme metriği kullanılacaktır.
+
+Deney parametreleri merkezi bir yapılandırma dosyasında tutulmakta ve deneylerin tekrarlanabilirliği için sabit rastgelelik tohumu kullanılmaktadır.
 
 Modellerin temel performans karşılaştırması test veri seti üzerinde elde edilen MAE değerleri kullanılarak gerçekleştirilecektir.
 
@@ -94,6 +110,10 @@ Tahmin edilen görüş mesafesi sonucu kullanıcı arayüzünde gösterilecektir
 - Flask API, model tahmininin web tabanlı kullanımını göstermek amacıyla kullanılacaktır.
 - Proje uygulaması onaylanan TÜBİTAK 2209-A araştırma önerisinin bilimsel kapsamı dışına çıkmayacaktır.
 - Eğitim sürecinde veri sızıntısını önlemek amacıyla eğitim, doğrulama ve test ayrımı sahne bazlı gerçekleştirilecektir.
+- Aynı temel sahneye ait tüm görüntüler tek bir veri alt kümesinde tutulacaktır.
+- VGG16 ve ResNet50 modelleri mümkün olduğunca aynı eğitim ve değerlendirme koşullarında karşılaştırılacaktır.
+- Model seçimi doğrulama performansına göre yapılacak, nihai karşılaştırma ise bağımsız test kümesi üzerinde gerçekleştirilecektir.
+- Test veri kümesi model geliştirme ve hiperparametre ayarlama süreçlerinde kullanılmayacaktır.
 
 ## Proje Uygulama İlkesi
 
@@ -104,3 +124,5 @@ Roadmap, araştırma önerisinde tanımlanan çalışmanın günlük uygulama s�
 Araştırma önerisinin kapsamını değiştiren yeni bir araştırma problemi, temel model mimarisi veya proje amacı eklenmeyecektir.
 
 Teknik uygulama sırasında alınması gereken kararlar, araştırma sorusu, hipotez, yöntem ve proje hedefleri ile uyumlu olacak şekilde değerlendirilecektir.
+
+Geliştirilen kod, veri hazırlama adımları, deney parametreleri ve model sonuçları düzenli olarak dokümante edilecek; proje sürecinin tekrarlanabilir ve denetlenebilir olması sağlanacaktır.

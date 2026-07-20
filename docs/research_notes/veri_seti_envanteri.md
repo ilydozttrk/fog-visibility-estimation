@@ -237,48 +237,48 @@ Bu yapı sayesinde veri kümesi doğrudan PyTorch DataLoader tarafından okunabi
 # 7. Projede Kullanım Sırası
 
 ```
-FRIDA
-      │
-      ▼
-FRIDA2
-      │
-      ▼
-Sahne Eşleştirme
-      │
-      ▼
+FRIDA + FRIDA2
+        │
+        ▼
 Derinlik Haritaları
-      │
-      ▼
-Sentetik Veri Üretimi
-      │
-      ▼
+        │
+        ▼
+Atmosferik Saçılım Modeli
+        │
+        ▼
+672 Sentetik Görüntü
+        │
+        ▼
 labels.csv
-      │
-      ▼
+        │
+        ▼
+Scene-based Split
+        │
+        ▼
 PyTorch Dataset
-      │
-      ▼
+        │
+        ▼
 DataLoader
-      │
-      ▼
-VGG16 Eğitimi
-      │
-      ▼
-ResNet50 Eğitimi
-      │
-      ▼
+        │
+        ▼
+VGG16 Baseline
+        │
+        ▼
+ResNet50 Baseline
+        │
+        ▼
 Model Karşılaştırması
-      │
-      ▼
-Attention
-      │
-      ▼
+        │
+        ▼
+Attention Mekanizması
+        │
+        ▼
 FVEI / FHVI
-      │
-      ▼
+        │
+        ▼
 Fine-Tuning
-      │
-      ▼
+        │
+        ▼
 Flask Prototipi
 ```
 
@@ -318,8 +318,14 @@ Derinlik haritaları kullanılarak atmosferik saçılım modeli uygulanmış ve 
 
 # 9. Sonuç
 
+# 9. Sonuç
+
 Proje kapsamında oluşturulan veri stratejisi araştırma önerisiyle uyumludur.
 
-FRIDA ve FRIDA2 veri setlerinden yararlanılarak toplam **84 sahneden oluşan**, **672 görüntü içeren** sürekli görüş mesafesi etiketli sentetik veri kümesi hazırlanmıştır. Bu veri kümesi PyTorch tabanlı veri yükleme altyapısına entegre edilmiş olup VGG16 ve ResNet50 modellerinin eğitiminde kullanılmaya hazır durumdadır.
+FRIDA ve FRIDA2 veri setlerinden yararlanılarak toplam **84 sahneden oluşan**, **672 görüntü içeren** sürekli görüş mesafesi etiketli sentetik veri kümesi hazırlanmıştır.
+
+Hazırlanan veri kümesi PyTorch tabanlı veri yükleme altyapısına başarıyla entegre edilmiş, sahne bazlı eğitim, doğrulama ve test kümelerine ayrılmış ve ilk transfer öğrenme modeli olan VGG16 ile başarıyla doğrulanmıştır.
+
+Bu yapı sayesinde VGG16 ve ilerleyen aşamada geliştirilecek ResNet50 modelleri aynı veri bölünmesi ve aynı deney koşulları altında karşılaştırılabilecektir.
 
 İlerleyen aşamada gerçek dünya veri setleri kullanılarak fine-tuning ve performans değerlendirme çalışmaları gerçekleştirilecektir.

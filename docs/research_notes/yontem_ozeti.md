@@ -39,31 +39,43 @@ Bu kapsamda;
 
 Model eğitiminde kullanılmak üzere PyTorch tabanlı özel bir `FogVisibilityDataset` sınıfı geliştirilmiş ve veri kümesinin batch'ler hâlinde yüklenmesini sağlayan `DataLoader` altyapısı hazırlanmıştır.
 
+Veri yükleme altyapısı sahne bazlı eğitim, doğrulama ve test veri kümelerini destekleyecek şekilde geliştirilmiş ve eğitim sırasında görüntülerin doğrudan modele aktarılmasını sağlayacak biçimde yapılandırılmıştır.
+
 Bu yapı ilerleyen aşamalarda VGG16, ResNet50 ve Attention tabanlı modeller tarafından ortak olarak kullanılacaktır.
 
 ---
 
 ## Aşama 3 — Eğitim, Doğrulama ve Test Veri Ayrımı
 
-Hazırlanan veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılacaktır.
+Hazırlanan veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılmıştır.
 
-Planlanan veri dağılımı aşağıdaki şekildedir.
+Uygulanan veri dağılımı aşağıdaki şekildedir.
 
-- Eğitim kümesi: %70–80
-- Doğrulama kümesi: %10–15
-- Test kümesi: %10–15
+- Eğitim kümesi: **464 görüntü (%70)**
+- Doğrulama kümesi: **96 görüntü (%15)**
+- Test kümesi: **112 görüntü (%15)**
 
-Sahne bazlı ayrım uygulanarak aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunması engellenecek ve veri sızıntısının önüne geçilecektir.
+Sahne bazlı ayrım uygulanarak aynı temel sahneye ait görüntülerin farklı veri kümelerinde bulunması engellenmiş ve veri sızıntısı önlenmiştir.
+
+Bu veri ayrımı VGG16 ve ResNet50 modellerinin aynı koşullar altında karşılaştırılabilmesi amacıyla ortak olarak kullanılacaktır.
 
 ---
 
 ## Aşama 4 — Transfer Öğrenme ile Model Adaptasyonu
 
-VGG16 ve ResNet50 modelleri ImageNet üzerinde önceden eğitilmiş ağırlıklarla yüklenecektir.
+VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir.
 
-Başlangıç aşamasında evrişimsel katmanlar korunacak, son sınıflandırma katmanları kaldırılarak tek çıkışlı regresyon başlığı eklenecektir.
+Modelin orijinal sınıflandırma katmanı kaldırılarak tek çıkışlı regresyon başlığı eklenmiştir.
 
-Modeller oluşturulan sentetik veri kümesi üzerinde eğitilecek ve kayıp fonksiyonu olarak Ortalama Mutlak Hata (MAE) kullanılacaktır.
+Transfer öğrenme yaklaşımı kapsamında evrişimsel (backbone) katmanlar dondurulmuş ve yalnızca yeni eklenen regresyon katmanlarının eğitilmesi hedeflenmiştir.
+
+Deneylerin tekrarlanabilirliğini sağlamak amacıyla eğitim parametreleri merkezi bir `config.py` dosyasında toplanmış, sabit rastgelelik tohumu (`random_seed`) kullanılmış ve deterministik PyTorch ayarları etkinleştirilmiştir.
+
+Model için eğitim, doğrulama ve checkpoint kayıt süreçlerini içeren temel eğitim altyapısı geliştirilmiş ve bir epoch'luk başlangıç eğitimi başarıyla tamamlanmıştır.
+
+Aynı transfer öğrenme yaklaşımı ilerleyen aşamada ResNet50 modeli için de uygulanacaktır.
+
+Model eğitiminde kayıp fonksiyonu olarak Ortalama Mutlak Hata (MAE / L1 Loss) kullanılacaktır.
 
 ---
 

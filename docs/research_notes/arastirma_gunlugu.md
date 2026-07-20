@@ -299,3 +299,58 @@ Bugün geliştirilen veri yükleme altyapısı sayesinde sentetik veri kümesi P
 ## Oluşturulan Dosyalar
 
 - src/training/dataloader.py
+
+---
+
+# Gün 7 – VGG16 Transfer Öğrenme Altyapısının Geliştirilmesi
+
+## Tamamlanan Görevler
+
+- VGG16 mimarisi transfer öğrenme yaklaşımı açısından incelendi.
+- Eğitim parametrelerini merkezi olarak yönetmek amacıyla `config.py` dosyası oluşturuldu.
+- Deneylerin tekrarlanabilirliğini sağlamak için sabit rastgelelik tohumu (random seed) tanımlandı.
+- Deterministik PyTorch ayarları etkinleştirildi.
+- ImageNet üzerinde önceden eğitilmiş VGG16 modeli projeye entegre edildi.
+- VGG16 modelinin evrişimsel (backbone) katmanları donduruldu.
+- Sınıflandırma katmanı kaldırılarak tek çıkışlı regresyon başlığı geliştirildi.
+- Veri yükleme altyapısı sahne bazlı eğitim, doğrulama ve test kümelerini destekleyecek şekilde güncellendi.
+- Eğitim (training) ve doğrulama (validation) döngüleri geliştirildi.
+- En düşük doğrulama hatasına sahip modeli otomatik olarak kaydeden checkpoint mekanizması oluşturuldu.
+- Eğitim altyapısı bir epoch'luk başlangıç testi ile doğrulandı.
+- Geliştirilen kodlar GitHub deposuna aktarıldı.
+
+## Bugün Öğrendiklerim
+
+Transfer öğrenme yaklaşımında önceden eğitilmiş özellik çıkarıcı katmanların korunması ve yalnızca yeni eklenen regresyon katmanlarının eğitilmesi, sınırlı büyüklükteki veri kümelerinde daha kararlı bir başlangıç sağlamaktadır.
+
+Ayrıca veri kümesinin sahne bazlı olarak ayrılması sayesinde aynı temel sahneye ait görüntülerin farklı veri kümelerinde yer alması engellenmiş ve model değerlendirmesinin daha güvenilir olması sağlanmıştır.
+
+## Alınan Teknik Kararlar
+
+- Eğitim parametreleri merkezi bir yapılandırma dosyası (`config.py`) üzerinden yönetilecektir.
+- Tüm deneylerde `random_seed = 42` kullanılacaktır.
+- Kayıp fonksiyonu olarak Ortalama Mutlak Hata (L1 Loss / MAE) kullanılacaktır.
+- En düşük doğrulama hatasına sahip model otomatik olarak checkpoint şeklinde kaydedilecektir.
+- VGG16 ve ResNet50 modelleri aynı veri bölünmesi ve aynı temel eğitim parametreleri kullanılarak karşılaştırılacaktır.
+
+## Karşılaşılan Durumlar
+
+Eğitim altyapısı geliştirilirken veri yükleme yapısının yalnızca tek bir DataLoader oluşturduğu görüldü. Model karşılaştırmasının güvenilirliği açısından eğitim, doğrulama ve test kümelerinin sahne bazlı olarak ayrılması gerektiğinden veri yükleme altyapısı yeniden düzenlendi.
+
+Geliştirilen eğitim betiğinin doğru çalıştığını doğrulamak amacıyla tam eğitimden önce tek epoch'luk bir başlangıç testi gerçekleştirildi. Test sonucunda modelin veri okuyabildiği, eğitim yapabildiği, doğrulama gerçekleştirebildiği ve en iyi modeli başarıyla kaydedebildiği doğrulandı.
+
+## Gün Sonu Değerlendirmesi
+
+Bugün geliştirilen eğitim altyapısı sayesinde proje ilk çalışabilir derin öğrenme modeline ulaşmıştır. VGG16 tabanlı temel model veri okuyabilmekte, eğitim gerçekleştirebilmekte, doğrulama yapabilmekte ve en iyi modeli otomatik olarak kaydedebilmektedir.
+
+Böylece veri hazırlama aşamasından model geliştirme aşamasına başarıyla geçilmiş ve VGG16 tabanlı baseline modelin eğitim altyapısı tamamlanmıştır.
+
+## Oluşturulan Dosyalar
+
+- `src/training/config.py`
+- `src/training/utils.py`
+- `src/training/train_vgg16.py`
+
+## Sonraki Adım
+
+VGG16 modeli tam eğitim süreciyle çalıştırılarak başlangıç performansı değerlendirilecek, deney sonuçları kayıt altına alınacak ve aynı deney koşulları altında ResNet50 modeli ile karşılaştırılacaktır.

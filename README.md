@@ -1,115 +1,221 @@
-# Sisli Hava Koşullarında Görüş Mesafesi Tahmini
+# Fog Visibility Estimation using Transfer Learning
 
-Bu proje, sisli hava koşullarında görüntü tabanlı görüş mesafesi tahmini için transfer öğrenme temelli VGG16 ve ResNet50 CNN mimarilerinin karşılaştırmalı analizini gerçekleştirmeyi amaçlamaktadır.
+Transfer öğrenme tabanlı derin evrişimsel sinir ağları (CNN) kullanılarak sisli hava koşullarında görüntü tabanlı görüş mesafesi tahmini gerçekleştirmeyi amaçlayan TÜBİTAK 2209-A araştırma projesidir.
 
-Proje, TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı kapsamında yürütülmektedir.
-
----
-
-## Araştırmanın Amacı
-
-VGG16 ve ResNet50 modellerinin sürekli görüş mesafesi regresyonu görevindeki performansları Ortalama Mutlak Hata (MAE) metriği kullanılarak karşılaştırılacaktır.
-
-Test veri seti üzerinde en düşük MAE değerini sağlayan model seçilecek ve seçilen modele Dikkat Mekanizması (Attention Mechanism) entegre edilerek performans artışı değerlendirilecektir.
+Bu çalışma kapsamında ImageNet üzerinde önceden eğitilmiş **VGG16** ve **ResNet50** mimarileri karşılaştırılacak, en başarılı temel modele **Attention Mechanism** entegre edilerek performans artışı değerlendirilecektir.
 
 ---
 
-## Araştırma Sorusu
+# TÜBİTAK 2209-A Araştırma Projesi
 
-Transfer öğrenme yöntemi ile görüntü tabanlı görüş mesafesi tahmini görevine adapte edilen VGG16 ve ResNet50 mimarilerinden hangisi daha düşük Ortalama Mutlak Hata (MAE) değeri sağlayarak Akıllı Ulaşım Sistemleri entegrasyonu için daha uygun bir temel model oluşturur?
+**Proje Başlığı**
 
----
-
-## Planlanan Proje Süreci
-
-1. FRIDA ve FRIDA2 veri setlerinin hazırlanması
-2. Sürekli görüş mesafesi regresyon etiketlerinin hazırlanması
-3. Veri ön işleme pipeline'ının geliştirilmesi
-4. Eğitim, doğrulama ve test veri kümelerinin oluşturulması
-5. VGG16 tabanlı transfer öğrenme modeli
-6. ResNet50 tabanlı transfer öğrenme modeli
-7. Modellerin MAE metriği ile karşılaştırılması
-8. En başarılı modele Dikkat Mekanizması entegrasyonu
-9. Gerçek dünya veri setleri üzerinde ince ayar (Fine-tuning)
-10. Flask API ve HTML/CSS tabanlı web prototipi geliştirilmesi
+> Transfer Öğrenme Temelli CNN Mimarilerinin Görüş Mesafesi Tahmininde Karşılaştırmalı Analizi
 
 ---
 
-## Veri Ön İşleme
+# Araştırmanın Amacı
 
-FRIDA veri seti için yeniden kullanılabilir bir veri ön işleme modülü geliştirilmiştir.
+Bu proje;
 
-Uygulanan işlemler:
+- görüntü tabanlı sürekli görüş mesafesi tahmini gerçekleştirmeyi,
+- transfer öğrenme ile VGG16 ve ResNet50 modellerini karşılaştırmayı,
+- en başarılı temel modele Attention Mechanism eklemeyi,
+- gerçek dünya verileri üzerinde modeli değerlendirmeyi,
+- Flask tabanlı bir web prototipi geliştirmeyi
 
-- RGB formatında güvenli görüntü yükleme
-- En-boy oranı korunarak 224×224 piksele yeniden boyutlandırma
-- Siyah padding uygulanması
-- İşlenmiş görüntülerin `data/processed/frida` klasörüne kaydedilmesi
-- Dosya doğrulama ve hata yönetimi
+amaçlamaktadır.
 
-Model mimarilerine özgü normalizasyon işlemleri (VGG16 / ResNet50 `preprocess_input`) eğitim aşamasında uygulanacaktır.
-
----
-
-## Veri Seti Bölme Stratejisi
-
-FRIDA veri seti, veri sızıntısını önlemek amacıyla **sahne bazlı (scene-based)** olarak bölünmektedir.
-
-Aynı sahneye ait farklı sis varyasyonlarının farklı veri kümelerinde bulunmasına izin verilmemektedir.
-
-Kullanılan bölme:
-
-- Eğitim: **12 sahne (60 görüntü)**
-- Doğrulama: **3 sahne (15 görüntü)**
-- Test: **3 sahne (15 görüntü)**
-
-Bölme işlemi tekrarlanabilir sonuçlar elde etmek amacıyla **Random Seed = 42** kullanılarak gerçekleştirilmiştir.
+Temel performans metriği **Mean Absolute Error (MAE)** olarak belirlenmiştir.
 
 ---
 
-## Proje Yapısı
+# Araştırma Sorusu
 
-```
-src/
-├── api/
-├── attention/
-├── data/
-│   ├── preprocessing.py
-│   └── dataset_split.py
-├── evaluation/
-├── models/
-└── training/
-```
+Transfer öğrenme yöntemi ile görüş mesafesi tahmini görevine uyarlanan VGG16 ve ResNet50 mimarilerinden hangisi daha düşük MAE değeri üreterek Akıllı Ulaşım Sistemleri için daha uygun bir temel model sunmaktadır?
 
 ---
 
-## Kullanılan Teknolojiler
+# Veri Seti
+
+Projede başlangıç modeli için **FRIDA** ve **FRIDA2** veri setleri kullanılmaktadır.
+
+Hazır sürekli görüş mesafesi etiketleri bulunmadığından derinlik haritaları kullanılarak sentetik görüş mesafesi görüntüleri oluşturulmuştur.
+
+## Kullanılan Görüş Mesafeleri
+
+- 50 m
+- 80 m
+- 100 m
+- 150 m
+- 200 m
+- 300 m
+- 500 m
+- 800 m
+
+## Oluşturulan Veri Kümesi
+
+| Özellik | Değer |
+|---------|------:|
+| Toplam sahne | **84** |
+| Toplam görüntü | **672** |
+| Görüş mesafesi seviyesi | **8** |
+
+---
+
+# Veri Bölme Stratejisi
+
+Veri sızıntısını önlemek amacıyla **scene-based splitting** uygulanmıştır.
+
+Aynı temel sahneye ait tüm görüntüler yalnızca tek veri kümesinde bulunmaktadır.
+
+| Küme | Görüntü |
+|------|---------:|
+| Train | **464** |
+| Validation | **96** |
+| Test | **112** |
+
+Bölme işlemi tamamen tekrarlanabilir olacak şekilde **Random Seed = 42** kullanılarak gerçekleştirilmiştir.
+
+---
+
+# Ön İşleme
+
+Model eğitiminden önce aşağıdaki işlemler uygulanmaktadır.
+
+- RGB formatına dönüştürme
+- 224×224 yeniden boyutlandırma
+- ImageNet normalizasyonu
+- Scene-based veri bölme
+- PyTorch DataLoader oluşturulması
+
+Bu ön işleme süreci hem VGG16 hem de ResNet50 tarafından ortak kullanılmaktadır.
+
+---
+
+# Kullanılan Teknolojiler
 
 - Python
 - PyTorch
 - Torchvision
-- Pillow (PIL)
+- Pillow
 - NumPy
 - Pandas
+- Matplotlib
 - Scikit-learn
 - OpenCV
-- Matplotlib
 - Flask
 
 ---
 
-## Proje Durumu
+# Proje Yapısı
 
-### Tamamlanan
+```text
+.
+├── data/
+│   ├── generated/
+│   ├── processed/
+│   ├── raw/
+│   └── splits/
+│
+├── docs/
+│   └── research_notes/
+│
+├── notebooks/
+│
+├── results/
+│   ├── checkpoints/
+│   ├── logs/
+│   └── plots/
+│
+├── src/
+│   ├── api/
+│   ├── attention/
+│   ├── data/
+│   ├── evaluation/
+│   ├── models/
+│   └── training/
+│
+├── README.md
+└── requirements.txt
+```
 
-- Veri seti araştırması
-- FRIDA veri seti analizi
-- Veri seti doğrulama
-- Görüntü ön işleme pipeline'ı
-- Sahne bazlı veri bölme sistemi
+---
 
-### Devam Eden
+# İlk Eğitim Sonuçları
 
-- Regresyon etiketlerinin hazırlanması
-- VGG16 baseline modeli
-- ResNet50 baseline modeli
+İlk VGG16 baseline modeli başarıyla eğitilmiştir.
+
+| Metrik | Sonuç |
+|--------|------:|
+| Epoch | **20** |
+| Best Epoch | **18** |
+| Best Validation MAE | **69.9705 m** |
+
+Araştırma önerisinde belirlenen
+
+> **MAE < 100 metre**
+
+hedefi ilk baseline model ile başarıyla karşılanmıştır.
+
+---
+
+# Tamamlanan Çalışmalar
+
+- ✅ Literatür araştırması
+- ✅ Veri seti analizi
+- ✅ FRIDA ve FRIDA2 incelemesi
+- ✅ Sentetik veri kümesinin oluşturulması
+- ✅ Veri doğrulama süreci
+- ✅ Ön işleme pipeline'ı
+- ✅ Scene-based veri bölme
+- ✅ PyTorch veri yükleme altyapısı
+- ✅ VGG16 transfer öğrenme modeli
+- ✅ Eğitim altyapısı
+- ✅ Checkpoint sistemi
+- ✅ Deney kayıt sistemi
+- ✅ İlk VGG16 baseline eğitimi
+
+---
+
+# Devam Eden Çalışmalar
+
+- 🚧 ResNet50 baseline modeli
+- 🚧 Model karşılaştırmaları
+- 🚧 Attention Mechanism entegrasyonu
+- 🚧 Gerçek dünya veri kümelerinde değerlendirme
+- 🚧 Flask tabanlı web prototipi
+
+---
+
+# Yol Haritası
+
+- [x] Veri seti analizi
+- [x] Sentetik veri kümesi oluşturulması
+- [x] Veri ön işleme
+- [x] Scene-based veri bölme
+- [x] PyTorch DataLoader
+- [x] VGG16 baseline
+- [ ] ResNet50 baseline
+- [ ] Model karşılaştırması
+- [ ] Attention Mechanism
+- [ ] Fine-tuning
+- [ ] Flask API
+- [ ] Web arayüzü
+
+---
+
+# Beklenen Çıktılar
+
+- VGG16 ve ResNet50 performans karşılaştırması
+- Attention Mechanism performans analizi
+- Görüş mesafesi tahmin modeli
+- Flask tabanlı web prototipi
+- TÜBİTAK 2209-A proje raporu
+- Açık kaynak GitHub deposu
+
+---
+
+# Lisans
+
+Bu proje, **TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı** kapsamında akademik araştırma amacıyla geliştirilmektedir.

@@ -26,7 +26,7 @@ Sisli hava koşullarında yol güvenliğini artırmak amacıyla, transfer öğre
 
 Ortalama Mutlak Hata (Mean Absolute Error — MAE).
 
-MAE değeri, metre cinsinden görüş mesafesi tahmin hatasını değerlendirmek için kullanılacaktır.
+MAE değeri, metre cinsinden görüş mesafesi tahmin hatasını değerlendirmek için kullanılmaktadır. İlk VGG16 baseline eğitimi sonucunda elde edilen en düşük doğrulama hatası **69.9705 metre** olarak ölçülmüş ve araştırma önerisinde belirlenen performans hedefi başarıyla karşılanmıştır.
 
 ## Planlanan Veri Setleri
 
@@ -58,7 +58,15 @@ Her iki model de ImageNet üzerinde önceden eğitilmiş ağırlıklarla transfe
 
 Modellerin orijinal sınıflandırma katmanları kaldırılacak ve sürekli bir görüş mesafesi değeri tahmin eden regresyon çıkışı kullanılacaktır.
 
-VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir. Modelin evrişimsel backbone katmanları dondurulmuş ve orijinal sınıflandırma başlığı, tek bir görüş mesafesi değeri üreten regresyon başlığı ile değiştirilmiştir.
+VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir. Modelin evrişimsel (backbone) katmanları dondurulmuş ve orijinal sınıflandırma başlığı yerine tek çıkışlı bir regresyon başlığı geliştirilmiştir.
+
+Model için eğitim, doğrulama ve checkpoint mekanizmalarını içeren eğitim altyapısı tamamlanmış; Adam optimizasyon algoritması ve Ortalama Mutlak Hata (L1 Loss / MAE) kullanılarak ilk tam eğitim gerçekleştirilmiştir.
+
+Toplam **20 epoch** süren ilk eğitim sonunda model **18. epochta 69.9705 metre Validation MAE** değerine ulaşmış ve araştırma önerisinde belirlenen **MAE < 100 metre** performans hedefini başarıyla karşılamıştır.
+
+Deney sonuçları standart deney kayıt dosyalarında saklanmış, eğitim geçmişi grafiksel olarak raporlanmış ve en başarılı model otomatik olarak checkpoint şeklinde kaydedilmiştir.
+
+Aynı transfer öğrenme, veri bölünmesi ve eğitim yaklaşımı bir sonraki aşamada ResNet50 modeli için uygulanacak; iki model aynı deney koşulları altında karşılaştırılacaktır.
 
 VGG16 için eğitim, doğrulama ve checkpoint kayıt süreçlerini içeren temel eğitim altyapısı geliştirilmiş ve bir epoch'luk başlangıç testi başarıyla tamamlanmıştır.
 

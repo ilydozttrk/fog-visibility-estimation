@@ -354,3 +354,65 @@ Böylece veri hazırlama aşamasından model geliştirme aşamasına başarıyla
 ## Sonraki Adım
 
 VGG16 modeli tam eğitim süreciyle çalıştırılarak başlangıç performansı değerlendirilecek, deney sonuçları kayıt altına alınacak ve aynı deney koşulları altında ResNet50 modeli ile karşılaştırılacaktır.
+
+---
+
+# Gün 8 – VGG16 Baseline Modelinin İlk Tam Eğitimi ve Performans Değerlendirmesi
+
+## Tamamlanan Görevler
+
+- VGG16 tabanlı baseline modeli tam eğitim süreciyle çalıştırıldı.
+- Eğitim sürecinde Adam optimizasyon algoritması ve L1 Loss (MAE) kullanıldı.
+- Model toplam 20 epoch boyunca eğitildi.
+- Her epoch sonunda eğitim (Training MAE) ve doğrulama (Validation MAE) performansı kaydedildi.
+- En düşük doğrulama hatasına sahip model otomatik olarak checkpoint olarak kaydedildi.
+- Eğitim geçmişini görselleştiren öğrenme eğrisi (loss_curve.png) oluşturuldu.
+- Deney sonuçlarını kayıt altına almak amacıyla experiment_log.xlsx dosyası oluşturuldu.
+- Eğitim sürecini özetleyen initial_training_log.md dosyası hazırlandı.
+
+## Bugün Öğrendiklerim
+
+Transfer öğrenme yaklaşımı kullanılarak geliştirilen VGG16 modeli, sentetik görüş mesafesi veri kümesi üzerinde kararlı bir öğrenme davranışı sergilemiştir.
+
+Eğitim sürecinin ilk epochlarında doğrulama hatasında hızlı bir düşüş gözlenirken, ilerleyen epochlarda öğrenme hızının azalarak daha kararlı bir yapıya ulaştığı görülmüştür.
+
+Ayrıca modelin en iyi doğrulama performansına 18. epoch sonunda ulaştığı ve sonraki epochlarda doğrulama hatasında çok küçük dalgalanmalar oluştuğu gözlenmiştir. Bu durum, modelin bu noktadan sonra hafif düzeyde overfitting eğilimi göstermeye başladığını düşündürmektedir.
+
+## Alınan Teknik Kararlar
+
+- Eğitim süresi başlangıç deneyi için 20 epoch olarak belirlendi.
+- En düşük Validation MAE değerine sahip model sonraki deneylerde kullanılmak üzere checkpoint olarak saklandı.
+- Tüm deney sonuçları standart bir deney kayıt dosyasında tutulacaktır.
+- Eğitim performansı her deney sonunda grafik olarak kaydedilecektir.
+- Aynı eğitim parametreleri ResNet50 modeli için de korunacaktır.
+
+## Elde Edilen Sonuçlar
+
+- Eğitim süresi: 20 epoch
+- En iyi epoch: 18
+- En düşük Validation MAE: **69.9705 metre**
+- Araştırma önerisinde belirlenen **MAE < 100 metre** hedefi başarıyla karşılandı.
+
+## Karşılaşılan Durumlar
+
+Eğitim süreci boyunca herhangi bir çalışma zamanı (runtime) hatası ile karşılaşılmadı.
+
+Validation MAE değeri 18. epoch sonrasında çok küçük değişimler göstermiş, ancak checkpoint mekanizması sayesinde en iyi model otomatik olarak korunmuştur.
+
+## Gün Sonu Değerlendirmesi
+
+Bugün proje kapsamında geliştirilen VGG16 tabanlı baseline modelinin ilk tam eğitimi başarıyla tamamlanmıştır.
+
+Model, araştırma önerisinde belirlenen performans hedefini karşılayarak **69.9705 metre Validation MAE** değerine ulaşmıştır.
+
+Böylece proje kapsamında geliştirilen ilk temel model başarıyla doğrulanmış ve VGG16 baseline modeli, ResNet50 ile gerçekleştirilecek karşılaştırmalı deneyler için referans model hâline gelmiştir.
+
+## Oluşturulan Dosyalar
+
+- `results/experiment_log.xlsx`
+- `results/plots/loss_curve.png`
+- `results/logs/initial_training_log.md`
+
+## Sonraki Adım
+
+Aynı veri bölünmesi ve aynı eğitim parametreleri kullanılarak ResNet50 tabanlı baseline model geliştirilecek ve iki modelin performansları MAE değerleri üzerinden karşılaştırılacaktır.

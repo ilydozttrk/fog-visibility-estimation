@@ -71,11 +71,23 @@ Transfer öğrenme yaklaşımı kapsamında evrişimsel (backbone) katmanlar don
 
 Deneylerin tekrarlanabilirliğini sağlamak amacıyla eğitim parametreleri merkezi bir `config.py` dosyasında toplanmış, sabit rastgelelik tohumu (`random_seed`) kullanılmış ve deterministik PyTorch ayarları etkinleştirilmiştir.
 
-Model için eğitim, doğrulama ve checkpoint kayıt süreçlerini içeren temel eğitim altyapısı geliştirilmiş ve bir epoch'luk başlangıç eğitimi başarıyla tamamlanmıştır.
+VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir.
 
-Aynı transfer öğrenme yaklaşımı ilerleyen aşamada ResNet50 modeli için de uygulanacaktır.
+Modelin orijinal sınıflandırma katmanı kaldırılarak tek çıkışlı regresyon başlığı geliştirilmiştir.
 
-Model eğitiminde kayıp fonksiyonu olarak Ortalama Mutlak Hata (MAE / L1 Loss) kullanılacaktır.
+Transfer öğrenme yaklaşımı kapsamında evrişimsel (backbone) katmanlar dondurulmuş ve yalnızca yeni eklenen regresyon katmanları eğitilmiştir.
+
+Deneylerin tekrarlanabilirliğini sağlamak amacıyla eğitim parametreleri merkezi bir `config.py` dosyasında yönetilmiş, sabit rastgelelik tohumu (`random_seed = 42`) kullanılmış ve deterministik PyTorch ayarları etkinleştirilmiştir.
+
+Model, Adam optimizasyon algoritması ve Ortalama Mutlak Hata (L1 Loss / MAE) kullanılarak toplam **20 epoch** boyunca eğitilmiştir.
+
+Eğitim sürecinde her epoch sonunda eğitim ve doğrulama MAE değerleri kaydedilmiş, en düşük doğrulama hatasına sahip model otomatik olarak checkpoint olarak saklanmıştır.
+
+İlk tam eğitim sonunda model **18. epochta 69.9705 metre Validation MAE** değerine ulaşmış ve araştırma önerisinde belirlenen **MAE < 100 metre** performans hedefi başarıyla karşılanmıştır.
+
+Deney sonuçları `experiment_log.xlsx` dosyasında kayıt altına alınmış, eğitim geçmişi `loss_curve.png` grafiği ile görselleştirilmiş ve eğitim süreci `initial_training_log.md` dosyasında ayrıntılı olarak dokümante edilmiştir.
+
+Aynı eğitim altyapısı ve aynı veri bölünmesi kullanılarak bir sonraki aşamada ResNet50 modeli geliştirilecek ve iki temel model adil koşullar altında karşılaştırılacaktır.
 
 ---
 

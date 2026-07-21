@@ -219,34 +219,30 @@ Bu yaklaşım, transfer öğrenme sürecinde model ağırlıkları ile giriş g�
 Proje kapsamında uygulanması planlanan veri hazırlama süreci aşağıdaki sırayla gerçekleştirilecektir.
 
 ```text
-FRIDA Ham Görüntüleri
-        │
-        ▼
-Dosya Kontrolü
-        │
-        ▼
-Sahne Kimliklerinin Belirlenmesi
-        │
-        ▼
-Sahne Bazlı Train / Validation / Test Ayrımı
-        │
-        ▼
-Aspect Ratio Korunarak Resize
-        │
-        ▼
-Padding ile 224 × 224 Boyutuna Getirme
-        │
-        ▼
-Model Uyumlu Normalizasyon
-        │
-        ▼
-(Yalnızca Train Setinde)
-Data Augmentation
-        │
-        ▼
-Batch Oluşturma
-        │
-        ▼
+FRIDA + FRIDA2 Sentetik Veri Kümesi
+                │
+                ▼
+labels.csv
+                │
+                ▼
+Scene-based Split
+                │
+                ▼
+FogVisibilityDataset
+                │
+                ▼
+Resize (224×224)
+                │
+                ▼
+RGB Dönüşümü
+                │
+                ▼
+ImageNet Normalizasyonu
+                │
+                ▼
+PyTorch DataLoader
+                │
+                ▼
 VGG16 / ResNet50
 ```
 
@@ -403,3 +399,21 @@ Belirlenen yaklaşım aşağıdaki esaslara dayanmaktadır:
 - Aynı veri hazırlama süreci hem VGG16 hem de ResNet50 için kullanılacaktır.
 
 Bu taslak, ilerleyen günlerde gerçekleştirilecek veri hazırlama ve model geliştirme çalışmalarının temel referans dokümanı olacaktır.
+
+---
+
+---
+
+# 11. Güncel Durum (Day 7)
+
+Ön işleme süreci proje kapsamında başarıyla uygulanmıştır.
+
+FRIDA ve FRIDA2 veri setlerinden oluşturulan sentetik veri kümesi `labels.csv` dosyası üzerinden okunacak şekilde yapılandırılmıştır.
+
+Veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılmış; aynı temel sahneye ait görüntülerin farklı veri kümelerinde yer alması engellenerek veri sızıntısı önlenmiştir.
+
+PyTorch tabanlı `FogVisibilityDataset` ve `DataLoader` altyapısı geliştirilmiş; görüntüler eğitim sırasında otomatik olarak yeniden boyutlandırılmakta, RGB formatına dönüştürülmekte ve ImageNet normalizasyonu uygulanmaktadır.
+
+Hazırlanan ön işleme ve veri yükleme altyapısı VGG16 tabanlı ilk transfer öğrenme modelinin eğitiminde başarıyla doğrulanmıştır.
+
+Aynı veri hazırlama süreci ilerleyen aşamalarda ResNet50 ve Attention tabanlı modeller tarafından da ortak olarak kullanılacaktır.

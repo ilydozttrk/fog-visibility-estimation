@@ -416,3 +416,15 @@ Böylece proje kapsamında geliştirilen ilk temel model başarıyla doğrulanm�
 ## Sonraki Adım
 
 Aynı veri bölünmesi ve aynı eğitim parametreleri kullanılarak ResNet50 tabanlı baseline model geliştirilecek ve iki modelin performansları MAE değerleri üzerinden karşılaştırılacaktır.
+
+## Gün 9 — VGG16 Baseline Model Evaluation
+
+Bugün VGG16 tabanlı transfer öğrenme modelinin bağımsız test kümesi üzerindeki performansı değerlendirildi. Eğitim sırasında kaydedilen en iyi checkpoint yüklenerek test görüntüleri üzerinde tahminler üretildi ve modelin genelleme başarısı analiz edildi.
+
+Değerlendirme pipeline'ı `evaluation_vgg16.py` dosyasında geliştirildi. Pipeline kapsamında model checkpoint'inin yüklenmesi, test veri kümesinin değerlendirilmesi, MAE hesaplanması, tahmin sonuçlarının CSV formatında kaydedilmesi, değerlendirme özetinin JSON olarak oluşturulması ve otomatik Markdown raporunun üretilmesi gerçekleştirildi.
+
+Model, 112 görüntüden oluşan bağımsız test kümesi üzerinde **66.7227 metre Test MAE** elde etti. Bu değer eğitim sırasında elde edilen **69.9705 metre Validation MAE** sonucuna oldukça yakın olup modelin daha önce görmediği sahnelere başarılı şekilde genelleme yapabildiğini göstermektedir.
+
+Ek olarak gerçek ve tahmin edilen görünürlük değerlerini karşılaştıran saçılım grafiği ile hata dağılım histogramı oluşturuldu. Bu çıktılar ileride gerçekleştirilecek ResNet50 karşılaştırmaları ve nihai proje raporu için kullanılacaktır.
+
+Bir sonraki aşamada aynı veri kümesi ve değerlendirme prosedürü kullanılarak ResNet50 tabanlı ikinci baseline model geliştirilecektir.

@@ -89,6 +89,12 @@ Deney sonuçları `experiment_log.xlsx` dosyasında kayıt altına alınmış, e
 
 Aynı eğitim altyapısı ve aynı veri bölünmesi kullanılarak bir sonraki aşamada ResNet50 modeli geliştirilecek ve iki temel model adil koşullar altında karşılaştırılacaktır.
 
+### VGG16 Model Evaluation
+
+Eğitim tamamlandıktan sonra en düşük doğrulama hatasına sahip model checkpoint'i bağımsız test veri kümesi üzerinde değerlendirilmiştir. Değerlendirme sürecinde eğitim sırasında kullanılmayan test görüntüleri üzerinde tahminler üretilmiş, Test MAE hesaplanmış ve model performansını analiz etmek amacıyla tahmin sonuçları, değerlendirme raporu ve görselleştirme çıktıları otomatik olarak oluşturulmuştur.
+
+VGG16 modeli bağımsız test kümesi üzerinde **66.7227 metre Test MAE** elde etmiş ve proje önerisinde belirlenen **100 metre altında MAE** hedefini başarıyla karşılamıştır.
+
 ---
 
 ## Aşama 5 — Model Karşılaştırması ve Attention Mekanizması

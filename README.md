@@ -144,19 +144,31 @@ Bu ön işleme süreci hem VGG16 hem de ResNet50 tarafından ortak kullanılmakt
 
 # İlk Eğitim Sonuçları
 
-İlk VGG16 baseline modeli başarıyla eğitilmiştir.
+# VGG16 Baseline Results
+
+İlk VGG16 transfer öğrenme tabanlı baseline modeli başarıyla eğitilmiş ve bağımsız test kümesi üzerinde değerlendirilmiştir.
 
 | Metrik | Sonuç |
 |--------|------:|
 | Epoch | **20** |
 | Best Epoch | **18** |
 | Best Validation MAE | **69.9705 m** |
+| Test MAE | **66.7227 m** |
+| Test Görüntü Sayısı | **112** |
 
-Araştırma önerisinde belirlenen
+Model, proje önerisinde belirlenen
 
 > **MAE < 100 metre**
 
-hedefi ilk baseline model ile başarıyla karşılanmıştır.
+hedefini hem doğrulama hem de bağımsız test kümesi üzerinde başarıyla karşılamıştır.
+
+Evaluation pipeline kapsamında aşağıdaki çıktılar otomatik olarak oluşturulmaktadır:
+
+- Test prediction CSV
+- Evaluation summary JSON
+- Markdown evaluation report
+- Actual vs Predicted scatter plot
+- Prediction error histogram
 
 ---
 
@@ -171,22 +183,31 @@ hedefi ilk baseline model ile başarıyla karşılanmıştır.
 - ✅ Scene-based veri bölme
 - ✅ PyTorch veri yükleme altyapısı
 - ✅ VGG16 transfer öğrenme modeli
-- ✅ Eğitim altyapısı
+- ✅ Eğitim pipeline'ı
 - ✅ Checkpoint sistemi
 - ✅ Deney kayıt sistemi
-- ✅ İlk VGG16 baseline eğitimi
+- ✅ VGG16 baseline eğitimi
+- ✅ VGG16 evaluation pipeline
+- ✅ Test kümesi değerlendirmesi
+- ✅ Otomatik değerlendirme raporu ve grafik üretimi
 
 ---
 
 # Devam Eden Çalışmalar
 
+# Devam Eden Çalışmalar
+
 - 🚧 ResNet50 baseline modeli
-- 🚧 Model karşılaştırmaları
+- 🚧 ResNet50 evaluation pipeline
+- 🚧 VGG16 ve ResNet50 performans karşılaştırması
 - 🚧 Attention Mechanism entegrasyonu
+- 🚧 Fine-tuning çalışmaları
 - 🚧 Gerçek dünya veri kümelerinde değerlendirme
 - 🚧 Flask tabanlı web prototipi
 
 ---
+
+# Yol Haritası
 
 # Yol Haritası
 
@@ -196,22 +217,27 @@ hedefi ilk baseline model ile başarıyla karşılanmıştır.
 - [x] Scene-based veri bölme
 - [x] PyTorch DataLoader
 - [x] VGG16 baseline
+- [x] VGG16 evaluation
 - [ ] ResNet50 baseline
-- [ ] Model karşılaştırması
+- [ ] ResNet50 evaluation
+- [ ] Model comparison
 - [ ] Attention Mechanism
 - [ ] Fine-tuning
 - [ ] Flask API
-- [ ] Web arayüzü
+- [ ] Web interface
 
 ---
 
 # Beklenen Çıktılar
 
+# Beklenen Çıktılar
+
 - VGG16 ve ResNet50 performans karşılaştırması
 - Attention Mechanism performans analizi
-- Görüş mesafesi tahmin modeli
+- Görüş mesafesi regresyon modeli
 - Flask tabanlı web prototipi
 - TÜBİTAK 2209-A proje raporu
+- Deney kayıtları ve değerlendirme raporları
 - Açık kaynak GitHub deposu
 
 ---

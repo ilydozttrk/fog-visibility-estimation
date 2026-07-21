@@ -51,8 +51,18 @@ FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk du
 
 ## Karşılaştırılacak Modeller
 
-- VGG16
-- ResNet50
+• VGG16 (Tamamlandı)
+
+- ImageNet ön eğitimli ağırlıklar kullanıldı.
+- Transfer öğrenme tabanlı regresyon modeli geliştirildi.
+- 20 epoch eğitim gerçekleştirildi.
+- En iyi Validation MAE: 69.9705 m (18. epoch)
+- Bağımsız test kümesi üzerinde Test MAE: 66.7227 m
+- Otomatik değerlendirme pipeline'ı geliştirildi.
+- Tahmin CSV dosyaları, JSON özetleri, Markdown raporları ve değerlendirme grafikleri oluşturuldu.
+- İlk baseline modeli başarıyla tamamlandı.
+
+• ResNet50
 
 Her iki model de ImageNet üzerinde önceden eğitilmiş ağırlıklarla transfer öğrenme yaklaşımı kullanılarak görüş mesafesi tahmini görevine adapte edilecektir.
 

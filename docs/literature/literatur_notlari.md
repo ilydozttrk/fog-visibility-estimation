@@ -435,3 +435,175 @@ Bunun yerine gerçek dünya görüntüleri üzerinde model davranışının değ
 FHVI, gerçek dünya görüntüleri açısından oldukça değerli bir veri setidir.
 
 Ancak proje kapsamında temel performans metriğimiz MAE ve problem tanımımız sürekli görüş mesafesi regresyonu olduğundan, FHVI başlangıç eğitim veri seti olarak değil; gerçek dünya doğrulaması ve ek değerlendirme amacıyla kullanılmaya daha uygundur.
+
+---
+
+# Visibility Estimation Based on Weakly Supervised Learning under Discrete Label Distribution — Makale İncelemesi
+
+## Makale Bilgileri
+
+**Makale Başlığı**
+
+Visibility Estimation Based on Weakly Supervised Learning under Discrete Label Distribution
+
+**Yazarlar**
+
+Qian Yan, Tao Sun, Jian Zhang, Lei Xun
+
+**Yayın Yılı**
+
+2023
+
+**Kaynak**
+
+Sensors, 23(23), 9390
+
+**DOI veya Bağlantı**
+
+https://doi.org/10.3390/s23239390
+
+---
+
+## Araştırma Problemi
+
+Bu çalışma, sisli yol görüntülerinden görüş mesafesinin tahmin edilmesini amaçlamaktadır.
+
+Yazarlar özellikle gerçek yol görüntülerinde sis yoğunluğunun homojen olmaması ve manuel ilgi bölgesi (ROI) belirleme işleminin zaman alıcı olması problemlerine odaklanmıştır.
+
+Bu problemlerin çözümü için zayıf denetimli öğrenme (Weakly Supervised Learning), dikkat mekanizması (Attention Mechanism) ve Label Distribution Learning yaklaşımlarını bir araya getiren yeni bir yöntem önerilmiştir.
+
+---
+
+## Kullanılan Veri Seti
+
+Çalışmada iki farklı veri seti kullanılmıştır.
+
+- RFID (Gerçek dünya veri seti)
+- FRIDA (Sentetik veri seti)
+
+Model hem gerçek hem de sentetik veri üzerinde değerlendirilmiştir.
+
+---
+
+## Görüş Mesafesi Etiket Türü
+
+**Sürekli regresyon**
+
+Hayır
+
+**Ayrık sınıflandırma**
+
+Evet
+
+**Ölçüm Birimi**
+
+Görüş mesafesi sınıfları
+
+Çalışmada görüş mesafesi doğrudan metre cinsinden sürekli bir değer olarak tahmin edilmemektedir.
+
+---
+
+## Kullanılan Yöntem
+
+Makalede önerilen yöntem aşağıdaki temel bileşenlerden oluşmaktadır.
+
+- Transfer Learning tabanlı ResNet18
+- Weakly Supervised Learning
+- Bilinear Attention Pooling (BAP)
+- Attention Branch
+- Feature Fusion
+- Discrete Label Distribution Learning (DLDL)
+
+Model önce görüntü içerisindeki en uzak görülebilen bölgeyi dikkat mekanizması ile belirlemekte, ardından bu bölgeyi kullanarak görünürlük tahmini gerçekleştirmektedir.
+
+---
+
+## Model Mimarisi
+
+- ResNet18
+- Bilinear Attention Pooling
+- Attention Branch
+- Feature Fusion
+- Label Distribution Learning
+
+---
+
+## Transfer Öğrenme Yaklaşımı
+
+Çalışmada ImageNet üzerinde önceden eğitilmiş ResNet18 modeli temel ağ olarak kullanılmıştır.
+
+Transfer öğrenme yöntemi ile model görünürlük tahmini problemine uyarlanmıştır.
+
+---
+
+## Değerlendirme Metrikleri
+
+Çalışmada aşağıdaki değerlendirme metrikleri kullanılmıştır.
+
+- Accuracy
+- Classification Performance
+
+Çalışma sınıflandırma problemi üzerine kurulduğu için MAE, RMSE veya MSE kullanılmamıştır.
+
+---
+
+## Temel Sonuçlar
+
+Önerilen yöntem;
+
+- AlexNet
+- VGG16
+- ResNet18
+- ResNet50
+- SCNN
+- TVRNet
+- VisNet
+
+gibi yöntemlerle karşılaştırılmıştır.
+
+Hem FRIDA hem de RFID veri setlerinde önerilen model en yüksek performansı elde etmiştir.
+
+Sonuçlar attention mekanizmasının ve Label Distribution Learning yaklaşımının birlikte kullanıldığında görünürlük tahminini iyileştirdiğini göstermektedir.
+
+---
+
+## Çalışmanın Sınırlılıkları
+
+- Sürekli regresyon problemi yerine sınıflandırma problemi ele alınmıştır.
+- Label Distribution Learning yalnızca ayrık görünürlük sınıfları için tasarlanmıştır.
+- Model iki dallı (Two-Branch) yapı kullandığından hesaplama maliyeti yüksektir.
+- Mimari klasik transfer öğrenme modellerine göre daha karmaşıktır.
+
+---
+
+## TÜBİTAK Projemizle İlişkisi
+
+Bu çalışma, görüntü tabanlı görüş mesafesi tahmini üzerine gerçekleştirildiği için TÜBİTAK 2209-A projemiz açısından doğrudan ilgili bir literatür çalışmasıdır.
+
+Makalede kullanılan transfer öğrenme yaklaşımı ve ResNet tabanlı mimari, proje kapsamında geliştirilecek modeller için önemli bir referans oluşturmaktadır.
+
+Çalışmada kullanılan attention mekanizması, proje öneri formunda yer alan "dikkat mekanizması entegrasyonu" aşaması için güncel bir literatür desteği sağlamaktadır.
+
+Buna karşılık makaledeki Label Distribution Learning yaklaşımı proje kapsamında kullanılmayacaktır. Bunun nedeni projemizin sürekli görüş mesafesi regresyonu üzerine kurulmuş olmasıdır.
+
+---
+
+## Proje Açısından Ortaya Çıkan Sorular veya Kararlar
+
+Bu makale incelendikten sonra aşağıdaki teknik kararlar alınmıştır.
+
+- Projede temel problem sürekli görüş mesafesi regresyonu olarak korunacaktır.
+- Performans değerlendirme metriği olarak MAE kullanılmaya devam edilecektir.
+- Öncelikle VGG16 ve ResNet50 modelleri karşılaştırılacaktır.
+- En başarılı temel modele attention mekanizması entegre edilecektir.
+- Label Distribution Learning yöntemi proje kapsamına dahil edilmeyecektir.
+
+---
+
+## İlk Değerlendirme
+
+Bu çalışma, attention mekanizmalarının görüş mesafesi tahmini probleminde model performansını artırabileceğini gösteren güncel ve doğrudan ilgili bir araştırmadır.
+
+Makalede kullanılan tüm yöntemler doğrudan uygulanmayacak olsa da özellikle attention mekanizmasının transfer öğrenme tabanlı CNN modelleri ile birlikte kullanılmasının başarılı sonuçlar verdiği görülmektedir.
+
+Bu nedenle çalışma, TÜBİTAK 2209-A projesinin dikkat mekanizması geliştirme aşaması için önemli bir bilimsel referans niteliğindedir.

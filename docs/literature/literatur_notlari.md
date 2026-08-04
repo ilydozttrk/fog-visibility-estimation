@@ -607,3 +607,36 @@ Bu çalışma, attention mekanizmalarının görüş mesafesi tahmini problemind
 Makalede kullanılan tüm yöntemler doğrudan uygulanmayacak olsa da özellikle attention mekanizmasının transfer öğrenme tabanlı CNN modelleri ile birlikte kullanılmasının başarılı sonuçlar verdiği görülmektedir.
 
 Bu nedenle çalışma, TÜBİTAK 2209-A projesinin dikkat mekanizması geliştirme aşaması için önemli bir bilimsel referans niteliğindedir.
+
+---
+
+# ResNet50 Mimarisi — Kısa Araştırma Notu
+
+## Mimarinin Temel Amacı
+
+ResNet50, çok katmanlı evrişimsel sinir ağlarında derinlik arttıkça ortaya çıkabilen eğitim zorluklarını azaltmak amacıyla geliştirilmiş bir CNN mimarisidir.
+
+Klasik derin ağlarda katman sayısının artması, gradyanların önceki katmanlara yeterli düzeyde aktarılamamasına ve eğitim performansının düşmesine neden olabilmektedir.
+
+ResNet mimarisi bu problemi artık öğrenme (Residual Learning) yaklaşımı ve kısa yol bağlantıları (Skip Connections) kullanarak ele almaktadır.
+
+---
+
+## Residual Learning Yaklaşımı
+
+ResNet mimarisinin temel fikri, her katman grubunun doğrudan hedef dönüşümü öğrenmesi yerine giriş ile hedef çıktı arasındaki farkı, yani artık fonksiyonu öğrenmesidir.
+
+Bir residual block içerisinde giriş bilgisi evrişim katmanlarından geçirilirken aynı zamanda kısa yol bağlantısı üzerinden doğrudan bloğun çıkışına aktarılmaktadır.
+
+Genel yapı aşağıdaki şekilde ifade edilebilir:
+
+```text
+Giriş
+  │
+  ├───────────────┐
+  │               │
+Evrişim Katmanları│
+  │               │
+  └──── Toplama ◄─┘
+          │
+        Çıkış

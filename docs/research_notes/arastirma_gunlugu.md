@@ -428,3 +428,115 @@ Model, 112 görüntüden oluşan bağımsız test kümesi üzerinde **66.7227 me
 Ek olarak gerçek ve tahmin edilen görünürlük değerlerini karşılaştıran saçılım grafiği ile hata dağılım histogramı oluşturuldu. Bu çıktılar ileride gerçekleştirilecek ResNet50 karşılaştırmaları ve nihai proje raporu için kullanılacaktır.
 
 Bir sonraki aşamada aynı veri kümesi ve değerlendirme prosedürü kullanılarak ResNet50 tabanlı ikinci baseline model geliştirilecektir.
+
+---
+
+# Gün 10 – Haftalık Değerlendirme ve Literatür Güncellemesi
+
+## Tamamlanan Görevler
+
+- İkinci haftada gerçekleştirilen proje çalışmaları ayrıntılı olarak değerlendirildi.
+- Haftalık ilerleme raporu (`week2_report.md`) hazırlandı.
+- Haftalık gelişim kaydı (`weekly_progress_log.md`) oluşturuldu.
+- ResNet50 mimarisi üzerine güncel literatür çalışmaları incelendi.
+- İncelenen çalışmalar doğrultusunda literatür notları güncellendi.
+- Danışman toplantısı öncesinde proje ilerleme notları hazırlandı.
+- Üçüncü hafta çalışma planı oluşturuldu.
+- Güncellenen dokümantasyon GitHub deposuna aktarıldı.
+
+## Bugün Öğrendiklerim
+
+Literatür incelemesi sonucunda ResNet50 mimarisinin görüntü tabanlı regresyon problemlerinde yaygın olarak kullanılan güçlü bir transfer öğrenme modeli olduğu görüldü.
+
+Residual (artık) bağlantılar sayesinde derin sinir ağlarında gradyan kaybolması probleminin önemli ölçüde azaltılabildiği ve bunun daha derin mimarilerin daha kararlı şekilde eğitilmesini sağladığı öğrenildi.
+
+İncelenen çalışmalarda temel modeller oluşturulduktan sonra dikkat mekanizmalarının (Attention Mechanism) modele entegre edilerek performansın artırıldığı görüldü. Bu yaklaşımın araştırma önerisinde planlanan çalışma akışı ile uyumlu olduğu değerlendirildi.
+
+## Alınan Teknik Kararlar
+
+- Üçüncü hafta çalışmalarında ResNet50 modeli geliştirilecektir.
+- VGG16 ve ResNet50 modelleri aynı veri bölünmesi, aynı eğitim parametreleri ve aynı değerlendirme metriği kullanılarak karşılaştırılacaktır.
+- Dikkat Mekanizması entegrasyonu yalnızca temel model karşılaştırmaları tamamlandıktan sonra gerçekleştirilecektir.
+- Literatür notları proje süreci boyunca düzenli olarak güncellenecektir.
+
+## Karşılaşılan Durumlar
+
+Literatür incelemesi sırasında farklı çalışmaların farklı veri kümeleri, farklı eğitim stratejileri ve farklı performans metrikleri kullandığı görüldü. Bu durum doğrudan performans karşılaştırmalarını güçleştirmektedir.
+
+Bu nedenle proje kapsamında tüm deneylerin aynı veri kümesi, aynı veri bölünmesi ve aynı eğitim parametreleri altında gerçekleştirilmesine karar verildi.
+
+## Gün Sonu Değerlendirmesi
+
+Bugün gerçekleştirilen haftalık değerlendirme ile ikinci hafta çalışmaları tamamlanmıştır. Proje dokümantasyonu güncellenmiş, literatür incelemesi genişletilmiş ve üçüncü hafta gerçekleştirilecek ResNet50 geliştirme süreci için teknik hazırlık tamamlanmıştır.
+
+Böylece proje, ikinci temel model olan ResNet50'nin geliştirilmesine başlanabilecek aşamaya ulaşmıştır.
+
+## Oluşturulan Dosyalar
+
+- `docs/reports/week2_report.md`
+- `docs/reports/weekly_progress_log.md`
+- `docs/literature/literatur_notlari.md`
+
+## Sonraki Adım
+
+ResNet50 tabanlı ikinci baseline model geliştirilecek, ImageNet üzerinde önceden eğitilmiş ağırlıklar kullanılacak, modelin backbone katmanları dondurulacak ve VGG16 ile aynı eğitim koşulları altında karşılaştırmalı deneyler gerçekleştirilecektir.
+
+---
+
+# Gün 11 – ResNet50 Transfer Öğrenme Altyapısının Geliştirilmesi
+
+## Tamamlanan Görevler
+
+- ResNet50 mimarisi transfer öğrenme yaklaşımı açısından ayrıntılı olarak incelendi.
+- VGG16 ve ResNet50 mimarileri teknik özellikleri bakımından karşılaştırıldı.
+- ImageNet üzerinde önceden eğitilmiş ResNet50 modeli projeye entegre edildi.
+- ResNet50 modelinin backbone katmanları donduruldu.
+- Sınıflandırma katmanı kaldırılarak tek çıkışlı regresyon başlığı geliştirildi.
+- ResNet50 modeli için bağımsız eğitim betiği (`train_resnet50.py`) oluşturuldu.
+- Eğitim (training) ve doğrulama (validation) döngüleri VGG16 altyapısı temel alınarak uyarlandı.
+- Checkpoint mekanizması ResNet50 modeli için yapılandırıldı.
+- Deney kayıt sistemi ve eğitim loglarının otomatik oluşturulması sağlandı.
+- Öğrenme eğrilerinin kaydedilmesi için gerekli altyapı geliştirildi.
+- Kodun doğruluğunu kontrol etmek amacıyla sözdizimi (syntax) testi gerçekleştirildi.
+- Model oluşturma (forward pass) testi başarıyla tamamlandı.
+- DataLoader uyumluluğu doğrulandı.
+- Eğitilebilir ve dondurulmuş parametre sayıları doğrulanarak backbone katmanlarının başarıyla dondurulduğu kontrol edildi.
+- Geliştirilen kodlar GitHub deposuna aktarıldı.
+
+## Bugün Öğrendiklerim
+
+ResNet50 mimarisinin residual bağlantılar sayesinde çok daha derin olmasına rağmen kararlı şekilde eğitilebildiği görüldü.
+
+Transfer öğrenme yaklaşımında yalnızca yeni eklenen regresyon katmanlarının eğitilmesi, önceden öğrenilmiş görsel özelliklerin korunmasını sağlamakta ve sınırlı büyüklükteki veri kümelerinde daha güvenilir sonuçlar elde edilmesine katkı sağlamaktadır.
+
+Ayrıca geliştirilen eğitim altyapısının eğitim süreci başlamadan önce çeşitli doğrulama testlerinden geçirilmesinin olası yazılım hatalarının erken aşamada tespit edilmesini sağladığı görüldü.
+
+## Alınan Teknik Kararlar
+
+- ResNet50 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla kullanılacaktır.
+- Backbone katmanları dondurulacak ve yalnızca regresyon başlığı eğitilecektir.
+- VGG16 ile aynı eğitim parametreleri korunarak adil model karşılaştırması gerçekleştirilecektir.
+- Eğitim süreci boyunca en düşük doğrulama hatasına sahip model otomatik olarak checkpoint şeklinde kaydedilecektir.
+- Deney sonuçları standart deney kayıt dosyasında saklanacaktır.
+
+## Karşılaşılan Durumlar
+
+ResNet50 mimarisinin VGG16'dan farklı olarak tam bağlantılı sınıflandırma katmanı yerine Global Average Pooling sonrasında tek bir `fc` katmanı kullandığı görüldü. Bu nedenle regresyon başlığının VGG16'dan farklı şekilde yeniden tasarlanması gerekti.
+
+Geliştirilen eğitim betiğinin doğruluğunu kontrol etmek amacıyla Python sözdizimi doğrulaması, model oluşturma testi, DataLoader uyumluluk testi ve eğitilebilir parametre kontrolleri gerçekleştirildi. Yapılan doğrulamalar sonucunda eğitim altyapısının sorunsuz şekilde çalıştığı doğrulandı.
+
+## Gün Sonu Değerlendirmesi
+
+Bugün geliştirilen ResNet50 eğitim altyapısı sayesinde proje kapsamındaki ikinci temel model eğitim için hazır hâle getirilmiştir.
+
+Model başarıyla oluşturulabilmekte, veri yükleme altyapısı ile uyumlu şekilde çalışabilmekte ve eğitim sürecini gerçekleştirebilecek teknik yeterliliğe sahiptir.
+
+Böylece VGG16 ve ResNet50 modellerinin aynı deney koşulları altında karşılaştırılabileceği altyapı tamamlanmış ve bir sonraki aşama olan ResNet50 model eğitimi için hazırlık süreci tamamlanmıştır.
+
+## Oluşturulan Dosyalar
+
+- `src/training/train_resnet50.py`
+
+## Sonraki Adım
+
+ResNet50 tabanlı baseline model tam eğitim süreciyle çalıştırılacak, eğitim ve doğrulama performansı değerlendirilecek, en iyi model checkpoint olarak kaydedilecek ve elde edilen sonuçlar VGG16 modeli ile karşılaştırılacaktır.

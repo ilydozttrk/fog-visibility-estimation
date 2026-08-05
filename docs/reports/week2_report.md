@@ -99,7 +99,7 @@ Her eğitim sonunda;
 
 kayıt altına alınacak şekilde yapı hazırlanmıştır.
 
-Bu sistem ilerleyen haftalarda gerçekleştirilecek ResNet50 ve Attention deneylerinde ortak olarak kullanılacaktır.
+Bu sistem VGG16 ve ResNet50 baseline deneylerinde başarıyla kullanılmış olup ilerleyen aşamada Attention Mechanism tabanlı deneylerde de aynı altyapı kullanılacaktır.
 
 ---
 
@@ -138,7 +138,7 @@ Bu modül;
 
 işlemlerini otomatik olarak gerçekleştirmektedir.
 
-Evaluation süreci eğitim kodundan bağımsız olarak tasarlanmış ve gelecekteki tüm modeller tarafından yeniden kullanılabilecek şekilde geliştirilmiştir.
+Evaluation süreci eğitim kodundan bağımsız olarak tasarlanmış ve hem VGG16 hem de ResNet50 modellerinde başarıyla kullanılmıştır. Aynı değerlendirme altyapısı ilerleyen aşamada geliştirilecek Attention Mechanism tabanlı model için de kullanılacaktır.
 
 ---
 
@@ -161,7 +161,7 @@ Test performansının doğrulama performansına oldukça yakın olması modelin 
 
 ## 3.8 Otomatik Çıktılar
 
-Evaluation modülü çalıştırıldığında aşağıdaki çıktılar otomatik olarak oluşturulmaktadır.
+Evaluation modülü çalıştırıldığında aşağıdaki çıktılar otomatik olarak oluşturulmaktadır. Bu standart çıktı yapısı, tüm baseline modellerinin aynı değerlendirme prosedürü ile analiz edilmesini sağlayarak deneylerin tekrarlanabilirliğini artırmaktadır.
 
 ### Grafikler
 
@@ -189,8 +189,10 @@ Güncellenen dosyalar:
 
 - README
 - Araştırma günlüğü
+- Literatür notları
 - Yöntem özeti
 - Proje kapsamı
+- Haftalık ilerleme raporları
 
 Ayrıca GitHub üzerinde geliştirme süreci anlamlı commit'ler halinde kayıt altına alınmıştır.
 
@@ -239,6 +241,12 @@ Bu yaklaşım sayesinde aynı değerlendirme prosedürü ResNet50 ve ileride gel
 
 ---
 
+### Deneylerin Tekrarlanabilirliği
+
+Tüm deneylerde aynı veri bölünmesi, aynı rastgele tohum (Random Seed), aynı eğitim süresi ve aynı hiperparametreler kullanılarak modeller arasında adil karşılaştırma yapılması sağlanmıştır.
+
+---
+
 # 6. Hafta Sonu Değerlendirmesi
 
 İkinci hafta sonunda proje kapsamında ilk transfer öğrenme tabanlı baseline model başarıyla tamamlanmıştır.
@@ -253,11 +261,11 @@ Ayrıca geliştirilen evaluation altyapısı sayesinde ilerleyen haftalarda fark
 
 Üçüncü haftada aşağıdaki çalışmaların gerçekleştirilmesi planlanmaktadır.
 
-- ResNet50 mimarisinin geliştirilmesi
-- İkinci baseline modelinin eğitilmesi
-- Bağımsız test değerlendirmesinin yapılması
-- VGG16 ve ResNet50 performanslarının karşılaştırılması
-- Deney sonuçlarının analiz edilmesi
+- VGG16 ve ResNet50 baseline modellerinin ayrıntılı performans karşılaştırmasının tamamlanması
+- Attention Mechanism tabanlı yeni mimarinin tasarlanması
+- Attention modülünün seçilen baseline modele entegre edilmesi
+- Attention tabanlı modelin ilk eğitim deneylerinin gerçekleştirilmesi
+- Nihai model performans analizlerinin hazırlanması
 
 ---
 
@@ -265,4 +273,4 @@ Ayrıca geliştirilen evaluation altyapısı sayesinde ilerleyen haftalarda fark
 
 İkinci hafta sonunda proje, yalnızca veri hazırlama aşamasını tamamlamış bir araştırma olmaktan çıkmış; ilk deneysel sonuçlarını üreten, ölçülebilir performans değerlerine sahip bir bilgisayarlı görü çalışmasına dönüşmüştür.
 
-Elde edilen **66.7227 metre Test MAE** değeri, proje önerisinde belirlenen başarı kriterini karşılamakta olup geliştirilecek ResNet50 ve Attention tabanlı modeller için referans (baseline) performansı oluşturmaktadır.
+Elde edilen **66.7227 metre Test MAE** değeri, proje önerisinde belirlenen başarı kriterini karşılamakta olup proje kapsamında geliştirilen ilk başarılı baseline modeli temsil etmektedir. Bu sonuç, ilerleyen aşamada geliştirilecek ResNet50 ve Attention Mechanism tabanlı modellerin performanslarının objektif olarak karşılaştırılacağı temel referans performansını oluşturmaktadır.

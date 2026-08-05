@@ -540,3 +540,69 @@ Böylece VGG16 ve ResNet50 modellerinin aynı deney koşulları altında karşı
 ## Sonraki Adım
 
 ResNet50 tabanlı baseline model tam eğitim süreciyle çalıştırılacak, eğitim ve doğrulama performansı değerlendirilecek, en iyi model checkpoint olarak kaydedilecek ve elde edilen sonuçlar VGG16 modeli ile karşılaştırılacaktır.
+
+---
+
+# Gün 12 – ResNet50 Baseline Modelinin İlk Tam Eğitimi ve Performans Değerlendirmesi
+
+## Tamamlanan Görevler
+
+- ResNet50 tabanlı baseline modeli tam eğitim süreciyle çalıştırıldı.
+- Eğitim sürecinde Adam optimizasyon algoritması ve L1 Loss (MAE) kullanıldı.
+- Model toplam 20 epoch boyunca eğitildi.
+- Her epoch sonunda eğitim (Training MAE) ve doğrulama (Validation MAE) performansı kaydedildi.
+- En düşük doğrulama hatasına sahip model otomatik olarak checkpoint olarak kaydedildi.
+- Eğitim geçmişini görselleştiren öğrenme eğrisi (`resnet50_loss_curve.png`) oluşturuldu.
+- Deney sonuçları `experiment_log.xlsx` dosyasına kaydedildi.
+- Eğitim sürecini özetleyen `resnet50_initial_training_log.md` dosyası oluşturuldu.
+- Elde edilen performans sonuçları VGG16 baseline modeli ile karşılaştırıldı.
+
+## Bugün Öğrendiklerim
+
+ResNet50 modeli eğitim süreci boyunca kararlı bir öğrenme davranışı sergilemiş ve doğrulama hatası her epoch sonunda düzenli olarak azalmıştır.
+
+Eğitim ve doğrulama hata değerlerinin birbirine oldukça yakın seyretmesi, modelin eğitim veri kümesini ezberlemeden öğrenebildiğini ve belirgin bir overfitting problemi oluşmadığını göstermektedir.
+
+Ayrıca aynı eğitim parametreleri kullanıldığında daha derin bir mimariye sahip olmanın her zaman daha yüksek performans anlamına gelmediği görülmüştür. Bu durum, veri kümesinin yapısı ve seçilen hiperparametrelerin model performansı üzerindeki etkisini bir kez daha ortaya koymuştur.
+
+## Alınan Teknik Kararlar
+
+- ResNet50 modeli başlangıç deneyi için 20 epoch boyunca eğitilecektir.
+- En düşük Validation MAE değerine sahip model sonraki deneylerde kullanılmak üzere checkpoint olarak saklanacaktır.
+- Eğitim sürecinde kullanılan veri bölünmesi ve hiperparametreler VGG16 modeli ile aynı tutulacaktır.
+- Model karşılaştırmaları yalnızca aynı deney koşullarında elde edilen sonuçlar üzerinden gerçekleştirilecektir.
+
+## Elde Edilen Sonuçlar
+
+- Eğitim süresi: **20 epoch**
+- En iyi epoch: **20**
+- En düşük Validation MAE: **121.8414 metre**
+
+Model eğitim süreci boyunca doğrulama performansı sürekli olarak iyileşmiş ve son epoch sonunda en düşük doğrulama hatasına ulaşılmıştır.
+
+## Karşılaşılan Durumlar
+
+Eğitim süreci boyunca herhangi bir çalışma zamanı (runtime) hatası ile karşılaşılmamıştır.
+
+Checkpoint mekanizması doğrulama performansındaki her iyileşmede başarılı şekilde çalışmış ve en iyi model otomatik olarak kaydedilmiştir.
+
+İlk karşılaştırma sonuçlarına göre ResNet50 modeli, aynı veri kümesi ve aynı eğitim parametreleri altında eğitilen VGG16 modeline göre daha yüksek doğrulama hatası elde etmiştir. Bu durumun mimari farklılıklar, veri kümesinin özellikleri veya kullanılan hiperparametrelerin ResNet50 modeli için en uygun değerler olmamasından kaynaklanabileceği değerlendirilmiştir.
+
+## Gün Sonu Değerlendirmesi
+
+Bugün proje kapsamında geliştirilen ResNet50 tabanlı ikinci baseline modelinin ilk tam eğitimi başarıyla tamamlanmıştır.
+
+Model eğitim süreci boyunca kararlı bir öğrenme davranışı sergilemiş, en iyi modeli otomatik olarak kaydetmiş ve tüm deney çıktıları başarıyla oluşturulmuştur.
+
+İlk karşılaştırma sonuçlarına göre mevcut deney koşullarında VGG16 modeli daha düşük doğrulama hatası elde etmiştir. Bununla birlikte ResNet50 modeli başarıyla eğitilmiş ve proje kapsamında planlanan karşılaştırmalı analizler için ikinci temel model hazır hâle getirilmiştir.
+
+## Oluşturulan Dosyalar
+
+- `results/checkpoints/resnet50_baseline_best.pth`
+- `results/plots/resnet50_loss_curve.png`
+- `results/logs/resnet50_initial_training_log.md`
+- `results/experiment_log.xlsx`
+
+## Sonraki Adım
+
+ResNet50 modelinin bağımsız test kümesi üzerindeki performansı değerlendirilecek, elde edilen Test MAE değeri VGG16 modeli ile karşılaştırılacak ve iki modelin sonuçları ayrıntılı olarak analiz edilecektir. Daha sonra araştırma önerisinde planlanan Dikkat Mekanizması (Attention Mechanism) entegrasyonu gerçekleştirilerek performans iyileştirme çalışmaları başlatılacaktır.

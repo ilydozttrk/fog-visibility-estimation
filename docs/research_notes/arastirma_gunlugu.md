@@ -606,3 +606,98 @@ Model eğitim süreci boyunca kararlı bir öğrenme davranışı sergilemiş, e
 ## Sonraki Adım
 
 ResNet50 modelinin bağımsız test kümesi üzerindeki performansı değerlendirilecek, elde edilen Test MAE değeri VGG16 modeli ile karşılaştırılacak ve iki modelin sonuçları ayrıntılı olarak analiz edilecektir. Daha sonra araştırma önerisinde planlanan Dikkat Mekanizması (Attention Mechanism) entegrasyonu gerçekleştirilerek performans iyileştirme çalışmaları başlatılacaktır.
+
+---
+
+# Day 13 — ResNet50 Model Evaluation and Baseline Analysis
+
+## Objective
+
+The objective of today's work was to evaluate the trained ResNet50 baseline model on the independent test dataset and compare its performance with the validation results obtained during training. In addition, the evaluation pipeline was completed to ensure that future baseline models could be assessed using the same experimental procedure.
+
+---
+
+## Evaluation Pipeline Development
+
+A dedicated evaluation module (`evaluation_resnet50.py`) was implemented for the ResNet50 baseline model.
+
+The evaluation pipeline was designed independently from the training script and performs the following operations automatically:
+
+- Loading the best-performing checkpoint
+- Evaluating the independent test dataset
+- Computing Mean Absolute Error (MAE)
+- Exporting prediction results as CSV
+- Creating an evaluation summary in JSON format
+- Generating prediction scatter plots
+- Generating prediction error histograms
+- Producing a human-readable Markdown evaluation report
+
+The evaluation procedure follows exactly the same methodology previously used for the VGG16 baseline model to ensure a fair comparison.
+
+---
+
+## Checkpoint Verification
+
+Before starting the evaluation, several verification steps were performed.
+
+The ResNet50 checkpoint was successfully loaded and the stored metadata was verified.
+
+The following information was confirmed:
+
+- Best checkpoint epoch: **20**
+- Validation MAE: **121.8414 m**
+
+The evaluation script correctly restored the trained model parameters before testing.
+
+---
+
+## Independent Test Evaluation
+
+The trained model was evaluated using the held-out test dataset consisting of **112 previously unseen images**.
+
+The obtained results were:
+
+| Metric | Result |
+|--------|--------:|
+| Test Samples | **112** |
+| Test MAE | **124.6181 m** |
+| Validation MAE | **121.8414 m** |
+| Mean Signed Error | **−77.3460 m** |
+
+The difference between Validation MAE and Test MAE was only **2.78 metres**, indicating that the trained model generalized consistently to unseen scenes without significant performance degradation.
+
+---
+
+## Generated Outputs
+
+The evaluation pipeline automatically generated the following outputs:
+
+- `resnet50_test_predictions.csv`
+- `resnet50_evaluation_summary.json`
+- `resnet50_actual_vs_predicted.png`
+- `resnet50_prediction_error_histogram.png`
+- `resnet50_evaluation_report.md`
+
+These files provide both numerical and visual summaries of the model performance and will be used during the comparative analysis stage.
+
+---
+
+## Experimental Observations
+
+The ResNet50 baseline completed the entire evaluation process successfully.
+
+Although its prediction error remained higher than the previously developed VGG16 baseline, the model demonstrated stable behaviour during evaluation.
+
+The close agreement between validation and test performance indicates that the implemented training and evaluation pipeline is reliable and reproducible.
+
+These results establish the official ResNet50 baseline performance that will serve as the reference for the upcoming Attention Mechanism experiments.
+
+---
+
+## Daily Outcome
+
+Today's work completed the entire experimental workflow for the ResNet50 baseline model.
+
+At this stage, both VGG16 and ResNet50 baseline models have been successfully developed, trained, evaluated, and documented under identical experimental conditions.
+
+The next phase of the project will focus on the comparative analysis of both baseline models and the integration of the planned Attention Mechanism into the selected architecture.

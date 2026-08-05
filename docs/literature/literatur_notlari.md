@@ -87,11 +87,11 @@ Araştırma önerisinde yer alan kaynakça doğrultusunda ilk aşamada aşağıd
 ## Literatür İnceleme Durumu
 
 - [ ] Transfer öğrenme tabanlı meteorolojik görüş tahmini çalışması incelendi.
-- [ ] Derin CNN tabanlı görünürlük tespiti çalışması incelendi.
-- [ ] FRIDA veri seti dokümantasyonu incelendi.
-- [ ] FRIDA2 veri seti dokümantasyonu incelendi.
-- [ ] FVEI veri seti araştırıldı.
-- [ ] FHVI veri seti araştırıldı.
+- [x] Derin CNN tabanlı görünürlük tespiti çalışması incelendi.
+- [x] FRIDA veri seti dokümantasyonu incelendi.
+- [x] FRIDA2 veri seti dokümantasyonu incelendi.
+- [x] FVEI veri seti araştırıldı.
+- [x] FHVI veri seti araştırıldı.
 
 ---
 
@@ -640,3 +640,49 @@ Evrişim Katmanları│
   └──── Toplama ◄─┘
           │
         Çıkış
+
+```
+---
+
+## Projemizde Kullanım Nedeni
+
+TÜBİTAK 2209-A projesi kapsamında ResNet50, VGG16 modeli ile birlikte ikinci temel transfer öğrenme mimarisi olarak seçilmiştir.
+
+İki model aynı veri kümesi, aynı veri bölünmesi, aynı eğitim süresi ve aynı hiperparametreler kullanılarak eğitilecek ve karşılaştırılacaktır.
+
+Bu sayede mimari farklılıkların görüş mesafesi tahmini üzerindeki etkisi objektif olarak değerlendirilebilecektir.
+
+İlk baseline deneylerinde ResNet50 modeli başarılı ve kararlı bir eğitim süreci göstermesine rağmen mevcut deney koşullarında VGG16 modelinden daha yüksek MAE değeri elde etmiştir.
+
+Bu sonuç, Attention Mechanism entegrasyonu öncesinde kullanılacak referans performansı oluşturmaktadır.
+
+---
+
+# İlk Baseline Deneylerinden Elde Edilen Gözlemler
+
+Literatür incelemesi tamamlandıktan sonra proje kapsamında geliştirilen ilk iki transfer öğrenme tabanlı model olan VGG16 ve ResNet50 aynı veri kümesi, aynı eğitim parametreleri ve aynı değerlendirme yöntemi kullanılarak karşılaştırılmıştır.
+
+İlk deney sonuçları aşağıdaki gözlemleri ortaya koymuştur.
+
+- Daha derin bir CNN mimarisine sahip olmak tek başına daha yüksek doğruluk sağlamamaktadır.
+- Aynı eğitim koşulları altında VGG16 modeli ResNet50 modelinden daha düşük MAE değeri elde etmiştir.
+- ResNet50 modeli eğitim ve test veri kümelerinde kararlı bir öğrenme davranışı göstermiştir.
+- Validation MAE ile Test MAE arasındaki farkın düşük olması modelin genelleme yeteneğinin iyi olduğunu göstermektedir.
+- Attention Mechanism entegrasyonu öncesinde elde edilen bu sonuçlar proje için baseline performansı olarak kullanılacaktır.
+
+Bu gözlemler, ilerleyen aşamada gerçekleştirilecek Attention Mechanism entegrasyonunun gerçekten performans artışı sağlayıp sağlamadığını objektif olarak değerlendirebilmek açısından referans niteliği taşımaktadır.
+
+---
+
+
+
+## Güncel Literatür Durumu
+
+Bugüne kadar gerçekleştirilen literatür incelemeleri sonucunda aşağıdaki temel teknik kararlar kesinleşmiştir.
+
+- Problem sürekli görüş mesafesi regresyonu olarak ele alınacaktır.
+- Performans metriği olarak MAE kullanılacaktır.
+- Transfer öğrenme yaklaşımı uygulanacaktır.
+- VGG16 ve ResNet50 temel karşılaştırma modelleri olacaktır.
+- En başarılı temel modele Attention Mechanism entegre edilecektir.
+- Sonuçlar bağımsız test kümesi üzerinde değerlendirilecektir.

@@ -955,5 +955,90 @@ Elde edilen temel bulgular:
 
 Bu analizler, sonraki aşamada gerçekleştirilecek VGG16–ResNet50 karşılaştırmasında ve Attention Mechanism entegrasyonu için temel mimarinin seçiminde kullanılacaktır.
 
+# Day 15 — VGG16 ve ResNet50 Baseline Karşılaştırması
 
+## Amaç
+
+Bugünkü çalışmanın amacı, proje kapsamında geliştirilen VGG16 ve ResNet50 baseline modellerinin performanslarını karşılaştırmak ve mevcut sentetik veri aşamasında Attention Mechanism entegrasyonu için kullanılacak en başarılı temel mimariyi belirlemekti.
+
+---
+
+## Baseline Sonuçlarının Karşılaştırılması
+
+Karşılaştırmaya başlamadan önce her iki modele ait sonuçlar doğrudan evaluation JSON dosyalarından doğrulandı.
+
+Elde edilen temel sonuçlar:
+
+| Metrik | VGG16 | ResNet50 |
+| --- | ---: | ---: |
+| Validation MAE | **69.9705 m** | 121.8414 m |
+| Test MAE | **66.7227 m** | 124.6181 m |
+| Mean Signed Error | **−17.3877 m** | −77.3460 m |
+| Maximum Absolute Error | **392.8829 m** | 602.6687 m |
+
+VGG16 ve ResNet50 arasındaki Validation MAE farkı **51.8709 m**, Test MAE farkı ise **57.8954 m** olarak hesaplandı.
+
+VGG16, ResNet50 baseline sonucuna kıyasla Test MAE'de yaklaşık **%46.46 azalma** sağladı.
+
+---
+
+## Hata Davranışlarının Değerlendirilmesi
+
+Her iki modelde de negatif Mean Signed Error gözlenmesi, gerçek görüş mesafesini ortalama olarak olduğundan düşük tahmin etme eğilimi bulunduğunu gösterdi.
+
+Ancak bu davranış ResNet50 modelinde daha belirgindi.
+
+Day 14 kapsamında incelenen değerlendirme grafiklerinde de ResNet50'nin özellikle yüksek görüş mesafelerinde sistematik underestimation ve prediction-range compression davranışı gösterdiği gözlenmişti.
+
+Bu görsel bulgular bugünkü sayısal karşılaştırma sonuçlarıyla tutarlı bulundu.
+
+---
+
+## Araştırma Hipotezinin Değerlendirilmesi
+
+Projenin başlangıç hipotezinde ResNet50'nin residual learning yapısı ve daha derin mimarisi nedeniyle VGG16'ya kıyasla daha düşük MAE üretmesi bekleniyordu.
+
+Ancak mevcut FRIDA/FRIDA2 kaynaklı sentetik veri üzerinde gerçekleştirilen deneyler bu hipotezi desteklemedi.
+
+Bu sonuç ResNet50'nin genel olarak daha kötü bir mimari olduğu anlamına gelmemektedir. Elde edilen sonuç yalnızca mevcut veri kümesi, frozen backbone transfer learning yaklaşımı ve kullanılan eğitim koşulları kapsamında değerlendirilmiştir.
+
+---
+
+## Baseline Model Seçimi
+
+Bağımsız test kümesindeki MAE temel seçim kriteri olarak kullanıldı.
+
+VGG16 **66.7227 m Test MAE**, ResNet50 ise **124.6181 m Test MAE** elde etti.
+
+Bu nedenle **VGG16, mevcut FRIDA/FRIDA2 kaynaklı sentetik veri aşamasında Attention Mechanism entegrasyonu için kullanılacak en başarılı baseline mimarisi olarak seçildi.**
+
+Bu karar projenin nihai gerçek dünya model seçimi değildir. FVEI/FHVI veya uygun alternatif gerçek dünya verileriyle gerçekleştirilecek sonraki fine-tuning ve değerlendirme aşamalarında modelin gerçek dünya genelleme performansı ayrıca incelenecektir.
+
+---
+
+## Günlük Çıktı
+
+Baseline karşılaştırmasının ayrıntılı sonuçlarını belgelemek amacıyla:
+
+`baseline_comparison.md`
+
+dosyası oluşturuldu.
+
+Dosyada ortak deney koşulları, Validation ve Test MAE karşılaştırmaları, hata davranışları, hipotez değerlendirmesi ve baseline seçim kararı dokümante edildi.
+
+---
+
+## Gün Sonu Sonucu
+
+Day 15 sonunda VGG16 ve ResNet50 baseline karşılaştırması tamamlandı.
+
+**Selected Synthetic Baseline: VGG16**
+
+**VGG16 Test MAE: 66.7227 m**
+
+**ResNet50 Test MAE: 124.6181 m**
+
+Başlangıç hipotezinin aksine VGG16 mevcut sentetik deney koşullarında daha başarılı sonuç verdi ve Attention Mechanism aşamasında kullanılacak temel mimari olarak seçildi.
+
+Proje böylece baseline model karşılaştırma aşamasını tamamlayarak Attention Mechanism geliştirme aşamasına geçmeye hazır hâle geldi.
 

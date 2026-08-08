@@ -609,68 +609,72 @@ ResNet50 modelinin bağımsız test kümesi üzerindeki performansı değerlendi
 
 ---
 
-# Day 13 — ResNet50 Model Evaluation and Baseline Analysis
+# Day 13 — ResNet50 Model Değerlendirmesi ve Baseline Analizi
 
-## Objective
+## Amaç
 
-The objective of today's work was to evaluate the trained ResNet50 baseline model on the independent test dataset and compare its performance with the validation results obtained during training. In addition, the evaluation pipeline was completed to ensure that future baseline models could be assessed using the same experimental procedure.
+Bugünkü çalışmanın amacı, eğitilmiş ResNet50 baseline modelini bağımsız test veri kümesi üzerinde değerlendirmek ve modelin test performansını eğitim sırasında elde edilen doğrulama (validation) sonuçlarıyla karşılaştırmaktı.
 
----
-
-## Evaluation Pipeline Development
-
-A dedicated evaluation module (`evaluation_resnet50.py`) was implemented for the ResNet50 baseline model.
-
-The evaluation pipeline was designed independently from the training script and performs the following operations automatically:
-
-- Loading the best-performing checkpoint
-- Evaluating the independent test dataset
-- Computing Mean Absolute Error (MAE)
-- Exporting prediction results as CSV
-- Creating an evaluation summary in JSON format
-- Generating prediction scatter plots
-- Generating prediction error histograms
-- Producing a human-readable Markdown evaluation report
-
-The evaluation procedure follows exactly the same methodology previously used for the VGG16 baseline model to ensure a fair comparison.
+Ayrıca gelecekte geliştirilecek modellerin aynı deneysel prosedür kullanılarak değerlendirilebilmesini sağlamak amacıyla ResNet50 için değerlendirme (evaluation) pipeline'ı tamamlandı.
 
 ---
 
-## Checkpoint Verification
+## Evaluation Pipeline Geliştirilmesi
 
-Before starting the evaluation, several verification steps were performed.
+ResNet50 baseline modeli için özel bir değerlendirme modülü (`evaluation_resnet50.py`) geliştirildi.
 
-The ResNet50 checkpoint was successfully loaded and the stored metadata was verified.
+Evaluation pipeline, eğitim kodundan bağımsız olacak şekilde tasarlandı ve aşağıdaki işlemleri otomatik olarak gerçekleştirecek biçimde yapılandırıldı:
 
-The following information was confirmed:
+- En iyi performansa sahip checkpoint'in yüklenmesi
+- Bağımsız test veri kümesinin değerlendirilmesi
+- Mean Absolute Error (MAE) değerinin hesaplanması
+- Tahmin sonuçlarının CSV formatında dışa aktarılması
+- Değerlendirme özetinin JSON formatında oluşturulması
+- Actual vs Predicted tahmin grafiğinin oluşturulması
+- Tahmin hatası histogramının oluşturulması
+- İnsan tarafından okunabilir Markdown değerlendirme raporunun üretilmesi
 
-- Best checkpoint epoch: **20**
+Değerlendirme prosedürü, VGG16 baseline modeli için daha önce kullanılan metodolojiyle aynı şekilde uygulanarak iki model arasında adil bir karşılaştırma yapılması amaçlandı.
+
+---
+
+## Checkpoint Doğrulaması
+
+Değerlendirme işlemine başlamadan önce çeşitli doğrulama kontrolleri gerçekleştirildi.
+
+ResNet50 checkpoint'i başarıyla yüklendi ve checkpoint içerisinde saklanan metadata bilgileri doğrulandı.
+
+Aşağıdaki bilgiler kontrol edildi:
+
+- En iyi checkpoint epoch'u: **20**
 - Validation MAE: **121.8414 m**
 
-The evaluation script correctly restored the trained model parameters before testing.
+Evaluation script'inin eğitilmiş model parametrelerini doğru biçimde geri yüklediği doğrulandı.
 
 ---
 
-## Independent Test Evaluation
+## Bağımsız Test Değerlendirmesi
 
-The trained model was evaluated using the held-out test dataset consisting of **112 previously unseen images**.
+Eğitilmiş model, daha önce model tarafından görülmemiş **112 görüntüden** oluşan bağımsız test veri kümesi üzerinde değerlendirildi.
 
-The obtained results were:
+Elde edilen sonuçlar aşağıdaki gibidir:
 
-| Metric | Result |
-|--------|--------:|
-| Test Samples | **112** |
+| Metrik | Sonuç |
+| --- | ---: |
+| Test Örneği Sayısı | **112** |
 | Test MAE | **124.6181 m** |
 | Validation MAE | **121.8414 m** |
 | Mean Signed Error | **−77.3460 m** |
 
-The difference between Validation MAE and Test MAE was only **2.78 metres**, indicating that the trained model generalized consistently to unseen scenes without significant performance degradation.
+Validation MAE ile Test MAE arasındaki fark yalnızca **2.78 metre** olarak hesaplandı.
+
+Bu sonuç, eğitilen modelin daha önce görmediği sahneler üzerinde önemli bir performans kaybı yaşamadan benzer bir performans gösterdiğini ortaya koymaktadır.
 
 ---
 
-## Generated Outputs
+## Oluşturulan Çıktılar
 
-The evaluation pipeline automatically generated the following outputs:
+Evaluation pipeline çalıştırıldığında aşağıdaki çıktılar otomatik olarak oluşturuldu:
 
 - `resnet50_test_predictions.csv`
 - `resnet50_evaluation_summary.json`
@@ -678,26 +682,278 @@ The evaluation pipeline automatically generated the following outputs:
 - `resnet50_prediction_error_histogram.png`
 - `resnet50_evaluation_report.md`
 
-These files provide both numerical and visual summaries of the model performance and will be used during the comparative analysis stage.
+Bu dosyalar model performansının hem sayısal hem de görsel olarak incelenebilmesini sağlamaktadır.
+
+Oluşturulan çıktılar ilerleyen aşamada gerçekleştirilecek karşılaştırmalı model analizinde kullanılacaktır.
 
 ---
 
-## Experimental Observations
+## Deneysel Gözlemler
 
-The ResNet50 baseline completed the entire evaluation process successfully.
+ResNet50 baseline modeli tüm değerlendirme sürecini başarıyla tamamladı.
 
-Although its prediction error remained higher than the previously developed VGG16 baseline, the model demonstrated stable behaviour during evaluation.
+Modelin tahmin hatası daha önce geliştirilen VGG16 baseline modelinden yüksek olmasına rağmen değerlendirme sırasında kararlı bir performans gösterdiği gözlemlendi.
 
-The close agreement between validation and test performance indicates that the implemented training and evaluation pipeline is reliable and reproducible.
+Validation ve test performanslarının birbirine yakın olması, modelin bağımsız test veri kümesinde önemli bir performans düşüşü yaşamadığını göstermektedir.
 
-These results establish the official ResNet50 baseline performance that will serve as the reference for the upcoming Attention Mechanism experiments.
+Elde edilen sonuçlar, ResNet50 baseline modelinin resmi referans performansını oluşturmaktadır ve ilerleyen Attention Mechanism deneylerinde yapılacak karşılaştırmalar için kullanılacaktır.
 
 ---
 
-## Daily Outcome
+## Gün Sonu Sonucu
 
-Today's work completed the entire experimental workflow for the ResNet50 baseline model.
+Bugünkü çalışmalar sonucunda ResNet50 baseline modelinin tüm deneysel süreci tamamlandı.
 
-At this stage, both VGG16 and ResNet50 baseline models have been successfully developed, trained, evaluated, and documented under identical experimental conditions.
+Bu aşamada hem VGG16 hem de ResNet50 baseline modelleri aynı deneysel koşullar altında başarıyla:
 
-The next phase of the project will focus on the comparative analysis of both baseline models and the integration of the planned Attention Mechanism into the selected architecture.
+- geliştirildi,
+- eğitildi,
+- değerlendirildi,
+- sonuçları kaydedildi,
+- dokümante edildi.
+
+Bir sonraki aşamada iki baseline modelin ayrıntılı performans karşılaştırması gerçekleştirilecek ve elde edilen sonuçlara göre Attention Mechanism entegrasyonunda kullanılacak temel mimari belirlenecektir.
+
+
+# Day 14 — ResNet50 Değerlendirme Grafikleri ve Hata Analizi
+
+## Amaç
+
+Bugünkü çalışmanın amacı, ResNet50 baseline modelinin performansını yalnızca genel MAE değeri üzerinden değil, eğitim ve değerlendirme sürecinde oluşturulan grafikler üzerinden ayrıntılı biçimde analiz etmekti.
+
+Bu kapsamda ResNet50 modelinin öğrenme eğrisi, Actual vs Predicted grafiği ve tahmin hatası histogramı incelendi.
+
+Analiz sırasında özellikle aşağıdaki sorulara odaklanıldı:
+
+- Modelde belirgin bir overfitting davranışı bulunuyor mu?
+- Training ve validation performansları eğitim boyunca nasıl değişiyor?
+- Model farklı görüş mesafelerinde benzer tahmin davranışı gösteriyor mu?
+- Tahminlerde sistematik bir düşük veya yüksek tahmin eğilimi bulunuyor mu?
+- Test MAE değerinin yükselmesine hangi hata davranışları katkıda bulunuyor?
+
+---
+
+## Learning Curve Analizi
+
+ResNet50 modelinin 20 epoch boyunca elde edilen Training MAE ve Validation MAE değerleri incelendi.
+
+Eğitim sürecinde her iki hata değerinin de düzenli biçimde azaldığı görüldü.
+
+Temel sonuçlar aşağıdaki gibidir:
+
+| Metrik | Başlangıç | Son |
+| --- | ---: | ---: |
+| Training MAE | **271.6411 m** | **122.1239 m** |
+| Validation MAE | **269.8412 m** | **121.8414 m** |
+
+Eğitimin özellikle ilerleyen epoch'larında training ve validation eğrilerinin birbirine oldukça yakın ilerlediği gözlemlendi.
+
+20. epoch sonunda Training MAE ile Validation MAE arasındaki fark yaklaşık **0.28 m** olarak hesaplandı.
+
+Validation MAE eğitim boyunca genel olarak azalmaya devam etti ve en iyi validation sonucu **20. epoch'ta** elde edildi.
+
+Bu davranış, training performansı iyileşmeye devam ederken validation performansının kötüleşmesi şeklinde ortaya çıkan klasik overfitting davranışının mevcut deneyde görülmediğini göstermektedir.
+
+---
+
+## Overfitting Analizi
+
+Overfitting değerlendirmesi yalnızca learning curve üzerinden değil, training, validation ve bağımsız test sonuçları birlikte ele alınarak gerçekleştirildi.
+
+Elde edilen değerler:
+
+| Metrik | Sonuç |
+| --- | ---: |
+| Final Training MAE | **122.1239 m** |
+| Best Validation MAE | **121.8414 m** |
+| Test MAE | **124.6181 m** |
+| Validation–Test MAE Farkı | **2.7767 m** |
+
+Training ve validation performanslarının birbirine oldukça yakın olması ve bağımsız Test MAE değerinin Validation MAE değerinden yalnızca yaklaşık **2.78 m** yüksek olması, mevcut baseline deneyinde belirgin bir overfitting bulgusu olmadığını desteklemektedir.
+
+Bununla birlikte learning curve incelendiğinde Validation MAE değerinin 20. epoch'ta hâlâ düşmeye devam ettiği görülmektedir.
+
+Bu durum, ResNet50 modelinin belirlenen 20 epoch sonunda tamamen yakınsamamış olabileceğini düşündürmektedir.
+
+Ancak VGG16 ve ResNet50 baseline deneylerinin aynı deneysel koşullar altında karşılaştırılabilmesi amacıyla ResNet50 modeli bu aşamada daha uzun süre yeniden eğitilmeyecektir.
+
+Daha uzun eğitim süresinin etkisi ileride incelenirse bu çalışma mevcut baseline deneyinden ayrı bir deney olarak kaydedilecektir.
+
+---
+
+## Actual vs Predicted Grafiğinin Analizi
+
+Modelin farklı görüş mesafelerindeki tahmin davranışını incelemek amacıyla `resnet50_actual_vs_predicted.png` grafiği analiz edildi.
+
+Grafikteki kesikli diyagonal çizgi ideal tahmin durumunu temsil etmektedir:
+
+```text
+Predicted Visibility = Ground Truth Visibility
+```
+
+Düşük ve orta görüş mesafelerinde, özellikle yaklaşık **50–200 m** aralığında, tahminlerin önemli bir bölümünün ideal çizgiye görece yakın olduğu gözlemlendi.
+
+Ancak ground-truth görüş mesafesi yükseldikçe model tahminlerinin ideal çizginin altında kalmaya başladığı görüldü.
+
+Bu davranış özellikle **500 m** ve **800 m** görüş mesafesine sahip örneklerde belirginleşmektedir.
+
+500 m ground-truth değerine sahip görüntülerde tahminlerin önemli bir bölümü gerçek değerin oldukça altında kalırken, 800 m ground-truth değerine sahip örneklerde model tahminlerinin yaklaşık **200–360 m** aralığında kaldığı gözlemlendi.
+
+Bu sonuç, ResNet50 modelinin özellikle yüksek görüş mesafelerinde sistematik bir **underestimation (düşük tahmin)** davranışı gösterdiğini ortaya koymaktadır.
+
+---
+
+## Prediction Range Compression Gözlemi
+
+Actual vs Predicted grafiğinde dikkat çeken diğer bir davranış tahmin aralığının daralmasıdır.
+
+Ground-truth değerleri yaklaşık **50–800 m** arasında değişirken model tahminlerinin büyük bölümü bundan çok daha dar bir aralıkta kalmaktadır.
+
+Model özellikle yüksek görüş mesafelerini hedef değişkenin gerçek dinamik aralığına kadar taşıyamamaktadır.
+
+Bu davranış, modelin çıktı değerlerinin daha dar bir bölgede toplanması anlamına gelen **prediction-range compression** olarak değerlendirildi.
+
+Bu gözlem, yüksek görüş mesafelerinde oluşan büyük tahmin hatalarının önemli bir göstergesidir.
+
+---
+
+## Prediction Error Histogram Analizi
+
+Modelin tahmin hatalarının dağılımını incelemek amacıyla `resnet50_prediction_error_histogram.png` grafiği analiz edildi.
+
+Hata aşağıdaki şekilde tanımlanmaktadır:
+
+```text
+Prediction Error = Predicted Visibility - Ground Truth Visibility
+```
+
+Bu nedenle:
+
+- `0 m` → ideal tahmin,
+- negatif değer → gerçek değerden düşük tahmin,
+- pozitif değer → gerçek değerden yüksek tahmin
+
+anlamına gelmektedir.
+
+Histogram incelendiğinde test örneklerinin önemli bir bölümünün sıfır hata çevresinde ve görece düşük hata aralıklarında toplandığı görüldü.
+
+Bununla birlikte dağılımın negatif yönde oldukça uzun bir kuyruğa sahip olduğu gözlemlendi.
+
+Bazı tahmin hataları yaklaşık **−600 m** seviyesine kadar ulaşırken pozitif tarafta benzer büyüklükte bir hata kuyruğu bulunmamaktadır.
+
+Bu nedenle hata dağılımının belirgin biçimde asimetrik olduğu görüldü.
+
+---
+
+## Mean Signed Error ile İlişki
+
+Evaluation aşamasında ResNet50 için hesaplanan Mean Signed Error değeri:
+
+**−77.3460 m**
+
+olarak elde edilmişti.
+
+Actual vs Predicted grafiği ve hata histogramı birlikte değerlendirildiğinde bu negatif değerin nedeni daha açık biçimde görülmektedir.
+
+Modelin hataları yalnızca ground-truth değerlerinin çevresinde rastgele dağılmamaktadır.
+
+Özellikle yüksek görüş mesafesine sahip bazı örneklerde model çok büyük negatif tahmin hataları üretmektedir.
+
+Bu durum hata dağılımını negatif yönde kaydırmakta ve Mean Signed Error değerinin negatif olmasına katkıda bulunmaktadır.
+
+Evaluation sırasında hesaplanan **602.6687 m maksimum mutlak hata** değeri de histogramda gözlemlenen yaklaşık −600 m seviyesindeki büyük negatif hata kuyruğuyla uyumludur.
+
+---
+
+## Birleşik Değerlendirme
+
+Learning curve, Actual vs Predicted grafiği ve Prediction Error Histogram birlikte değerlendirildiğinde ResNet50 baseline modelinin davranışı daha ayrıntılı biçimde ortaya çıkmaktadır.
+
+Learning curve:
+
+- Eğitim sürecinin kararlı ilerlediğini,
+- Training ve Validation MAE değerlerinin birlikte azaldığını,
+- Belirgin bir training-validation ayrışması bulunmadığını
+
+göstermektedir.
+
+Actual vs Predicted grafiği:
+
+- Düşük ve orta görüş mesafelerinde daha başarılı tahminler üretildiğini,
+- Yüksek görüş mesafelerinde sistematik underestimation oluştuğunu,
+- Tahmin aralığının gerçek hedef aralığına kıyasla sıkıştığını
+
+göstermektedir.
+
+Prediction Error Histogram ise:
+
+- Hataların önemli bir bölümünün düşük hata bölgelerinde toplandığını,
+- Bununla birlikte büyük negatif hataların bulunduğunu,
+- Hata dağılımının negatif yönde uzun bir kuyruğa sahip olduğunu
+
+göstermektedir.
+
+Bu sonuçlar birlikte değerlendirildiğinde ResNet50 baseline modelinin temel sınırlılığının klasik overfitting olmadığı görülmektedir.
+
+Mevcut baseline konfigürasyonunda temel problem, modelin özellikle yüksek görüş mesafelerini yeterli doğrulukla temsil edememesi, bu örneklerde sistematik olarak düşük tahmin üretmesi ve tahmin aralığının sıkışmasıdır.
+
+---
+
+## Bulguların Yorumlanmasında Dikkat Edilecek Nokta
+
+Mevcut grafikler model davranışının nasıl gerçekleştiğini göstermesine rağmen bu davranışın kesin nedenini tek başına açıklamamaktadır.
+
+Örneğin;
+
+- hedef değer dağılımı,
+- frozen backbone kullanımı,
+- eğitim süresi,
+- model mimarisinin özellikleri
+
+gibi faktörler bu davranış üzerinde etkili olabilir.
+
+Ancak mevcut deneyler bu olası nedenleri birbirinden ayıracak şekilde tasarlanmadığından bunlar kesin sonuç olarak değil, ileride araştırılabilecek hipotezler olarak değerlendirilecektir.
+
+---
+
+## Deneysel Karar
+
+ResNet50 modelinin Validation MAE değeri 20. epoch'ta hâlâ iyileşiyor olmasına rağmen mevcut baseline model daha uzun epoch sayısı ile yeniden eğitilmeyecektir.
+
+VGG16 ve ResNet50 modelleri;
+
+- aynı veri bölünmesi,
+- aynı preprocessing pipeline,
+- aynı random seed,
+- aynı eğitim süresi,
+- aynı temel hiperparametreler,
+- aynı evaluation prosedürü
+
+altında değerlendirilmiştir.
+
+Bu deneysel koşulların korunması, iki baseline mimarinin adil biçimde karşılaştırılması açısından önemlidir.
+
+Daha uzun eğitim süresinin ResNet50 performansına etkisi araştırılacaksa bu çalışma ayrı bir deney olarak gerçekleştirilecektir.
+
+---
+
+## Gün Sonu Sonucu
+
+Bugünkü çalışmalar sonucunda ResNet50 baseline modelinin görsel ve davranışsal performans analizi tamamlandı.
+
+Elde edilen temel bulgular:
+
+- Belirgin bir overfitting davranışı gözlenmedi.
+- Training ve Validation MAE değerleri eğitim boyunca düzenli biçimde azaldı.
+- Validation ve Test MAE değerleri birbirine yakın bulundu.
+- Yüksek görüş mesafelerinde sistematik underestimation tespit edildi.
+- Modelde prediction-range compression davranışı gözlemlendi.
+- Hata dağılımında negatif yönde uzun bir kuyruk bulundu.
+- **−77.3460 m Mean Signed Error** değeri görsel analizlerle uyumlu bulundu.
+- Maksimum mutlak hata **602.6687 m** olarak kaydedildi.
+- Modelin 20 epoch sonunda tamamen yakınsamamış olması mümkün görülmesine rağmen baseline karşılaştırmasının adil olması amacıyla mevcut eğitim konfigürasyonunun korunmasına karar verildi.
+
+Bu analizler, sonraki aşamada gerçekleştirilecek VGG16–ResNet50 karşılaştırmasında ve Attention Mechanism entegrasyonu için temel mimarinin seçiminde kullanılacaktır.
+
+
+

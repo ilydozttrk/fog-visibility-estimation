@@ -1,10 +1,12 @@
-# Ön İşleme Pipeline Taslağı
+# Ön İşleme Pipeline Dokümantasyonu
 
 ## 1. Amaç
 
-Bu doküman, TÜBİTAK 2209-A projesinde kullanılacak FRIDA görüntülerinin VGG16 ve ResNet50 modellerine hazırlanması için uygulanacak ön işleme adımlarını tasarlamak amacıyla oluşturulmuştur.
+Bu doküman, TÜBİTAK 2209-A projesinde kullanılan FRIDA ve FRIDA2 tabanlı sentetik görüntü veri kümesinin VGG16 ve ResNet50 transfer öğrenme modellerine hazırlanması için tasarlanan ve uygulanan ön işleme sürecini açıklamaktadır.
 
-Bu aşamada herhangi bir görüntü fiziksel olarak dönüştürülmeyecek ve model eğitimi yapılmayacaktır. Amaç; görüntü boyutlandırma, normalizasyon, veri bölme ve veri akışıyla ilgili teknik kararları önceden belirlemektir.
+Dokümanın ilk sürümü model eğitiminden önce görüntü boyutlandırma, normalizasyon, veri bölme ve veri akışıyla ilgili teknik kararları belirlemek amacıyla hazırlanmıştır.
+
+Projenin mevcut aşamasında preprocessing ve DataLoader altyapısı uygulanmış; hem VGG16 hem de ResNet50 baseline deneylerinde başarıyla kullanılmıştır.
 
 ---
 
@@ -12,34 +14,34 @@ Bu aşamada herhangi bir görüntü fiziksel olarak dönüştürülmeyecek ve mo
 
 Görüntü ön işleme, ham görüntülerin derin öğrenme modelinin kabul edebileceği standart ve tutarlı bir yapıya dönüştürülmesidir.
 
-FRIDA veri setindeki görüntüler 640 × 480 çözünürlüğünde ve RGB renk modundadır. Ancak transfer öğrenmede kullanılacak VGG16 ve ResNet50 modellerinin girişine verilmeden önce görüntülerin belirli işlemlerden geçirilmesi gerekmektedir.
+FRIDA tabanlı görüntüler modele verilmeden önce ortak giriş formatına dönüştürülmektedir.
 
 Ön işleme sürecinin temel amaçları şunlardır:
 
 - Görüntüleri modellerin beklediği giriş boyutuna dönüştürmek
-- Piksel değerlerini önceden eğitilmiş model ağırlıklarıyla uyumlu hâle getirmek
+- Piksel değerlerini ImageNet üzerinde önceden eğitilmiş model ağırlıklarıyla uyumlu hâle getirmek
 - Tüm görüntüler için tutarlı bir veri yapısı oluşturmak
-- Eğitim, doğrulama ve test verilerini birbirinden ayırmak
+- Eğitim, doğrulama ve test verilerini birbirinden bağımsız tutmak
 - Veri sızıntısını önlemek
-- Model karşılaştırmasının aynı koşullarda yapılmasını sağlamak
-- Eğitim verisinin çeşitliliğini kontrollü şekilde artırmak
+- Model karşılaştırmasının aynı veri koşullarında yapılmasını sağlamak
+- Deneylerin tekrarlanabilirliğini korumak
 
 ---
 
-## 3. Proje Kapsamında Değerlendirilecek Ön İşleme Adımları
+## 3. Proje Kapsamında Uygulanan Ön İşleme Adımları
 
-FRIDA veri seti için aşağıdaki işlemler değerlendirilmiştir:
+Proje kapsamında kullanılan veri hazırlama süreci aşağıdaki temel adımlardan oluşmaktadır:
 
 1. Görüntü dosyalarının okunması
-2. Görüntülerin RGB renk modunda olduğunun doğrulanması
-3. Temel sahnelerin ve sis varyasyonlarının belirlenmesi
+2. Görüntülerin RGB renk formatına dönüştürülmesi
+3. Temel sahnelerin ve görüntü varyasyonlarının belirlenmesi
 4. Verinin sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılması
-5. Görüntülerin ortak giriş boyutuna dönüştürülmesi
-6. Görüntü oranının korunması veya doğrudan yeniden boyutlandırma seçeneklerinin karşılaştırılması
-7. Model mimarisine uygun normalizasyon uygulanması
-8. Yalnızca eğitim verisine veri artırma uygulanması
-9. Görüntülerin batch yapısına dönüştürülmesi
-10. Aynı veri bölünmesinin VGG16 ve ResNet50 için kullanılması
+5. Görüntülerin ortak model giriş boyutuna dönüştürülmesi
+6. ImageNet uyumlu normalizasyon uygulanması
+7. Görüntü ve regresyon hedeflerinin `FogVisibilityDataset` üzerinden yüklenmesi
+8. Verilerin mini-batch yapısına dönüştürülmesi
+9. Aynı veri bölünmesinin VGG16 ve ResNet50 modellerinde kullanılması
+10. Sabit random seed kullanılarak deneylerin tekrarlanabilirliğinin korunması
 
 ---
 
@@ -47,373 +49,441 @@ FRIDA veri seti için aşağıdaki işlemler değerlendirilmiştir:
 
 ### 4.1 Ham Verinin Korunması
 
-`data/raw/frida` klasöründeki orijinal görüntüler üzerinde doğrudan değişiklik yapılmayacaktır.
+Orijinal veri üzerinde doğrudan ve geri döndürülemez değişiklik yapılmamaktadır.
 
-Ön işlenmiş veriler gerektiğinde ayrı bir klasörde tutulacaktır:
+Model eğitiminde kullanılacak veri ve üretilen metadata yapıları proje içerisindeki ilgili veri klasörlerinde ayrı olarak tutulmaktadır.
 
-```text
-data/processed/
+Bu yaklaşım:
 
-```
+- ham verinin korunmasını,
+- deneylerin yeniden gerçekleştirilebilmesini,
+- farklı preprocessing stratejilerinin ileride karşılaştırılabilmesini
 
-Bu yaklaşım, deneylerin tekrarlanabilirliğini ve ham verinin korunmasını sağlar.
+sağlamaktadır.
+
+---
 
 ### 4.2 Veri Sızıntısının Önlenmesi
 
-FRIDA veri setinde aynı temel sahnenin farklı sis koşullarında oluşturulmuş birden fazla görüntüsü bulunmaktadır.
+FRIDA ve FRIDA2 tabanlı veri yapısında aynı temel sahnenin farklı sis koşullarını veya varyasyonlarını temsil eden birden fazla görüntü bulunabilmektedir.
 
-Aynı sahneye ait görüntülerin bir kısmının eğitim, diğer kısmının test kümesine alınması modelin sahneyi önceden görmesine neden olabilir. Bu durum test performansının gerçekte olduğundan daha yüksek görünmesine yol açar.
+Aynı temel sahneye ait görüntülerin bir kısmının eğitim, diğer kısmının validation veya test kümesine alınması modelin sahne özelliklerini daha önce görmesine neden olabilir.
 
-Bu nedenle veri bölme işlemi tek tek görüntüler üzerinden değil, temel sahneler üzerinden gerçekleştirilecektir.
+Bu durum bağımsız test performansının gerçekte olduğundan daha yüksek görünmesine yol açabilecek bir veri sızıntısı oluşturabilir.
+
+Bu nedenle veri bölme işlemi tek tek görüntüler üzerinden değil, **scene-based split** yaklaşımı kullanılarak gerçekleştirilmiştir.
+
+Aynı temel sahneye ait örneklerin farklı veri kümelerine dağılması engellenmiştir.
+
+---
 
 ### 4.3 Modeller Arasında Adil Karşılaştırma
 
-VGG16 ve ResNet50 modelleri aşağıdaki ortak koşullarda karşılaştırılacaktır:
+VGG16 ve ResNet50 baseline modelleri mümkün olduğunca aynı deneysel koşullar altında karşılaştırılmıştır.
 
-- Aynı eğitim, doğrulama ve test kümeleri
+Ortak tutulan temel koşullar şunlardır:
+
+- Aynı training, validation ve test split'i
 - Aynı giriş görüntü boyutu
 - Aynı regresyon hedefleri
-- Aynı veri artırma politikası
+- Aynı preprocessing pipeline
 - Aynı değerlendirme metriği
-- Aynı rastgelelik tohumu
+- Aynı random seed
+- Aynı batch size
+- Aynı baseline eğitim süresi
+- Aynı evaluation prosedürü
 
-Normalizasyon işlemi ise her modelin önceden eğitilmiş ağırlıklarının gerektirdiği biçimde uygulanacaktır.
-
-### 4.4 Veri Artırmanın Sınırlandırılması
-
-Veri artırma yalnızca eğitim kümesine uygulanacaktır.
-
-Doğrulama ve test görüntülerine veri artırma uygulanmayacaktır. Bu kümelerde yalnızca zorunlu yeniden boyutlandırma ve model uyumlu normalizasyon işlemleri kullanılacaktır.
-
-Ayrıca görüş mesafesi tahminini bozabilecek aşırı renk, kontrast veya sis değişikliklerinden kaçınılacaktır.
+Bu yaklaşım, modeller arasında gözlenen performans farklılıklarının veri hazırlama veya değerlendirme farklılıklarından kaynaklanma olasılığını azaltmaktadır.
 
 ---
 
-## 5. İlk Değerlendirme
+### 4.4 Veri Artırma Politikası
 
-FRIDA veri setinin küçük olması ve aynı temel sahnelere ait farklı sis varyasyonları içermesi nedeniyle ön işleme sürecinde en kritik konu veri sızıntısının engellenmesidir.
+Projenin başlangıç tasarımında veri artırmanın yalnızca training kümesine uygulanması ve validation/test kümelerinin değiştirilmeden değerlendirilmesi planlanmıştır.
 
-Bu nedenle projenin ön işleme yaklaşımı aşağıdaki esaslara dayanacaktır:
+Görüş mesafesi tahmini probleminde görüntünün sis yoğunluğu, kontrastı ve atmosferik görünümü doğrudan hedef değişkenle ilişkili olabileceğinden agresif renk, kontrast veya yapay sis dönüşümlerinin regresyon hedefinin anlamını değiştirebileceği değerlendirilmiştir.
 
-- ham veriyi değiştirmeme,
-- sahne bazlı veri bölme,
-- modeller için ortak giriş boyutu,
-- model uyumlu normalizasyon,
-- yalnızca eğitim verisine kontrollü veri artırma,
-- tekrarlanabilir veri bölme ve deney yapısı.
+Bu nedenle augmentation kullanımı kontrollü tutulmalı ve uygulanan her dönüşüm deney kayıtlarında açık biçimde belirtilmelidir.
 
-Bir sonraki aşamada VGG16 ve ResNet50 için kullanılacak ortak görüntü boyutu belirlenecektir.
+Validation ve test verilerine performansı yapay biçimde değiştirecek augmentation uygulanmaması temel deneysel ilke olarak korunmaktadır.
 
 ---
 
-# 6. Görüntü Boyutlandırma (Resize) Kararı
+## 5. Görüntü Boyutlandırma Kararı
 
-## Mevcut Durum
+### Mevcut Durum
 
-FRIDA veri setindeki görüntüler 640 × 480 piksel çözünürlüğündedir.
+Transfer öğrenmede kullanılan VGG16 ve ResNet50 modelleri için ortak giriş boyutu:
 
-Transfer öğrenmede kullanılacak VGG16 ve ResNet50 modelleri ise standart olarak 224 × 224 piksel giriş boyutu beklemektedir.
+**224 × 224 piksel**
 
-Bu nedenle tüm görüntülerin ortak bir giriş boyutuna dönüştürülmesi gerekmektedir.
+olarak belirlenmiştir.
 
-## Değerlendirilen Yaklaşımlar
+Bu karar iki mimarinin aynı görüntü boyutu altında karşılaştırılmasını sağlamaktadır.
 
-### Yaklaşım 1
+### İlk Tasarımda Değerlendirilen Yaklaşımlar
 
-Doğrudan 224 × 224 yeniden boyutlandırma
+#### Yaklaşım 1 — Doğrudan 224 × 224 Resize
 
-Avantajları
-
-- Basit uygulama
-- Hızlıdır
-
-Dezavantajları
-
-- Görüntü oranı değişebilir.
-- Yol geometrisi ve nesne oranları bozulabilir.
-
----
-
-### Yaklaşım 2
-
-Aspect ratio korunarak yeniden boyutlandırma ve padding uygulanması
-
-Avantajları
-
-- Görüntü geometrisi korunur.
-- Yol yapısı bozulmaz.
-- Görüş mesafesi ile ilişkili görsel ipuçları daha doğru korunur.
-
-Dezavantajları
-
-- Görüntü kenarlarında padding oluşabilir.
-
----
-
-## Seçilen Yaklaşım
-
-Bu proje kapsamında görüntülerin aspect ratio korunarak yeniden boyutlandırılması ve gerekli durumlarda padding uygulanarak 224 × 224 giriş boyutuna dönüştürülmesi planlanmaktadır.
-
-Bu yaklaşım hem transfer öğrenme modelleriyle uyumludur hem de görüş mesafesi tahmini açısından önemli olan yol geometrisinin korunmasını sağlamaktadır.
-
----
-
-# 7. Normalizasyon Kararı
-
-## Amaç
-
-Transfer öğrenme modellerinin önceden öğrendikleri ağırlıkları doğru şekilde kullanabilmeleri için giriş görüntülerinin uygun biçimde normalize edilmesi gerekmektedir.
-
-Ham görüntülerde piksel değerleri 0–255 aralığında bulunmaktadır. Bu değerler doğrudan modele verilmek yerine modelin beklediği giriş formatına dönüştürülecektir.
-
-## Değerlendirilen Yaklaşımlar
-
-### Yaklaşım 1
-
-Manuel normalizasyon
-
-Örnek:
-
-- Piksel değerlerini 255'e bölmek
-- Ortalama ve standart sapma kullanmak
-
-Avantajları
+Avantajları:
 
 - Basit uygulanabilir.
-- Genel amaçlıdır.
+- Hesaplama açısından pratiktir.
+- Standart CNN giriş yapısıyla doğrudan uyumludur.
 
-Dezavantajları
+Dezavantajları:
 
-- Önceden eğitilmiş model ağırlıklarıyla tam uyum sağlamayabilir.
+- Orijinal görüntü en-boy oranı farklıysa geometrik deformasyon oluşturabilir.
 
----
+#### Yaklaşım 2 — Aspect Ratio Koruma ve Padding
 
-### Yaklaşım 2
+Avantajları:
 
-Modelin resmi preprocessing fonksiyonunun kullanılması
+- Görüntü geometrisinin korunmasını sağlar.
+- Yol ve sahne yapısındaki geometrik ilişkilerin bozulmasını azaltabilir.
 
-Avantajları
+Dezavantajları:
 
-- Önceden eğitilmiş ImageNet ağırlıklarıyla tam uyumludur.
-- Ek manuel ayar gerektirmez.
-- Literatürde yaygın olarak kullanılan yaklaşımdır.
+- Görüntü kenarlarında yapay padding bölgeleri oluşturabilir.
+- Pipeline'ı bir miktar karmaşıklaştırır.
 
-Dezavantajları
+### Uygulanan Deneysel Ayar
 
-- Kullanılan derin öğrenme kütüphanesine bağlıdır.
+Baseline deneylerinde VGG16 ve ResNet50 için aynı **224 × 224** giriş boyutu kullanılmıştır.
 
----
+Dolayısıyla iki modelin performans karşılaştırmasında görüntü boyutu sabit tutulmuştur.
 
-## Seçilen Yaklaşım
-
-Bu proje kapsamında VGG16 ve ResNet50 modelleri için ilgili derin öğrenme kütüphanesinin sağladığı resmi preprocessing fonksiyonlarının kullanılması planlanmaktadır.
-
-Bu yaklaşım, transfer öğrenme sürecinde model ağırlıkları ile giriş görüntüleri arasındaki uyumu koruyacak ve modeller arasında adil karşılaştırma yapılmasını sağlayacaktır.
+Gelecekte resize stratejisinin etkisi ayrıca araştırılacaksa bu değişiklik mevcut baseline deneyinden bağımsız bir ablation veya ek deney olarak değerlendirilmelidir.
 
 ---
 
-# 8. Ön İşleme İş Akışı (Workflow)
+## 6. Normalizasyon Kararı
 
-## Genel İş Akışı
+### Amaç
 
-Proje kapsamında uygulanması planlanan veri hazırlama süreci aşağıdaki sırayla gerçekleştirilecektir.
+VGG16 ve ResNet50 modellerinde ImageNet üzerinde önceden eğitilmiş ağırlıklar kullanılmaktadır.
+
+Bu nedenle giriş görüntülerinin pretrained ağırlıkların beklediği dağılımla uyumlu biçimde normalize edilmesi gerekmektedir.
+
+### Değerlendirilen Yaklaşımlar
+
+#### Yaklaşım 1 — Genel Amaçlı Manuel Normalizasyon
+
+Örneğin:
+
+- Piksel değerlerini `[0, 1]` aralığına dönüştürmek
+- Veri kümesine özgü ortalama ve standart sapma kullanmak
+
+Bu yaklaşım uygulanabilir olmakla birlikte ImageNet pretrained ağırlıklarıyla kullanılan standart preprocessing prosedüründen farklılaşabilir.
+
+#### Yaklaşım 2 — ImageNet Uyumlu Normalizasyon
+
+ImageNet üzerinde önceden eğitilmiş CNN modelleriyle uyumlu standart normalizasyon değerlerinin kullanılmasıdır.
+
+Bu yaklaşım:
+
+- pretrained ağırlıklarla uyumluluğu korur,
+- transfer öğrenme deneylerinin standartlaştırılmasını sağlar,
+- VGG16 ve ResNet50 için ortak preprocessing koşulu oluşturur.
+
+### Seçilen ve Uygulanan Yaklaşım
+
+Proje kapsamında **ImageNet uyumlu normalizasyon** kullanılmaktadır.
+
+Aynı normalizasyon prosedürü VGG16 ve ResNet50 baseline deneylerinde başarıyla uygulanmıştır.
+
+---
+
+## 7. Ön İşleme İş Akışı
+
+### Güncel İş Akışı
 
 ```text
-FRIDA + FRIDA2 Sentetik Veri Kümesi
+FRIDA + FRIDA2 Tabanlı Sentetik Veri
                 │
                 ▼
-labels.csv
+            labels.csv
                 │
                 ▼
-Scene-based Split
+       Scene-Based Split
                 │
                 ▼
-FogVisibilityDataset
+     FogVisibilityDataset
                 │
                 ▼
-Resize (224×224)
+         RGB Dönüşümü
                 │
                 ▼
-RGB Dönüşümü
+        Resize (224×224)
                 │
                 ▼
-ImageNet Normalizasyonu
+   ImageNet Normalizasyonu
                 │
                 ▼
-PyTorch DataLoader
+       PyTorch DataLoader
                 │
                 ▼
-VGG16 / ResNet50
+       Mini-Batch Oluşturma
+                │
+                ▼
+        VGG16 / ResNet50
+                │
+                ▼
+       Regression Output
 ```
 
 ---
 
-## İş Akışının Açıklaması
+## 8. İş Akışının Açıklaması
 
-### 1. Dosya Kontrolü
+### 8.1 Dosya ve Metadata Kontrolü
 
-İlk aşamada veri setindeki tüm görüntülerin okunabilir olduğu doğrulanacaktır.
+Model eğitiminden önce görüntü yolları ve regresyon hedefleri `labels.csv` üzerinden okunmaktadır.
 
-Bozuk veya eksik dosyalar tespit edilerek veri bütünlüğü kontrol edilecektir.
-
----
-
-### 2. Sahne Kimliklerinin Belirlenmesi
-
-FRIDA veri setinde aynı temel sahneye ait farklı sis seviyelerinde oluşturulmuş görüntüler bulunmaktadır.
-
-Bu nedenle görüntüler yalnızca dosya adı üzerinden değil, ait oldukları temel sahneye göre gruplandırılacaktır.
+Görüntü ve etiket eşleşmelerinin korunması, supervised regression pipeline'ının temel gereksinimlerinden biridir.
 
 ---
 
-### 3. Veri Bölme
+### 8.2 Sahne Kimliklerinin Kullanılması
 
-Eğitim, doğrulama ve test kümeleri sahne bazlı olarak oluşturulacaktır.
+Aynı temel sahneye ait görüntüler scene identifier bilgileri kullanılarak birlikte değerlendirilmektedir.
 
-Bu yöntem veri sızıntısını önleyecek ve modellerin daha gerçekçi değerlendirilmesini sağlayacaktır.
-
----
-
-### 4. Resize
-
-Tüm görüntüler aspect ratio korunarak yeniden boyutlandırılacaktır.
-
-Gerekli durumlarda padding uygulanarak ortak giriş boyutu olan 224 × 224 elde edilecektir.
+Bu yapı scene-based split uygulanmasını mümkün kılmaktadır.
 
 ---
 
-### 5. Normalizasyon
+### 8.3 Veri Bölme
 
-Her model için ilgili derin öğrenme kütüphanesinin sağladığı resmi preprocessing yöntemi uygulanacaktır.
+Veri kümesi training, validation ve test olmak üzere üç bağımsız bölüme ayrılmaktadır.
 
----
-
-### 6. Data Augmentation
-
-Veri artırma yalnızca eğitim kümesine uygulanacaktır.
-
-Doğrulama ve test kümeleri değiştirilmeden kullanılacaktır.
+Bölme işlemi sahne bazlı gerçekleştirildiğinden aynı sahneye ait görüntüler farklı split'lere dağıtılmamaktadır.
 
 ---
 
-### 7. Batch Oluşturma
+### 8.4 RGB Dönüşümü
 
-Ön işleme tamamlandıktan sonra görüntüler mini-batch yapısına dönüştürülecek ve model eğitimine hazır hale getirilecektir.
+Model girişlerinin tutarlı kanal yapısına sahip olması amacıyla görüntüler RGB formatına dönüştürülmektedir.
 
----
-
-### 8. Model Eğitimi
-
-Hazırlanan veri aynı koşullar altında hem VGG16 hem de ResNet50 modellerine verilecektir.
-
-Bu sayede karşılaştırma adil ve tekrarlanabilir olacaktır.
+Bu işlem VGG16 ve ResNet50'nin üç kanallı görüntü giriş yapısıyla uyumludur.
 
 ---
 
-# 9. Veri Bölme (Split) Planı
+### 8.5 Resize
 
-## Amaç
+Görüntüler model girişinde ortak **224 × 224** boyutuna dönüştürülmektedir.
 
-Model performansının gerçekçi biçimde değerlendirilebilmesi için eğitim, doğrulama ve test kümeleri birbirinden bağımsız oluşturulacaktır.
-
-Bu süreçte veri sızıntısını önlemek temel öncelik olacaktır.
+Bu boyut hem VGG16 hem de ResNet50 baseline deneylerinde sabit tutulmuştur.
 
 ---
 
-## Değerlendirilen Yaklaşımlar
+### 8.6 Normalizasyon
 
-### Yaklaşım 1
+Görüntülere ImageNet pretrained modelleriyle uyumlu normalizasyon uygulanmaktadır.
 
-Rastgele görüntü bazlı veri bölme
+Bu işlem transfer öğrenme sırasında pretrained feature extractor'ların beklediği giriş dağılımının korunmasını amaçlamaktadır.
 
-Avantajları
+---
+
+### 8.7 DataLoader
+
+`FogVisibilityDataset` üzerinden hazırlanan görüntü ve hedef çiftleri PyTorch `DataLoader` yapısına aktarılmaktadır.
+
+Baseline deneylerinde kullanılan temel DataLoader ayarları:
+
+- Batch Size: **16**
+- Number of Workers: **0**
+- Random Seed: **42**
+
+şeklindedir.
+
+GPU kullanılması durumunda veri aktarım performansını desteklemek amacıyla `pin_memory` cihaz türüne göre yapılandırılabilmektedir.
+
+---
+
+### 8.8 Model Eğitimi
+
+Hazırlanan DataLoader yapısı hem VGG16 hem de ResNet50 eğitim pipeline'larında kullanılmıştır.
+
+Böylece her iki model aynı veri hazırlama altyapısı üzerinden eğitilmiştir.
+
+---
+
+## 9. Veri Bölme Planı ve Uygulaması
+
+### Amaç
+
+Model performansının gerçekçi biçimde değerlendirilebilmesi için training, validation ve test kümelerinin birbirinden bağımsız tutulması amaçlanmıştır.
+
+Bu süreçte veri sızıntısının önlenmesi temel öncelik olarak belirlenmiştir.
+
+### Değerlendirilen Yaklaşımlar
+
+#### Yaklaşım 1 — Rastgele Görüntü Bazlı Split
+
+Avantajları:
 
 - Kolay uygulanabilir.
-- Veri dağılımı dengeli olabilir.
+- Örnek sayılarının dengelenmesi daha kolay olabilir.
 
-Dezavantajları
+Dezavantajları:
 
-- Aynı temel sahne farklı veri kümelerinde yer alabilir.
-- Veri sızıntısına neden olabilir.
-- Model performansı olduğundan yüksek görünebilir.
+- Aynı temel sahne farklı veri kümelerinde bulunabilir.
+- Veri sızıntısına yol açabilir.
+- Test performansının yapay biçimde yükselmesine neden olabilir.
 
----
+#### Yaklaşım 2 — Scene-Based Split
 
-### Yaklaşım 2
+Avantajları:
 
-Sahne bazlı veri bölme
+- Aynı sahnenin farklı split'lerde bulunmasını engeller.
+- Veri sızıntısı riskini azaltır.
+- Bağımsız test değerlendirmesinin güvenilirliğini artırır.
 
-Avantajları
+Dezavantajları:
 
-- Veri sızıntısını önler.
-- Gerçek dünya performansını daha doğru yansıtır.
-- Literatürde önerilen yaklaşımla uyumludur.
+- Örnek oranlarının tam olarak hedeflenen yüzdelere eşit olması her zaman mümkün olmayabilir.
 
-Dezavantajları
+### Seçilen ve Uygulanan Yaklaşım
 
-- Veri dağılımı daha dikkatli planlanmalıdır.
+Projede **scene-based split** uygulanmıştır.
 
----
+Aynı temel sahneye ait örnekler aynı veri kümesinde tutulmaktadır.
 
-## Seçilen Yaklaşım
+Hedeflenen oranlar:
 
-Bu proje kapsamında veri bölme işlemi görüntü bazlı değil, temel sahneler bazında gerçekleştirilecektir.
+- Training: **%70**
+- Validation: **%15**
+- Test: **%15**
 
-Aynı temel sahneye ait tüm sis varyasyonları aynı veri kümesinde tutulacaktır.
+olarak belirlenmiştir.
 
-Bu yaklaşım model karşılaştırmasının güvenilirliğini artıracaktır.
+Scene-based split nedeniyle gerçek görüntü sayılarının bu oranlarla birebir eşleşmesi zorunlu değildir.
 
----
+Mevcut baseline deneylerinde oluşan veri dağılımı:
 
-## Planlanan Dağılım
+| Veri Kümesi | Görüntü Sayısı |
+| --- | ---: |
+| Training | **464** |
+| Validation | **96** |
+| Test | **112** |
+| Toplam | **672** |
 
-Veri kümeleri aşağıdaki oranlar dikkate alınarak oluşturulacaktır.
+şeklindedir.
 
-- Eğitim (Train): %70
-- Doğrulama (Validation): %15
-- Test: %15
-
-Sahne sayısının sınırlı olması nedeniyle kesin dağılım uygulama aşamasında temel sahneler dikkate alınarak belirlenecektir.
-
----
-
-## Rastgelelik Kontrolü
-
-Deneylerin tekrarlanabilir olması amacıyla veri bölme işlemi sabit bir rastgelelik tohumu (random seed) kullanılarak gerçekleştirilecektir.
-
-Aynı seed değeri tüm deneylerde korunacaktır.
+Bu aynı split hem VGG16 hem de ResNet50 baseline deneylerinde kullanılmıştır.
 
 ---
 
-# 10. Ön İşleme Pipeline Özeti
+## 10. Rastgelelik ve Tekrarlanabilirlik Kontrolü
 
-Bu dokümanda FRIDA veri setinin ön işleme süreci için temel teknik kararlar belirlenmiştir.
+Deneylerin tekrarlanabilirliğini artırmak amacıyla sabit random seed kullanılmaktadır.
 
-Belirlenen yaklaşım aşağıdaki esaslara dayanmaktadır:
+Mevcut deneylerde:
+
+```text
+RANDOM_SEED = 42
+```
+
+olarak belirlenmiştir.
+
+Aynı random seed;
+
+- veri bölme,
+- model deneyleri,
+- karşılaştırmalı baseline çalışmaları
+
+boyunca korunmaktadır.
+
+Ayrıca deterministik davranışı desteklemek amacıyla ilgili PyTorch reproducibility ayarları merkezi konfigürasyon üzerinden yönetilmektedir.
+
+---
+
+## 11. Baseline Deneylerinde Doğrulama
+
+Hazırlanan preprocessing ve DataLoader altyapısı artık yalnızca teorik bir tasarım değildir.
+
+Pipeline iki bağımsız transfer öğrenme baseline deneyinde kullanılmış ve doğrulanmıştır.
+
+### VGG16
+
+VGG16 modeli aynı preprocessing pipeline kullanılarak eğitilmiş ve bağımsız test veri kümesi üzerinde değerlendirilmiştir.
+
+Elde edilen temel sonuçlar:
+
+- Best Validation MAE: **69.9705 m**
+- Test MAE: **66.7227 m**
+
+olarak kaydedilmiştir.
+
+### ResNet50
+
+ResNet50 modeli de aynı veri hazırlama ve split yapısı kullanılarak eğitilmiş ve değerlendirilmiştir.
+
+Elde edilen temel sonuçlar:
+
+- Best Validation MAE: **121.8414 m**
+- Test MAE: **124.6181 m**
+
+olarak kaydedilmiştir.
+
+Her iki modelin aynı preprocessing ve veri bölme altyapısını kullanması, ilerleyen karşılaştırmalı analiz için ortak deneysel temel sağlamaktadır.
+
+---
+
+## 12. ResNet50 Değerlendirmesinden Elde Edilen İlgili Gözlemler
+
+ResNet50 evaluation sonuçlarının Day 14 kapsamında gerçekleştirilen görsel analizinde training ve validation eğrilerinin birbirine yakın ilerlediği ve belirgin bir overfitting davranışı göstermediği gözlemlenmiştir.
+
+Bununla birlikte Actual vs Predicted ve Prediction Error Histogram analizleri, modelin özellikle yüksek görüş mesafelerinde sistematik underestimation davranışı gösterdiğini ortaya koymuştur.
+
+Ground-truth değerleri geniş bir aralığa yayılmasına rağmen model tahminlerinin daha dar bir aralıkta yoğunlaşması **prediction-range compression** davranışı olarak değerlendirilmiştir.
+
+ResNet50 için hesaplanan:
+
+- Mean Signed Error: **−77.3460 m**
+- Maximum Absolute Error: **602.6687 m**
+
+değerleri de yüksek görüş mesafelerindeki büyük negatif tahmin hatalarıyla uyumludur.
+
+Bu davranışın kesin nedeninin preprocessing pipeline olduğu sonucuna varılmamıştır.
+
+Hedef değer dağılımı, frozen backbone kullanımı, eğitim süresi ve model mimarisi gibi faktörler olası açıklamalar arasında bulunmakla birlikte bunların etkisini belirlemek için ayrı deneyler gerekmektedir.
+
+---
+
+## 13. Güncel Teknik Kararlar
+
+Projenin Day 14 aşamasında preprocessing ve veri hazırlama açısından aşağıdaki kararlar kesinleşmiştir:
 
 - Ham veri korunacaktır.
-- Veri bölme işlemi sahne bazlı gerçekleştirilecektir.
-- Görüntüler ortak giriş boyutuna dönüştürülecektir.
-- Model uyumlu normalizasyon uygulanacaktır.
-- Veri artırma yalnızca eğitim kümesine uygulanacaktır.
-- Aynı veri hazırlama süreci hem VGG16 hem de ResNet50 için kullanılacaktır.
-
-Bu taslak, ilerleyen günlerde gerçekleştirilecek veri hazırlama ve model geliştirme çalışmalarının temel referans dokümanı olacaktır.
+- Veri bölme scene-based olarak gerçekleştirilecektir.
+- VGG16 ve ResNet50 aynı split üzerinde değerlendirilecektir.
+- Ortak giriş boyutu **224 × 224** olacaktır.
+- ImageNet uyumlu normalizasyon kullanılacaktır.
+- Validation ve test verilerine performansı değiştirecek augmentation uygulanmayacaktır.
+- Random seed **42** olarak sabit tutulacaktır.
+- Baseline modeller aynı temel veri hazırlama ve evaluation koşulları altında karşılaştırılacaktır.
+- Mevcut preprocessing pipeline Attention Mechanism aşamasında da ortak altyapı olarak kullanılacaktır.
+- Preprocessing veya eğitim ayarlarında yapılacak önemli değişiklikler mevcut baseline sonuçlarının üzerine sessizce uygulanmayacak; ayrı deney olarak kaydedilecektir.
 
 ---
 
----
+## 14. Güncel Durum — Day 14
 
-# 11. Güncel Durum (Day 7)
+Ön işleme ve veri yükleme pipeline'ı proje kapsamında başarıyla uygulanmış ve iki baseline model üzerinde doğrulanmıştır.
 
-Ön işleme süreci proje kapsamında başarıyla uygulanmıştır.
+FRIDA ve FRIDA2 tabanlı sentetik veri kümesi `labels.csv` üzerinden okunmakta, scene-based split ile training, validation ve test kümelerine ayrılmakta ve PyTorch tabanlı `FogVisibilityDataset` / `DataLoader` altyapısı üzerinden modellere aktarılmaktadır.
 
-FRIDA ve FRIDA2 veri setlerinden oluşturulan sentetik veri kümesi `labels.csv` dosyası üzerinden okunacak şekilde yapılandırılmıştır.
+Mevcut veri dağılımı:
 
-Veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılmış; aynı temel sahneye ait görüntülerin farklı veri kümelerinde yer alması engellenerek veri sızıntısı önlenmiştir.
+- **464 training görüntüsü**
+- **96 validation görüntüsü**
+- **112 test görüntüsü**
 
-PyTorch tabanlı `FogVisibilityDataset` ve `DataLoader` altyapısı geliştirilmiş; görüntüler eğitim sırasında otomatik olarak yeniden boyutlandırılmakta, RGB formatına dönüştürülmekte ve ImageNet normalizasyonu uygulanmaktadır.
+olmak üzere toplam **672 görüntüden** oluşmaktadır.
 
-Hazırlanan ön işleme ve veri yükleme altyapısı VGG16 tabanlı ilk transfer öğrenme modelinin eğitiminde başarıyla doğrulanmıştır.
+VGG16 ve ResNet50 aynı preprocessing ve veri bölme altyapısı kullanılarak eğitilmiş ve bağımsız test kümesi üzerinde değerlendirilmiştir.
 
-Aynı veri hazırlama süreci ilerleyen aşamalarda ResNet50 ve Attention tabanlı modeller tarafından da ortak olarak kullanılacaktır.
+Bu nedenle preprocessing pipeline artık projenin doğrulanmış ortak deneysel altyapısı olarak kabul edilmektedir.
+
+Bir sonraki aşamada VGG16 ve ResNet50 baseline sonuçları ayrıntılı olarak karşılaştırılacak ve Attention Mechanism entegrasyonunda kullanılacak temel mimari deneysel sonuçlara göre belirlenecektir.

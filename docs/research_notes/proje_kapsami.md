@@ -2,138 +2,341 @@
 
 ## Proje Başlığı
 
-Transfer Öğrenme Temelli CNN Mimarilerinin Görüş Mesafesi Tahmininde Karşılaştırmalı Analizi
+**Transfer Öğrenme Temelli CNN Mimarilerinin Görüş Mesafesi Tahmininde Karşılaştırmalı Analizi**
+
+---
 
 ## Araştırma Problemi
 
 Kötü hava koşullarına bağlı düşük görüş mesafesi, karayolları trafiğinde önemli bir kaza riski oluşturmaktadır. Mevcut güvenlik sistemlerinde kullanılan sensör tabanlı yöntemler, yüksek maliyetleri ve sınırlı kapsama alanları nedeniyle yaygın entegrasyonda zorluk oluşturabilmektedir.
 
-Bu proje, mevcut yol gözetleme kameralarının kullanıldığı görüntü tabanlı bir yapay zekâ yaklaşımıyla daha düşük maliyetli görüş mesafesi tahmini yapılabilirliğini araştırmaktadır.
+Bu proje, mevcut yol gözetleme kameralarının kullanılabileceği görüntü tabanlı bir yapay zekâ yaklaşımıyla daha düşük maliyetli görüş mesafesi tahmini yapılabilirliğini araştırmaktadır.
+
+---
 
 ## Araştırma Sorusu
 
-Transfer öğrenme yöntemi ile görüntü tabanlı görüş mesafesi tahmini görevine adapte edilen VGG16 ve ResNet50 mimarilerinden hangisi, sentetik ve gerçek dünya veri kümelerinde en düşük MAE değerini sunarak Akıllı Ulaşım Sistemleri entegrasyonu için daha uygun bir temel oluşturur?
+Transfer öğrenme yöntemi ile görüntü tabanlı görüş mesafesi tahmini görevine adapte edilen VGG16 ve ResNet50 mimarilerinden hangisi, sentetik ve uygun gerçek dünya veri kümelerinde daha düşük MAE değeri sunarak Akıllı Ulaşım Sistemleri entegrasyonu için daha uygun bir temel oluşturur?
+
+---
 
 ## Hipotez
 
-ResNet50 mimarisinin, artık bağlantıları sayesinde transfer öğrenme ile adapte edildiğinde, aynı veri seti ve eğitim parametreleri altında VGG16 mimarisine kıyasla istatistiksel olarak anlamlı düzeyde daha düşük MAE değerleri üretmesi beklenmektedir.
+ResNet50 mimarisinin, residual bağlantıları sayesinde transfer öğrenme ile adapte edildiğinde, aynı veri seti ve eğitim parametreleri altında VGG16 mimarisine kıyasla istatistiksel olarak anlamlı düzeyde daha düşük MAE değerleri üretmesi beklenmektedir.
+
+Bu hipotez proje başlangıcında tanımlanmış olup elde edilen deneysel sonuçlar doğrultusunda değerlendirilecektir.
+
+---
 
 ## Projenin Temel Amacı
 
-Sisli hava koşullarında yol güvenliğini artırmak amacıyla, transfer öğrenme yöntemi kullanılarak önceden eğitilmiş VGG16 ve ResNet50 CNN modellerini karşılaştırmalı olarak analiz etmek, görüntü tabanlı görüş mesafesi tahmini gerçekleştirmek ve Flask API ile Akıllı Ulaşım Sistemleri entegrasyonuna uygun fonksiyonel bir prototip geliştirmektir.
+Sisli hava koşullarında yol güvenliğini artırmak amacıyla, transfer öğrenme yöntemi kullanılarak önceden eğitilmiş VGG16 ve ResNet50 CNN modellerini karşılaştırmalı olarak analiz etmek, görüntü tabanlı sürekli görüş mesafesi tahmini gerçekleştirmek ve Flask API ile Akıllı Ulaşım Sistemleri entegrasyonuna uygun fonksiyonel bir prototip geliştirmektir.
+
+---
 
 ## Temel Performans Metriği
 
-Ortalama Mutlak Hata (Mean Absolute Error — MAE).
+Projenin temel performans metriği:
 
-MAE değeri, metre cinsinden görüş mesafesi tahmin hatasını değerlendirmek için kullanılmaktadır. İlk VGG16 baseline eğitimi sonucunda elde edilen en düşük doğrulama hatası **69.9705 metre** olarak ölçülmüş ve araştırma önerisinde belirlenen performans hedefi başarıyla karşılanmıştır.
+**Mean Absolute Error (MAE)**
 
-## Planlanan Veri Setleri
+olarak belirlenmiştir.
+
+MAE değeri, metre cinsinden tahmin edilen görüş mesafesi ile ground-truth görüş mesafesi arasındaki ortalama mutlak farkı ölçmektedir.
+
+Araştırma önerisinde belirlenen temel başarı kriteri:
+
+**MAE < 100 metre**
+
+şeklindedir.
+
+Mevcut baseline sonuçlarına göre:
+
+| Model | Best Validation MAE | Test MAE | Hedef |
+| --- | ---: | ---: | --- |
+| VGG16 | **69.9705 m** | **66.7227 m** | ✓ MAE < 100 m |
+| ResNet50 | **121.8414 m** | **124.6181 m** | ✗ MAE < 100 m |
+
+Bu aşamada VGG16 baseline modeli proje performans hedefini karşılamış, ResNet50 baseline modeli ise aynı hedefi karşılayamamıştır.
+
+---
+
+## Kullanılan ve Planlanan Veri Setleri
+
+Proje kapsamında aşağıdaki veri kaynakları değerlendirilmiştir:
 
 - FRIDA
 - FRIDA2
 - FVEI
 - FHVI
 
-FRIDA ve FRIDA2 veri setleri kullanılarak derinlik haritaları üzerinden farklı görüş mesafelerini temsil eden sentetik görüntüler oluşturulmuştur.
+### Sentetik Veri
 
-Oluşturulan veri kümesi toplam **84 sahne** ve **672 sentetik görüntüden** oluşmaktadır. Bu veri kümesi model geliştirme ve başlangıç eğitim sürecinde kullanılmaktadır.
+FRIDA ve FRIDA2 veri setleri temel alınarak farklı görüş mesafelerini temsil eden sentetik görüntülerden oluşan çalışma veri kümesi hazırlanmıştır.
 
-Hazırlanan sentetik veri kümesi sahne bazlı olarak eğitim, doğrulama ve test kümelerine ayrılmıştır. Aynı temel sahneye ait tüm görüş mesafesi varyasyonları aynı alt kümede tutulmuş ve böylece veri sızıntısının önüne geçilmiştir.
+Mevcut sentetik veri kümesi:
 
-Uygulanan veri dağılımı aşağıdaki şekildedir:
+- **84 temel sahne**
+- **672 görüntü**
 
-- Eğitim kümesi: **464 görüntü**
-- Doğrulama kümesi: **96 görüntü**
-- Test kümesi: **112 görüntü**
+içermektedir.
 
-FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirlik ve uygunluk durumları araştırılacaktır. Uygun gerçek dünya verileri, modelin ince ayar ve gerçek dünya koşullarındaki değerlendirme süreçlerinde kullanılacaktır.
+Hazırlanan veri kümesi scene-based split yaklaşımıyla training, validation ve test kümelerine ayrılmıştır.
 
-## Karşılaştırılacak Modeller
+Aynı temel sahneye ait tüm görüş mesafesi varyasyonlarının aynı veri alt kümesinde tutulması sağlanarak veri sızıntısı riski azaltılmıştır.
 
-• VGG16 (Tamamlandı)
+Mevcut veri dağılımı:
 
-- ImageNet ön eğitimli ağırlıklar kullanıldı.
-- Transfer öğrenme tabanlı regresyon modeli geliştirildi.
-- 20 epoch eğitim gerçekleştirildi.
-- En iyi Validation MAE: 69.9705 m (18. epoch)
-- Bağımsız test kümesi üzerinde Test MAE: 66.7227 m
-- Otomatik değerlendirme pipeline'ı geliştirildi.
-- Tahmin CSV dosyaları, JSON özetleri, Markdown raporları ve değerlendirme grafikleri oluşturuldu.
-- İlk baseline modeli başarıyla tamamlandı.
+| Veri Kümesi | Görüntü Sayısı |
+| --- | ---: |
+| Training | **464** |
+| Validation | **96** |
+| Test | **112** |
+| **Toplam** | **672** |
 
-• ResNet50
+şeklindedir.
 
-Her iki model de ImageNet üzerinde önceden eğitilmiş ağırlıklarla transfer öğrenme yaklaşımı kullanılarak görüş mesafesi tahmini görevine adapte edilecektir.
+Aynı veri bölünmesi VGG16 ve ResNet50 baseline deneylerinde korunmuştur.
 
-Modellerin orijinal sınıflandırma katmanları kaldırılacak ve sürekli bir görüş mesafesi değeri tahmin eden regresyon çıkışı kullanılacaktır.
+### Gerçek Dünya Verileri
 
-VGG16 modeli ImageNet üzerinde önceden eğitilmiş ağırlıklarla projeye entegre edilmiştir. Modelin evrişimsel (backbone) katmanları dondurulmuş ve orijinal sınıflandırma başlığı yerine tek çıkışlı bir regresyon başlığı geliştirilmiştir.
+FVEI ve FHVI gibi gerçek dünya veri setlerinin erişilebilirliği ve proje problemine uygunluğu araştırılmaktadır.
 
-Model için eğitim, doğrulama ve checkpoint mekanizmalarını içeren eğitim altyapısı tamamlanmış; Adam optimizasyon algoritması ve Ortalama Mutlak Hata (L1 Loss / MAE) kullanılarak ilk tam eğitim gerçekleştirilmiştir.
+Uygun ve erişilebilir gerçek dünya verileri elde edilmesi durumunda bunlar modelin gerçek dünya koşullarındaki davranışını incelemek, gerektiğinde fine-tuning gerçekleştirmek ve sentetik-gerçek veri arasındaki domain farkını değerlendirmek amacıyla kullanılacaktır.
 
-Toplam **20 epoch** süren ilk eğitim sonunda model **18. epochta 69.9705 metre Validation MAE** değerine ulaşmış ve araştırma önerisinde belirlenen **MAE < 100 metre** performans hedefini başarıyla karşılamıştır.
+Gerçek dünya verilerinin kullanımı veri erişilebilirliği, etiket yapısı ve araştırma önerisinin kapsamı doğrultusunda gerçekleştirilecektir.
 
-Deney sonuçları standart deney kayıt dosyalarında saklanmış, eğitim geçmişi grafiksel olarak raporlanmış ve en başarılı model otomatik olarak checkpoint şeklinde kaydedilmiştir.
+---
 
-Aynı transfer öğrenme, veri bölünmesi ve eğitim yaklaşımı bir sonraki aşamada ResNet50 modeli için uygulanacak; iki model aynı deney koşulları altında karşılaştırılacaktır.
+# Karşılaştırılan Baseline Modeller
 
-VGG16 için eğitim, doğrulama ve checkpoint kayıt süreçlerini içeren temel eğitim altyapısı geliştirilmiş ve bir epoch'luk başlangıç testi başarıyla tamamlanmıştır.
+## VGG16 — Tamamlandı
 
-Aynı transfer öğrenme ve regresyon yaklaşımı ilerleyen aşamada ResNet50 mimarisi için de uygulanacaktır.
+ImageNet üzerinde önceden eğitilmiş VGG16 mimarisi ilk baseline model olarak kullanılmıştır.
 
-## Model Karşılaştırma Yaklaşımı
+Modelin convolutional backbone katmanları baseline deneyinde dondurulmuş ve orijinal sınıflandırma başlığı sürekli görüş mesafesi tahmini gerçekleştiren regresyon başlığı ile değiştirilmiştir.
 
-VGG16 ve ResNet50 modelleri aynı sentetik veri kümesi, aynı sahne bazlı eğitim/doğrulama/test ayrımı ve aynı eğitim parametreleri altında değerlendirilecektir.
+Temel eğitim ayarları:
 
-Adil ve tekrarlanabilir bir karşılaştırma sağlamak amacıyla modellerde aynı görüntü boyutu, normalizasyon yaklaşımı, batch büyüklüğü, veri ayrımı, rastgelelik tohumu ve temel değerlendirme metriği kullanılacaktır.
+- Pretrained weights: **ImageNet**
+- Frozen backbone: **True**
+- Image size: **224 × 224**
+- Batch size: **16**
+- Epoch: **20**
+- Optimizer: **Adam**
+- Learning rate: **1e-4**
+- Weight decay: **1e-5**
+- Loss function: **L1Loss / MAE**
+- Random seed: **42**
 
-Deney parametreleri merkezi bir yapılandırma dosyasında tutulmakta ve deneylerin tekrarlanabilirliği için sabit rastgelelik tohumu kullanılmaktadır.
+Eğitim sonucunda:
 
-Modellerin temel performans karşılaştırması test veri seti üzerinde elde edilen MAE değerleri kullanılarak gerçekleştirilecektir.
+- En iyi epoch: **18**
+- Best Validation MAE: **69.9705 m**
 
-Bu karşılaştırma sonucunda en düşük test MAE değerini sağlayan model nihai temel mimari olarak seçilecektir.
+elde edilmiştir.
 
-## Nihai Model Seçimi ve Dikkat Mekanizması
+En başarılı checkpoint bağımsız test kümesi üzerinde değerlendirilmiş ve:
 
-Test veri seti üzerinde en düşük MAE değerini sağlayan model nihai temel mimari olarak seçilecektir.
+- Test MAE: **66.7227 m**
+- Mean Signed Error: **−17.3877 m**
 
-Seçilen modele bir Dikkat Mekanizması entegre edilecektir.
+sonuçları elde edilmiştir.
 
-Dikkat Mekanizmasının modelin görüntülerdeki kritik uzamsal bölgelere daha fazla odaklanmasını sağlaması hedeflenmektedir.
+VGG16 baseline modeli araştırma önerisinde tanımlanan **MAE < 100 metre** hedefini başarıyla karşılamıştır.
 
-Dikkat Mekanizması entegrasyonunun ardından model yeniden değerlendirilecek ve elde edilen MAE değeri temel modelin MAE değeri ile karşılaştırılacaktır.
+Model için eğitim, checkpoint, deney kayıt ve bağımsız evaluation pipeline'ları tamamlanmıştır.
 
-Dikkat Mekanizmasının model performansına etkisi bu karşılaştırma üzerinden raporlanacaktır.
+---
 
-## Nihai Prototip
+## ResNet50 — Tamamlandı
 
-Optimize edilen nihai model Flask API kullanılarak hafif bir web sunucusuna entegre edilecektir.
+İkinci baseline model olarak ImageNet üzerinde önceden eğitilmiş ResNet50 mimarisi kullanılmıştır.
+
+ResNet50'nin convolutional backbone katmanları baseline deneyinde dondurulmuş ve sınıflandırma başlığı sürekli görüş mesafesi tahmini gerçekleştiren regresyon başlığı ile değiştirilmiştir.
+
+Model VGG16 ile karşılaştırılabilir deneysel koşullar altında eğitilmiştir.
+
+Temel eğitim ayarları:
+
+- Pretrained weights: **ImageNet**
+- Frozen backbone: **True**
+- Image size: **224 × 224**
+- Batch size: **16**
+- Epoch: **20**
+- Optimizer: **Adam**
+- Learning rate: **1e-4**
+- Weight decay: **1e-5**
+- Loss function: **L1Loss / MAE**
+- Random seed: **42**
+
+Eğitim sonucunda:
+
+- En iyi epoch: **20**
+- Final Training MAE: **122.1239 m**
+- Best Validation MAE: **121.8414 m**
+
+elde edilmiştir.
+
+En başarılı checkpoint bağımsız test veri kümesi üzerinde değerlendirilmiş ve:
+
+- Test MAE: **124.6181 m**
+- Mean Signed Error: **−77.3460 m**
+- Maximum Absolute Error: **602.6687 m**
+
+sonuçları elde edilmiştir.
+
+Validation MAE ile Test MAE arasındaki fark yalnızca:
+
+**2.7767 m**
+
+olarak hesaplanmıştır.
+
+Training, validation ve test sonuçlarının birbirine yakın olması mevcut baseline deneyinde belirgin bir overfitting davranışı olmadığını göstermektedir.
+
+Bununla birlikte Actual vs Predicted ve Prediction Error Histogram analizlerinde modelin özellikle yüksek görüş mesafelerinde sistematik **underestimation** davranışı gösterdiği tespit edilmiştir.
+
+Ayrıca ground-truth değerleri geniş bir aralığa yayılmasına rağmen model tahminlerinin daha dar bir aralıkta yoğunlaştığı **prediction-range compression** davranışı gözlemlenmiştir.
+
+ResNet50 baseline modeli mevcut konfigürasyon altında araştırma önerisindeki **MAE < 100 metre** hedefini karşılayamamıştır.
+
+---
+
+# Baseline Karşılaştırmasının Mevcut Durumu
+
+Day 14 itibarıyla her iki baseline model:
+
+- geliştirildi,
+- eğitildi,
+- checkpoint olarak kaydedildi,
+- bağımsız test kümesinde değerlendirildi,
+- sayısal çıktıları kaydedildi,
+- evaluation grafikleri oluşturuldu,
+- deneysel gözlemleri dokümante edildi.
+
+Mevcut temel sonuçlar:
+
+| Metrik | VGG16 | ResNet50 |
+| --- | ---: | ---: |
+| Best Epoch | **18** | **20** |
+| Best Validation MAE | **69.9705 m** | **121.8414 m** |
+| Test MAE | **66.7227 m** | **124.6181 m** |
+| Mean Signed Error | **−17.3877 m** | **−77.3460 m** |
+| MAE < 100 m | **Evet** | **Hayır** |
+
+ResNet50'nin Test MAE değeri VGG16'dan:
+
+**57.8954 m**
+
+daha yüksektir.
+
+Başka bir ifadeyle mevcut baseline deneyinde VGG16, bağımsız test MAE açısından ResNet50'den belirgin biçimde daha düşük hata üretmiştir.
+
+Bu sonuç başlangıç hipotezindeki ResNet50'nin daha düşük MAE üretmesi yönündeki beklentiyle uyumlu değildir.
+
+Bununla birlikte hipotezde geçen **istatistiksel anlamlılık** ifadesinin değerlendirilmesi yalnızca tek bir aggregate MAE karşılaştırması üzerinden yapılmayacaktır.
+
+---
+
+# Model Karşılaştırma Yaklaşımı
+
+VGG16 ve ResNet50 modelleri aynı sentetik veri kümesi ve aynı scene-based training/validation/test split'i kullanılarak değerlendirilmiştir.
+
+Karşılaştırılabilirliği artırmak amacıyla aşağıdaki temel koşullar ortak tutulmuştur:
+
+- Görüntü boyutu: **224 × 224**
+- Batch size: **16**
+- Epoch sayısı: **20**
+- Optimizer: **Adam**
+- Learning rate: **1e-4**
+- Weight decay: **1e-5**
+- Loss function: **L1Loss / MAE**
+- Random seed: **42**
+- Frozen backbone yaklaşımı
+- ImageNet pretrained weights
+- Preprocessing pipeline
+- Evaluation pipeline
+
+Model karşılaştırmasında temel seçim kriteri bağımsız test veri kümesi üzerindeki MAE performansıdır.
+
+Test veri kümesi model geliştirme veya hiperparametre ayarlama amacıyla kullanılmayacak; yalnızca nihai baseline değerlendirmesi için kullanılacaktır.
+
+---
+
+# Nihai Baseline Seçimi ve Attention Mechanism
+
+VGG16 ve ResNet50 baseline karşılaştırmasının tamamlanmasının ardından bağımsız test veri kümesinde daha düşük MAE sağlayan mimari Attention Mechanism aşamasının temel adayı olarak değerlendirilecektir.
+
+Day 14 itibarıyla mevcut sonuçlar:
+
+- VGG16 Test MAE: **66.7227 m**
+- ResNet50 Test MAE: **124.6181 m**
+
+olduğundan VGG16 mevcut deneysel sonuçlara göre daha başarılı baseline modeldir.
+
+Resmi baseline seçimi karşılaştırmalı analiz aşamasının tamamlanmasıyla dokümante edilecektir.
+
+Seçilen temel mimariye Attention Mechanism entegre edilecek ve model yeniden eğitilip değerlendirilecektir.
+
+Attention Mechanism'ın amacı modelin görüş mesafesi tahmini açısından önemli uzamsal özelliklere daha fazla ağırlık vermesini sağlamaktır.
+
+Attention modelinin performansı seçilen baseline modelle aynı değerlendirme prosedürü kullanılarak karşılaştırılacaktır.
+
+Temel karşılaştırma:
+
+```text
+Selected Baseline Test MAE
+            vs
+Attention Model Test MAE
+```
+
+üzerinden gerçekleştirilecektir.
+
+Attention entegrasyonunun performansı artırıp artırmadığı deneysel sonuçlara göre raporlanacaktır.
+
+---
+
+# Nihai Prototip
+
+Projenin deneysel model geliştirme aşamasından sonra seçilen nihai model Flask API kullanılarak hafif bir web servisine entegre edilecektir.
 
 HTML ve CSS kullanılarak basit ve fonksiyonel bir kullanıcı arayüzü geliştirilecektir.
 
-Kullanıcı sisteme bir görüntü yükleyebilecek ve model yüklenen görüntü üzerinden görüş mesafesi tahmini gerçekleştirecektir.
+Kullanıcı:
 
-Tahmin edilen görüş mesafesi sonucu kullanıcı arayüzünde gösterilecektir.
+1. Bir yol görüntüsü yükleyebilecek,
+2. Görüntü model preprocessing pipeline'ından geçirilecek,
+3. Model görüş mesafesi tahmini üretecek,
+4. Tahmin edilen mesafe kullanıcı arayüzünde metre cinsinden gösterilecektir.
 
-## Proje Sınırları
+Bu prototip, geliştirilen modelin Akıllı Ulaşım Sistemleri benzeri bir yazılım altyapısına nasıl entegre edilebileceğini göstermek amacıyla hazırlanacaktır.
+
+---
+
+# Proje Sınırları
 
 - Temel araştırma problemi sürekli görüş mesafesi regresyonudur.
 - Projenin ana amacı sis sınıflandırması yapmak değildir.
-- Ana model karşılaştırması VGG16 ve ResNet50 mimarileri arasında gerçekleştirilecektir.
-- Temel performans metriği MAE olacaktır.
-- Dikkat Mekanizması, temel VGG16 ve ResNet50 karşılaştırması tamamlandıktan sonra yalnızca seçilen en iyi modele uygulanacaktır.
-- Gerçek dünya verilerinin kullanımı erişilebilirlik ve veri uygunluğu doğrultusunda araştırma önerisinde tanımlanan yaklaşım çerçevesinde gerçekleştirilecektir.
+- Ana baseline karşılaştırması VGG16 ve ResNet50 mimarileri arasında gerçekleştirilmektedir.
+- Temel performans metriği MAE'dir.
+- Attention Mechanism yalnızca baseline karşılaştırması tamamlandıktan sonra seçilen mimariye uygulanacaktır.
+- Gerçek dünya verilerinin kullanımı erişilebilirlik ve etiket uygunluğu doğrultusunda gerçekleştirilecektir.
 - Web prototipi basit ve fonksiyonel tutulacaktır.
-- Flask API, model tahmininin web tabanlı kullanımını göstermek amacıyla kullanılacaktır.
+- Flask API model tahmininin web tabanlı kullanımını göstermek amacıyla kullanılacaktır.
 - Proje uygulaması onaylanan TÜBİTAK 2209-A araştırma önerisinin bilimsel kapsamı dışına çıkmayacaktır.
-- Eğitim sürecinde veri sızıntısını önlemek amacıyla eğitim, doğrulama ve test ayrımı sahne bazlı gerçekleştirilecektir.
-- Aynı temel sahneye ait tüm görüntüler tek bir veri alt kümesinde tutulacaktır.
-- VGG16 ve ResNet50 modelleri mümkün olduğunca aynı eğitim ve değerlendirme koşullarında karşılaştırılacaktır.
-- Model seçimi doğrulama performansına göre yapılacak, nihai karşılaştırma ise bağımsız test kümesi üzerinde gerçekleştirilecektir.
-- Test veri kümesi model geliştirme ve hiperparametre ayarlama süreçlerinde kullanılmayacaktır.
+- Training, validation ve test ayrımı scene-based gerçekleştirilmektedir.
+- Aynı temel sahneye ait tüm görüntüler tek bir veri alt kümesinde tutulmaktadır.
+- VGG16 ve ResNet50 mümkün olduğunca aynı eğitim ve değerlendirme koşullarında karşılaştırılmaktadır.
+- Eğitim sırasında en iyi checkpoint validation MAE kullanılarak belirlenmektedir.
+- Nihai baseline performansı bağımsız test kümesi üzerinde değerlendirilmektedir.
+- Test veri kümesi model geliştirme veya hiperparametre ayarlama amacıyla kullanılmayacaktır.
+- Baseline deneylerinin sonuçları sonradan değiştirilmeyecek; farklı hiperparametre veya eğitim stratejileri ayrı deneyler olarak kaydedilecektir.
+- Grafiklerden elde edilen davranışsal gözlemler ile bunların olası nedenleri birbirinden ayrılacaktır.
+- Bir davranışın nedeni deneysel olarak doğrulanmadıkça kesin nedensel sonuç olarak raporlanmayacaktır.
 
-## Proje Uygulama İlkesi
+---
+
+# Proje Uygulama İlkesi
 
 Projenin bütün teknik ve bilimsel kararlarında onaylanan TÜBİTAK 2209-A Araştırma Önerisi Formu temel kaynak olarak kabul edilecektir.
 
@@ -141,6 +344,51 @@ Roadmap, araştırma önerisinde tanımlanan çalışmanın günlük uygulama s�
 
 Araştırma önerisinin kapsamını değiştiren yeni bir araştırma problemi, temel model mimarisi veya proje amacı eklenmeyecektir.
 
-Teknik uygulama sırasında alınması gereken kararlar, araştırma sorusu, hipotez, yöntem ve proje hedefleri ile uyumlu olacak şekilde değerlendirilecektir.
+Teknik uygulama sırasında alınması gereken kararlar araştırma sorusu, hipotez, yöntem ve proje hedefleri ile uyumlu olacak şekilde değerlendirilecektir.
 
-Geliştirilen kod, veri hazırlama adımları, deney parametreleri ve model sonuçları düzenli olarak dokümante edilecek; proje sürecinin tekrarlanabilir ve denetlenebilir olması sağlanacaktır.
+Geliştirilen:
+
+- kaynak kod,
+- veri hazırlama adımları,
+- preprocessing kararları,
+- deney parametreleri,
+- checkpoint'ler,
+- evaluation sonuçları,
+- grafikler,
+- deneysel gözlemler
+
+düzenli olarak dokümante edilecektir.
+
+Deneylerde kullanılan temel konfigürasyon merkezi yapılandırma dosyasında tutulacak ve tekrarlanabilirliği destekleyen random seed ve veri bölme politikaları korunacaktır.
+
+Baseline sonuçlarında yapılacak herhangi bir değişiklik ayrı bir deney olarak kaydedilecek ve mevcut referans sonuçların üzerine yazılmayacaktır.
+
+Bu yaklaşım proje sürecinin bilimsel olarak izlenebilir, tekrarlanabilir ve denetlenebilir olmasını sağlayacaktır.
+
+---
+
+# Güncel Proje Durumu — Day 14
+
+Day 14 itibarıyla:
+
+- ✓ Sentetik veri hazırlama tamamlandı.
+- ✓ Scene-based split oluşturuldu.
+- ✓ Preprocessing pipeline tamamlandı.
+- ✓ PyTorch Dataset ve DataLoader altyapısı tamamlandı.
+- ✓ VGG16 baseline geliştirildi.
+- ✓ VGG16 eğitildi.
+- ✓ VGG16 bağımsız test değerlendirmesi tamamlandı.
+- ✓ VGG16 proje MAE hedefini karşıladı.
+- ✓ ResNet50 baseline geliştirildi.
+- ✓ ResNet50 eğitildi.
+- ✓ ResNet50 bağımsız test değerlendirmesi tamamlandı.
+- ✓ ResNet50 evaluation grafikleri analiz edildi.
+- ✓ ResNet50 için overfitting analizi gerçekleştirildi.
+- ✓ ResNet50 yüksek visibility underestimation davranışı dokümante edildi.
+- ✓ Her iki baseline için deney kayıt ve evaluation çıktıları oluşturuldu.
+- ⏳ VGG16–ResNet50 karşılaştırmalı analizinin tamamlanması.
+- ⏳ Nihai baseline mimarisinin resmi olarak seçilmesi.
+- ⏳ Attention Mechanism entegrasyonu.
+- ⏳ Attention modelinin eğitilmesi ve değerlendirilmesi.
+- ⏳ Gerçek dünya veri değerlendirmesi / uygunluk durumunun kesinleştirilmesi.
+- ⏳ Flask tabanlı prototipin geliştirilmesi.

@@ -1042,3 +1042,156 @@ Başlangıç hipotezinin aksine VGG16 mevcut sentetik deney koşullarında daha 
 
 Proje böylece baseline model karşılaştırma aşamasını tamamlayarak Attention Mechanism geliştirme aşamasına geçmeye hazır hâle geldi.
 
+
+# Day 16 — CBAM Attention Mekanizmasının VGG16 Mimarisine Entegrasyonu
+
+## Amaç
+
+Bugünkü çalışmanın amacı, Day 15 kapsamında sentetik veri üzerinde en başarılı baseline model olarak seçilen VGG16 mimarisine Attention Mechanism entegre etmek ve yeni modelin eğitim öncesi teknik doğrulamalarını gerçekleştirmekti.
+
+Attention yaklaşımı olarak Channel Attention ve Spatial Attention bileşenlerini birlikte kullanan CBAM (Convolutional Block Attention Module) seçildi.
+
+---
+
+## Attention Mekanizması Seçimi
+
+CNN tabanlı attention yaklaşımları incelendi ve SE ile CBAM yöntemleri karşılaştırıldı.
+
+SE temel olarak channel attention uygularken CBAM:
+
+- Channel Attention
+- Spatial Attention
+
+bileşenlerini ardışık biçimde kullanmaktadır.
+
+Görüş mesafesi tahmininde hem hangi feature channel'larının hem de görüntünün hangi uzamsal bölgelerinin önemli olabileceği değerlendirildiğinden CBAM kullanılmasına karar verildi.
+
+CBAM'ın performansı artıracağı önceden varsayılmadı; katkısının sonraki eğitim ve bağımsız test değerlendirmesi sonucunda ölçülmesine karar verildi.
+
+---
+
+## VGG16 Entegrasyon Tasarımı
+
+CBAM, VGG16'nın son convolutional feature map'inden sonra ve final MaxPool katmanından önce konumlandırıldı.
+
+224 × 224 giriş görüntüsü için attention giriş boyutu:
+
+`[B, 512, 14, 14]`
+
+olarak belirlendi.
+
+Genel mimari:
+
+Input Image → Frozen VGG16 Feature Extractor → CBAM (Channel Attention + Spatial Attention) → Final MaxPool → Regression Head → Visibility Prediction
+
+Regression head, baseline VGG16 ile kontrollü karşılaştırma yapılabilmesi amacıyla değiştirilmeden korundu.
+
+---
+
+## CBAM Implementasyonu
+
+`src/models/attention.py` dosyasında aşağıdaki modüller geliştirildi:
+
+- `ChannelAttention`
+- `SpatialAttention`
+- `CBAM`
+
+Channel Attention için Average Pooling ve Max Pooling birlikte kullanıldı. Reduction Ratio değeri **16** olarak belirlendi ve channel dönüşümü **512 → 32 → 512** şeklinde yapılandırıldı.
+
+Spatial Attention için channel-wise average projection ve maximum projection birlikte kullanıldı. Birleştirilen feature map üzerinde **7 × 7 convolution** ve sigmoid aktivasyonu uygulandı.
+
+CBAM'ın feature map boyutunu değiştirmediği yapılan shape testi ile doğrulandı:
+
+`[2, 512, 14, 14] → [2, 512, 14, 14]`
+
+---
+
+## Attention-Enhanced VGG16 Modeli
+
+`src/models/vgg16_attention.py` dosyası oluşturularak CBAM mekanizması VGG16 regresyon mimarisine entegre edildi.
+
+Model üzerinde gerçekleştirilen forward-pass testinde:
+
+`[2, 3, 224, 224] → [2, 1]`
+
+sonucu elde edildi.
+
+Böylece modelin sürekli görüş mesafesi regresyonu için beklenen tek çıkış değerini doğru biçimde ürettiği doğrulandı.
+
+---
+
+## Trainable ve Frozen Parametre Kontrolü
+
+Transfer learning stratejisinin doğru uygulanıp uygulanmadığı ayrıca kontrol edildi.
+
+Elde edilen parametre değerleri:
+
+| Parametre Grubu | Sayı |
+| --- | ---: |
+| Total Parameters | **27,658,915** |
+| Frozen Parameters | **14,714,688** |
+| Trainable Parameters | **12,944,227** |
+| CBAM Trainable Parameters | **32,866** |
+| Regression Head Trainable Parameters | **12,911,361** |
+
+Ayrıca yapılan doğrudan kontrolde:
+
+- Feature extractor trainable: **False**
+- CBAM trainable: **True**
+- Regression head trainable: **True**
+
+sonuçları elde edildi.
+
+Böylece pretrained VGG16 feature extractor'ın dondurulduğu, yalnızca CBAM ve regression head parametrelerinin eğitilebilir durumda olduğu doğrulandı.
+
+---
+
+## Training Pipeline Hazırlığı
+
+Attention modeli için ayrı bir `train_vgg16_attention.py` training pipeline'ı oluşturuldu.
+
+Baseline karşılaştırmasının kontrollü kalması amacıyla temel deney ayarları korundu:
+
+- Image Size: **224 × 224**
+- Batch Size: **16**
+- Epoch: **20**
+- Optimizer: **Adam**
+- Learning Rate: **1e-4**
+- Weight Decay: **1e-5**
+- Loss Function: **L1Loss / MAE**
+- Random Seed: **42**
+- Frozen Backbone: **True**
+
+Attention modeli için ayrı bir `vgg16_attention_best.pth` checkpoint yolu tanımlandı.
+
+Training script üzerinde syntax ve import testleri başarıyla tamamlandı.
+
+Gerçek DataLoader batch'i ile gerçekleştirilen uyumluluk testinde:
+
+- Images: `[16, 3, 224, 224]`
+- Targets: `[16]`
+- Outputs: `[16, 1]`
+
+boyutları elde edildi.
+
+Bu sonuç, mevcut veri pipeline'ının yeni Attention-enhanced VGG16 modeliyle uyumlu olduğunu doğruladı.
+
+---
+
+## Dokümantasyon
+
+Attention mimarisi ve alınan teknik kararları belgelemek amacıyla `attention_architecture_notes.md` dosyası oluşturuldu.
+
+Bu dokümanda CBAM seçim gerekçesi, Channel ve Spatial Attention yapıları, VGG16 entegrasyon noktası, parameter freeze stratejisi ve gerçekleştirilen teknik doğrulamalar kayıt altına alındı.
+
+---
+
+## Gün Sonu Sonucu
+
+Day 16 sonunda VGG16 + CBAM attention mimarisinin tasarımı ve ilk implementasyonu tamamlandı.
+
+CBAM mekanizması geliştirildi, VGG16 mimarisine entegre edildi, forward-pass ve tensor shape testleri başarıyla tamamlandı, frozen/trainable parametre yapısı doğrulandı, training pipeline hazırlandı ve DataLoader uyumluluğu test edildi.
+
+Henüz Attention modelinin tam 20 epoch eğitimi gerçekleştirilmedi.
+
+Bir sonraki aşamada VGG16 + CBAM modeli mevcut sentetik veri kümesi ve baseline deneyleriyle aynı temel koşullar altında eğitilecek, en başarılı checkpoint Validation MAE değerine göre seçilecek ve bağımsız test performansı mevcut **66.7227 m VGG16 baseline Test MAE** referansı ile karşılaştırılacaktır.

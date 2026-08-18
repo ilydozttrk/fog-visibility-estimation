@@ -21,6 +21,10 @@ LOGS_DIR = RESULTS_DIR / "logs"
 VGG16_CHECKPOINT_PATH = CHECKPOINTS_DIR / "vgg16_baseline_best.pth"
 RESNET50_CHECKPOINT_PATH = CHECKPOINTS_DIR / "resnet50_baseline_best.pth"
 
+VGG16_ATTENTION_CHECKPOINT_PATH = (
+    CHECKPOINTS_DIR / "vgg16_attention_best.pth"
+)
+
 # =========================================================
 # DATA SETTINGS
 # =========================================================

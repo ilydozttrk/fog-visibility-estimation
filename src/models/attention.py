@@ -1,13 +1,13 @@
 """
 attention.py
 
-CBAM (Convolutional Block Attention Module) components
-for the fog visibility estimation project.
+Attention mechanisms for the fog visibility estimation project.
 
 The module contains:
 - ChannelAttention
 - SpatialAttention
 - CBAM
+- SEBlock
 
 Author: Ilayda Ozturk
 Project: TUBITAK 2209-A
@@ -242,3 +242,107 @@ class CBAM(nn.Module):
         )
 
         return feature_map
+
+
+# =============================================================================
+# Squeeze-and-Excitation (SE) Attention
+# =============================================================================
+
+class SEBlock(nn.Module):
+    """
+    Squeeze-and-Excitation attention module.
+
+    The module performs channel-wise feature recalibration by:
+
+        1. Squeeze:
+           Global average pooling over spatial dimensions.
+
+        2. Excitation:
+           A two-layer bottleneck transformation learns channel
+           importance weights.
+
+        3. Recalibration:
+           The learned channel weights are multiplied with the
+           original feature map.
+
+    Expected input shape:
+        [batch_size, channels, height, width]
+
+    Output shape:
+        Same as the input shape.
+    """
+
+    def __init__(
+        self,
+        channels: int,
+        reduction_ratio: int = 16,
+    ) -> None:
+        super().__init__()
+
+        if channels <= 0:
+            raise ValueError(
+                "channels must be greater than zero."
+            )
+
+        if reduction_ratio <= 0:
+            raise ValueError(
+                "reduction_ratio must be greater than zero."
+            )
+
+        reduced_channels = max(
+            channels // reduction_ratio,
+            1,
+        )
+
+        self.global_average_pool = (
+            nn.AdaptiveAvgPool2d(1)
+        )
+
+        self.excitation = nn.Sequential(
+            nn.Linear(
+                channels,
+                reduced_channels,
+                bias=False,
+            ),
+            nn.ReLU(inplace=True),
+            nn.Linear(
+                reduced_channels,
+                channels,
+                bias=False,
+            ),
+            nn.Sigmoid(),
+        )
+
+    def forward(
+        self,
+        feature_map: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Apply SE channel attention to the input feature map.
+        """
+
+        batch_size, channels, _, _ = (
+            feature_map.shape
+        )
+
+        squeezed = self.global_average_pool(
+            feature_map
+        )
+
+        squeezed = squeezed.view(
+            batch_size,
+            channels,
+        )
+
+        channel_weights = self.excitation(
+            squeezed
+        )
+
+        channel_weights = channel_weights.view(
+            batch_size,
+            channels,
+            1,
+            1,
+        )
+
+        return feature_map * channel_weights

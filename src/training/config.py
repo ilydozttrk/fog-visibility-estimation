@@ -25,6 +25,8 @@ VGG16_ATTENTION_CHECKPOINT_PATH = (
     CHECKPOINTS_DIR / "vgg16_attention_best.pth"
 )
 
+VGG16_SE_CHECKPOINT_PATH = CHECKPOINTS_DIR / "vgg16_se_best.pth"
+
 # =========================================================
 # DATA SETTINGS
 # =========================================================

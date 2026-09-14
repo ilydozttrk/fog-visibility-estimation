@@ -1282,3 +1282,128 @@ Ayrıntılı attention karşılaştırması `docs/reports/attention_comparison.m
 - `results/plots/vgg16_attention_prediction_error_histogram.png`
 - `results/logs/vgg16_attention_evaluation_report.md`
 - `docs/reports/attention_comparison.md`
+
+
+## Gün 19 — SE-Net Risk Yönetimi Deneyi ve Nihai Sentetik Attention Karşılaştırması
+
+### Amaç
+
+Kabul edilen TÜBİTAK 2209-A proje önerisinde, seçilen attention mekanizmasının model performansını iyileştirmemesi durumunda daha basit ve kanal odaklı bir alternatif olarak Squeeze-and-Excitation (SE-Net) mekanizmasının denenmesi risk yönetimi planında belirtilmişti.
+
+Önceki VGG16 + CBAM deneyinde validation MAE değerinde küçük bir iyileşme elde edilmesine rağmen test MAE değeri VGG16 baseline modelinden daha kötü sonuç verdi. Bu nedenle proje önerisinde belirtilen alternatif plan uygulanarak SE-Net tabanlı VGG16 modeli geliştirildi ve aynı deney koşullarında değerlendirildi.
+
+### SE-Net Entegrasyonu
+
+VGG16 mimarisine kanal bazlı özellik yeniden ağırlıklandırması yapan bir Squeeze-and-Excitation bloğu eklendi.
+
+Entegrasyon sırası:
+
+VGG16 feature extractor  
+→ SE bloğu  
+→ final MaxPool  
+→ VGG16 avgpool  
+→ regression head
+
+SE bloğu, VGG16'nın son convolution bloğundan sonra ve final MaxPool işleminden önce konumlandırıldı. Bu konum daha önce CBAM için kullanılan entegrasyon noktasıyla aynı tutularak iki attention mekanizmasının mümkün olduğunca eşit mimari koşullar altında karşılaştırılması sağlandı.
+
+Deney konfigürasyonu:
+
+- SE reduction ratio: 16
+- ImageNet pretrained VGG16
+- VGG16 backbone: frozen
+- SE bloğu: trainable
+- Regression head: trainable
+- Baseline VGG16 ile aynı regression head
+- Aynı training, validation ve test bölünmesi
+- Random seed: 42
+- Aynı optimizer
+- Aynı learning rate
+- Aynı weight decay
+- Aynı batch size
+- Aynı 20 epoch eğitim bütçesi
+
+Parametre sayıları:
+
+- Toplam parametre: 27,658,817
+- Eğitilebilir parametre: 12,944,129
+- Dondurulmuş parametre: 14,714,688
+- SE parametreleri: 32,768
+- Regression head parametreleri: 12,911,361
+
+### Eğitim Sonuçları
+
+Model toplam 20 epoch boyunca eğitildi.
+
+En iyi checkpoint:
+
+- En iyi epoch: 19
+- En iyi validation MAE: 70.6083 m
+
+20. epoch sonuçları:
+
+- Training MAE: 50.1878 m
+- Validation MAE: 70.7658 m
+
+Validation MAE değeri 19. epoch'a kadar düzenli olarak azaldı. 20. epoch'ta küçük bir artış meydana geldiği için epoch 19'da kaydedilen checkpoint en iyi model olarak korundu.
+
+### Bağımsız Test Değerlendirmesi
+
+En iyi SE checkpoint'i, önceki modellerde kullanılan ve değiştirilmemiş olan 112 görüntülük scene-based test seti üzerinde değerlendirildi.
+
+Test sonuçları:
+
+- Test örneği: 112
+- Test MAE: 72.4412 m
+- Ortalama signed error: -12.9774 m
+- Minimum absolute error: 0.1255 m
+- Maximum absolute error: 423.1353 m
+
+Negatif ortalama signed error değeri, modelin gerçek görüş mesafesini ortalama olarak düşük tahmin etme eğiliminin devam ettiğini göstermektedir.
+
+### Nihai Sentetik Model Karşılaştırması
+
+| Model | En İyi Validation MAE | Test MAE |
+|---|---:|---:|
+| VGG16 baseline | 69.9705 m | **66.7227 m** |
+| VGG16 + CBAM | **69.3274 m** | 67.6214 m |
+| VGG16 + SE | 70.6083 m | 72.4412 m |
+| ResNet50 baseline | 121.8414 m | 124.6181 m |
+
+SE modeli, VGG16 baseline modeline göre test MAE açısından 5.7185 m daha yüksek hata üretmiştir. Bu değer yaklaşık %8.57 daha yüksek test hatasına karşılık gelmektedir.
+
+SE modeli ayrıca VGG16 + CBAM modelinden 4.8198 m daha yüksek test MAE üretmiştir.
+
+### Bulguların Yorumlanması
+
+Mevcut sentetik FRIDA/FRIDA2 deney düzeninde ne CBAM ne de SE mekanizması, temel VGG16 modelinin birincil model seçim metriği olan test MAE performansını iyileştirebilmiştir.
+
+CBAM modeli 69.3274 m ile en düşük validation MAE değerini üretmiş ancak bu iyileşme bağımsız test setine aynı şekilde yansımamıştır. CBAM'ın test MAE değeri 67.6214 m ile baseline VGG16'nın 66.7227 m değerinden biraz daha yüksek kalmıştır.
+
+SE modeli ise hem validation hem de test MAE açısından baseline VGG16'yı geçememiştir.
+
+Bu nedenle mevcut sentetik deney aşamasında en başarılı mimari VGG16 baseline olarak kalmıştır.
+
+### Risk Yönetimi Planının Sonucu
+
+Kabul edilen TÜBİTAK proje önerisindeki attention mekanizmasına ilişkin risk yönetimi planı uygulanmıştır:
+
+1. VGG16 üzerine CBAM attention mekanizması entegre edildi.
+2. CBAM modeli aynı deney koşullarında eğitildi ve değerlendirildi.
+3. CBAM test MAE açısından baseline VGG16'yı geçemedi.
+4. Bunun üzerine proje önerisindeki alternatif plan doğrultusunda SE-Net uygulandı.
+5. SE-Net aynı deney koşullarında eğitildi ve değerlendirildi.
+6. SE-Net de test MAE açısından baseline VGG16'yı geçemedi.
+
+Dolayısıyla attention mekanizmalarının mevcut sentetik deney düzeninde test MAE açısından avantaj sağladığı hipotezi desteklenmemiştir.
+
+Mevcut karşılaştırmalar tek bir deterministic veri bölünmesi ve tek random seed üzerinden gerçekleştirildiği için sonuçlar hakkında istatistiksel anlamlılık iddiasında bulunulmamaktadır.
+
+### Karar
+
+Sentetik veri aşamasında seçilen model:
+
+**VGG16 baseline — Test MAE: 66.7227 m**
+
+Sentetik baseline karşılaştırması ve attention mekanizması deneyleri bu aşamayla tamamlanmıştır.
+
+Projenin bir sonraki ana araştırma aşaması, kabul edilen TÜBİTAK 2209-A proje önerisinde belirtildiği şekilde gerçek dünya verileri üzerinde modelin genellenebilirliğinin incelenmesidir. Bu kapsamda FVEI/FHVI veri setlerinin erişilebilirliği değerlendirilecek, uygun gerçek dünya veri seti hazırlanacak ve seçilen model üzerinde gerçek dünya validation/fine-tuning deneylerine geçilecektir.

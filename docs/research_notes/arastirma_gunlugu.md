@@ -1195,3 +1195,90 @@ CBAM mekanizması geliştirildi, VGG16 mimarisine entegre edildi, forward-pass v
 Henüz Attention modelinin tam 20 epoch eğitimi gerçekleştirilmedi.
 
 Bir sonraki aşamada VGG16 + CBAM modeli mevcut sentetik veri kümesi ve baseline deneyleriyle aynı temel koşullar altında eğitilecek, en başarılı checkpoint Validation MAE değerine göre seçilecek ve bağımsız test performansı mevcut **66.7227 m VGG16 baseline Test MAE** referansı ile karşılaştırılacaktır.
+
+## Day 17 — VGG16 + CBAM Eğitimi
+
+VGG16 baseline üzerinde tasarlanan CBAM attention mimarisinin 20 epoch eğitim süreci tamamlandı. Karşılaştırmanın adil olması amacıyla baseline deneyleriyle aynı scene-based veri bölünmesi ve temel eğitim ayarları korundu.
+
+### Eğitim Yapılandırması
+
+- Eğitim örneği: 464
+- Validation örneği: 96
+- Batch size: 16
+- Epoch: 20
+- Optimizer: Adam
+- Learning rate: 1e-4
+- Loss: L1Loss (MAE)
+- Random seed: 42
+- Backbone: Frozen
+- CBAM reduction ratio: 16
+- CBAM spatial kernel: 7
+
+Model toplam 27,658,915 parametre içerirken 12,944,227 parametre eğitilebilir durumda tutuldu.
+
+### Sonuç
+
+En iyi checkpoint epoch 17'de elde edildi:
+
+- Best epoch: 17
+- Best validation MAE: **69.3274 m**
+- Epoch 17 train MAE: **47.8197 m**
+
+Epoch 17 sonrasında training MAE düşmeye devam ederken validation MAE dalgalanmaya başladı. Epoch 20'de training MAE 41.0328 m'ye düşmesine rağmen validation MAE 76.0531 m olarak ölçüldü. Bu nedenle bağımsız test değerlendirmesinde epoch 17 checkpoint'i kullanılmasına karar verildi.
+
+VGG16 baseline'ın en iyi validation MAE değeri 69.9705 m iken VGG16 + CBAM 69.3274 m elde etti. Attention modeli validation aşamasında yaklaşık 0.6431 m daha düşük MAE üretmiş olsa da CBAM'ın gerçek katkısı hakkında karar vermek için bağımsız test sonucu beklenmiştir.
+
+---
+
+## Day 18 — VGG16 + CBAM Test Değerlendirmesi
+
+VGG16 + CBAM modelinin epoch 17'de kaydedilen en iyi checkpoint'i, baseline modellerle aynı 112 örnekten oluşan bağımsız scene-based test kümesi üzerinde değerlendirildi.
+
+Değerlendirme için `src/evaluation/evaluation_vgg16_attention.py` oluşturuldu. Script; tahmin sonuçlarını, özet metrikleri, Actual vs Predicted grafiğini, hata histogramını ve Markdown değerlendirme raporunu üretmektedir.
+
+### Test Sonuçları
+
+- Test samples: 112
+- Test MAE: **67.6214 m**
+- Mean signed error: **-10.8501 m**
+- Minimum absolute error: **0.4317 m**
+- Maximum absolute error: **439.5097 m**
+
+### VGG16 Baseline ile Karşılaştırma
+
+| Metric | VGG16 | VGG16 + CBAM |
+|---|---:|---:|
+| Best Validation MAE (m) | 69.9705 | **69.3274** |
+| Test MAE (m) | **66.7227** | 67.6214 |
+| Mean Signed Error (m) | -17.3877 | **-10.8501** |
+| Maximum Absolute Error (m) | **392.8829** | 439.5097 |
+
+CBAM validation MAE değerini küçük ölçüde iyileştirmiş olsa da bu kazanım bağımsız test kümesine yansımadı. VGG16 baseline test MAE değeri 66.7227 m, VGG16 + CBAM test MAE değeri ise 67.6214 m oldu. Test MAE farkı yaklaşık 0.8987 m olarak hesaplandı.
+
+CBAM modelinin mean signed error değerinin -17.3877 m'den -10.8501 m'ye yaklaşması ortalama düşük tahmin eğiliminin azaldığını gösterirken, maksimum mutlak hatanın 392.8829 m'den 439.5097 m'ye yükseldiği gözlendi.
+
+Mevcut tek deney ve random seed üzerinden farkların istatistiksel anlamlılığı hakkında çıkarım yapılmadı.
+
+### Araştırma Kararı
+
+CBAM attention mekanizması teknik olarak başarıyla entegre edilmiş ve kontrollü koşullarda değerlendirilmiştir. Ancak mevcut sentetik FRIDA/FRIDA2 deneylerinde genel test MAE açısından VGG16 baseline üzerinde performans artışı sağlamamıştır.
+
+Bu nedenle mevcut sentetik aşamadaki model sıralaması:
+
+1. **VGG16 Baseline — 66.7227 m**
+2. **VGG16 + CBAM — 67.6214 m**
+3. **ResNet50 Baseline — 124.6181 m**
+
+Attention mekanizmasının performansı artıracağı hipotezi mevcut sentetik test sonuçları tarafından desteklenmemiştir. Mevcut sentetik aşamada en iyi model olarak VGG16 baseline korunmuştur.
+
+Ayrıntılı attention karşılaştırması `docs/reports/attention_comparison.md` dosyasında dokümante edilmiştir.
+
+### Üretilen Çıktılar
+
+- `src/evaluation/evaluation_vgg16_attention.py`
+- `results/evaluation/vgg16_attention_test_predictions.csv`
+- `results/evaluation/vgg16_attention_evaluation_summary.json`
+- `results/plots/vgg16_attention_actual_vs_predicted.png`
+- `results/plots/vgg16_attention_prediction_error_histogram.png`
+- `results/logs/vgg16_attention_evaluation_report.md`
+- `docs/reports/attention_comparison.md`

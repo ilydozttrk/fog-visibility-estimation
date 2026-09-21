@@ -49,3 +49,5 @@ traitlets==5.15.1
 typing_extensions==4.16.0
 tzdata==2026.3
 wcwidth==0.8.2
+
+pytest==9.1.1

@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sisli Hava Görüş Mesafesi Tahmini</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <div class="page-shell">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">△</div>
+
+                <div>
+                    <div class="brand-name">FOG VIEW</div>
+                    <div class="brand-subtitle">
+                        Visibility Estimation
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-meta">
+                <span class="project-badge">TÜBİTAK 2209-A</span>
+                <span>Araştırma Prototipi</span>
+                <span>VGG16</span>
+                <span>CIDET</span>
+            </div>
+        </header>
+
+
+        <section class="hero">
+            <div class="hero-copy">
+                <h1>
+                    Sisli Hava Koşullarında<br>
+                    Görüş Mesafesi Tahmini
+                </h1>
+
+                <p>
+                    Bir yol veya sis görüntüsü yükleyerek modelin
+                    tahmini görüş mesafesini saniyeler içinde
+                    görüntüleyin.
+                </p>
+            </div>
+
+            <div class="hero-note">
+                <p>
+                    Transfer öğrenme tabanlı<br>
+                    araştırma prototipi
+                </p>
+                <span>TÜBİTAK 2209-A</span>
+            </div>
+        </section>
+
+
+        <main class="workspace">
+
+            <section class="upload-panel">
+
+                <div class="section-heading">
+                    <div class="section-icon">↑</div>
+
+                    <div>
+                        <h2>Görüntü Yükle</h2>
+                        <p>JPG, JPEG veya PNG</p>
+                    </div>
+                </div>
+
+                <form id="prediction-form">
+
+                    <label
+                        id="upload-area"
+                        class="upload-area"
+                        for="image-input"
+                    >
+                        <input
+                            id="image-input"
+                            name="image"
+                            type="file"
+                            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                            required
+                        >
+
+                        <div class="upload-symbol">↑</div>
+
+                        <strong>Görüntü seçin</strong>
+
+                        <span>
+                            veya dosyayı buraya sürükleyin
+                        </span>
+                    </label>
+
+                    <div
+                        id="selected-file"
+                        class="selected-file hidden"
+                    ></div>
+
+                    <button
+                        id="predict-button"
+                        type="submit"
+                    >
+                        <span>Görüş Mesafesini Tahmin Et</span>
+                        <span class="button-arrow">→</span>
+                    </button>
+
+                </form>
+
+            </section>
+
+
+            <section class="result-panel">
+
+                <div class="section-heading">
+                    <div class="section-icon">◉</div>
+
+                    <div>
+                        <h2>Önizleme</h2>
+                        <p>Yüklenen görüntü</p>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+
+                    <div
+                        id="preview-placeholder"
+                        class="preview-placeholder"
+                    >
+                        <span>Görüntü önizlemesi burada görünecek</span>
+                    </div>
+
+                    <img
+                        id="preview"
+                        class="preview hidden"
+                        alt="Yüklenen görüntü önizlemesi"
+                    >
+
+                </div>
+
+
+                <div id="result" class="result-card">
+
+                    <div class="result-icon">▥</div>
+
+                    <div class="result-content">
+                        <span class="result-label">
+                            Tahmini görüş mesafesi
+                        </span>
+
+                        <div class="result-value">
+                            <strong id="visibility-value">—</strong>
+                            <span>m</span>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div id="error" class="error hidden"></div>
+
+
+                <div class="model-details">
+
+                    <div>
+                        <span>Model</span>
+                        <strong>VGG16 · Transfer Learning</strong>
+                    </div>
+
+                    <div>
+                        <span>Çıktı</span>
+                        <strong>Görüş Mesafesi</strong>
+                    </div>
+
+                    <div>
+                        <span>Birim</span>
+                        <strong>Metre (m)</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <footer>
+            <span>COMPUTER ENGINEERING</span>
+            <span>FOG VISIBILITY ESTIMATION</span>
+            <span>TÜBİTAK 2209-A RESEARCH PROJECT</span>
+        </footer>
+
+    </div>
+
+
+    <script>
+        const form = document.getElementById("prediction-form");
+        const input = document.getElementById("image-input");
+        const uploadArea = document.getElementById("upload-area");
+        const selectedFile = document.getElementById("selected-file");
+
+        const preview = document.getElementById("preview");
+        const previewPlaceholder =
+            document.getElementById("preview-placeholder");
+
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+        const value = document.getElementById("visibility-value");
+        const button = document.getElementById("predict-button");
+
+
+        function setImage(file) {
+            if (!file) {
+                return;
+            }
+
+            input.files = createFileList(file);
+
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+            previewPlaceholder.classList.add("hidden");
+
+            selectedFile.textContent = file.name;
+            selectedFile.classList.remove("hidden");
+
+            value.textContent = "—";
+
+            error.classList.add("hidden");
+        }
+
+
+        function createFileList(file) {
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            return transfer.files;
+        }
+
+
+        input.addEventListener("change", () => {
+            const file = input.files[0];
+
+            if (file) {
+                setImage(file);
+            }
+        });
+
+
+        ["dragenter", "dragover"].forEach(eventName => {
+            uploadArea.addEventListener(eventName, event => {
+                event.preventDefault();
+                uploadArea.classList.add("dragging");
+            });
+        });
+
+
+        ["dragleave", "drop"].forEach(eventName => {
+            uploadArea.addEventListener(eventName, event => {
+                event.preventDefault();
+                uploadArea.classList.remove("dragging");
+            });
+        });
+
+
+        uploadArea.addEventListener("drop", event => {
+            const file = event.dataTransfer.files[0];
+
+            if (file) {
+                setImage(file);
+            }
+        });
+
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+
+            const file = input.files[0];
+
+            if (!file) {
+                error.textContent =
+                    "Lütfen önce bir görüntü seçin.";
+
+                error.classList.remove("hidden");
+                return;
+            }
+
+            const data = new FormData();
+            data.append("image", file);
+
+            button.disabled = true;
+            button.querySelector("span").textContent =
+                "Tahmin yapılıyor...";
+
+            error.classList.add("hidden");
+
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: data
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        payload.error || "Tahmin başarısız."
+                    );
+                }
+
+                value.textContent =
+                    Number(payload.visibility_m)
+                    .toLocaleString(
+                        "tr-TR",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+            } catch (err) {
+                error.textContent = err.message;
+                error.classList.remove("hidden");
+
+            } finally {
+                button.disabled = false;
+
+                button.querySelector("span").textContent =
+                    "Görüş Mesafesini Tahmin Et";
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+
+

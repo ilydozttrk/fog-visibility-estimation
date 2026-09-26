@@ -1,4 +1,4 @@
-# Fog Visibility Estimation using Transfer Learning
+﻿# Fog Visibility Estimation using Transfer Learning
 
 TÜBİTAK 2209-A kapsamında yürütülen bu araştırma projesi, sisli hava koşullarında görüntü tabanlı **sürekli görüş mesafesi tahmini** için transfer öğrenme tabanlı CNN mimarilerini incelemektedir.
 
@@ -521,6 +521,7 @@ Araştırma sürecine ait ayrıntılı geliştirme notları `docs/research_notes
 - [x] Flask inference API
 - [x] Web interface
 - [x] Image upload and prediction workflow
+- [x] Flask API integration tests
 
 ---
 
@@ -532,7 +533,6 @@ Kalan temel çalışmalar:
 
 - [ ] FVEI erişim talebinin sonucunun takip edilmesi
 - [ ] FVEI erişimi sağlanırsa ek external real-world evaluation
-- [ ] Final integration tests
 - [ ] Final TÜBİTAK project report
 - [ ] Research paper / publication-oriented manuscript
 - [ ] Final figures and result tables
@@ -596,4 +596,6 @@ Kullanılan üçüncü taraf veri setlerinin kendi lisans ve kullanım koşullar
 
 Özellikle Benchmark-Visibility kaynak materyalinde akademik / nonprofit kullanım kısıtları bulunduğundan ilgili veri seti ve kaynak kodları kendi kaynak koşulları kapsamında değerlendirilmelidir.
 
-Repository'nin genel açık kaynak lisanslama politikası proje tamamlanırken ayrıca belirlenecektir.
+Bu repository kapsamında proje için özgün olarak geliştirilen yazılım ve dokümantasyon **MIT License** altında lisanslanmıştır. Ayrıntılar için `LICENSE` dosyasına bakınız.
+
+Üçüncü taraf veri setleri, kaynak materyalleri, önceden eğitilmiş model bileşenleri ve diğer üçüncü taraf kaynaklar MIT License kapsamında yeniden lisanslanmamaktadır; bunların kendi lisans, atıf ve kullanım koşulları geçerlidir.

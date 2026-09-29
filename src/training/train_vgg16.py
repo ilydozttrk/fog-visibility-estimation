@@ -47,13 +47,13 @@ from src.training.utils import set_seed
 # Model
 # =============================================================================
 
-def build_vgg16_regression_model() -> nn.Module:
+def build_vgg16_regression_model(pretrained: bool = True) -> nn.Module:
     """
     Load an ImageNet-pretrained VGG16 model and replace its
     classification head with a regression head.
     """
 
-    weights = VGG16_Weights.DEFAULT
+    weights = VGG16_Weights.DEFAULT if pretrained else None
     model = vgg16(weights=weights)
 
     if FREEZE_BACKBONE:

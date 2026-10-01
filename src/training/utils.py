@@ -21,4 +21,7 @@ def set_seed(seed: int) -> None:
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    torch.use_deterministic_algorithms(True)
+    # Some CUDA operations used by VGG16, including AdaptiveAvgPool2d backward,
+    # do not provide a strictly deterministic implementation. Keep deterministic
+    # algorithms enabled where available and warn instead of aborting.
+    torch.use_deterministic_algorithms(True, warn_only=True)

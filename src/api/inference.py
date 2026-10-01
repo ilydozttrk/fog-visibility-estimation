@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,7 +8,7 @@ from PIL import Image
 from torch import nn
 
 from src.training.train_vgg16 import build_vgg16_regression_model
-from src.training.cidet_dataloader import get_cidet_transforms
+from src.training.dataloader import get_transforms
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -21,7 +21,7 @@ DEFAULT_CHECKPOINT_PATH = (
     PROJECT_ROOT
     / "results"
     / "checkpoints"
-    / "vgg16_cidet_block5_huber_best.pth"
+    / "vgg16_fvei_block5_best.pth"
 )
 
 
@@ -33,7 +33,7 @@ class VisibilityPrediction:
 
 
 class VisibilityPredictor:
-    """Inference wrapper for the selected CIDET development checkpoint."""
+    """Inference wrapper for the validation-selected FVEI checkpoint."""
 
     def __init__(
         self,
@@ -48,9 +48,9 @@ class VisibilityPredictor:
                 f"Checkpoint not found: {self.checkpoint_path}"
             )
 
-        self.transform = get_cidet_transforms()
+        self.transform = get_transforms()
 
-        self.model: nn.Module = build_vgg16_regression_model()
+        self.model: nn.Module = build_vgg16_regression_model(pretrained=False)
 
         checkpoint = torch.load(
             self.checkpoint_path,

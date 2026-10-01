@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import io
 
@@ -35,7 +35,7 @@ def health():
     return jsonify(
         {
             "status": "ok",
-            "model": "VGG16 CIDET Block5 Huber",
+            "model": "VGG16 FVEI Block5 Fine-Tuned",
             "checkpoint_epoch": predictor.checkpoint_epoch,
             "validation_mae_m": predictor.validation_mae_m,
         }
@@ -84,7 +84,7 @@ def predict():
         {
             "visibility_m": round(prediction.visibility_m, 2),
             "unit": "m",
-            "model": "VGG16 CIDET Block5 Huber",
+            "model": "VGG16 FVEI Block5 Fine-Tuned",
             "checkpoint_epoch": prediction.checkpoint_epoch,
         }
     )

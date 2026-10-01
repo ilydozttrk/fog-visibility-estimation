@@ -1,4 +1,4 @@
-﻿# TÜBİTAK 2209-A Final Raporu — İçerik Taslağı
+# TÜBİTAK 2209-A Final Raporu — İçerik Taslağı
 
 > **Not:** Bu dosya, resmi TÜBİTAK sonuç raporu formuna aktarılmak üzere hazırlanmış içerik taslağıdır. Resmi formun bölüm adları ve karakter sınırları doğrulandıktan sonra nihai metin ilgili alanlara uyarlanacaktır.
 
@@ -6,22 +6,22 @@
 
 # A. PROJE BİLGİLERİ
 
-**Proje Başlığı:**  
+**Proje Başlığı:**
 Transfer Öğrenme Temelli CNN Mimarilerinin Görüş Mesafesi Tahmininde Karşılaştırmalı Analizi
 
-**Program:**  
+**Program:**
 TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı
 
-**Proje Yürütücüsü:**  
+**Proje Yürütücüsü:**
 İlayda Öztürk
 
-**Danışman:**  
+**Danışman:**
 Songül Karakuş
 
-**Kurum:**  
+**Kurum:**
 Bitlis Eren Üniversitesi
 
-**Önerilen Proje Dönemi:**  
+**Önerilen Proje Dönemi:**
 1 Nisan 2026 – 31 Ekim 2026
 
 ---

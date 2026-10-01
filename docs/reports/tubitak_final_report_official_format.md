@@ -67,7 +67,7 @@ Nihai sentetik veri dağılımı:
 | Test | 112 |
 | **Toplam** | **672** |
 
-PyTorch tabanlı Dataset ve DataLoader yapıları oluşturulmuş, görüntü yeniden boyutlandırma ve ImageNet normalizasyonu dahil ortak preprocessing i? ak??? geliştirilmiştir.
+PyTorch tabanlı Dataset ve DataLoader yapıları oluşturulmuş, görüntü yeniden boyutlandırma ve ImageNet normalizasyonu dahil ortak preprocessing ış akışı geliştirilmiştir.
 
 ---
 
@@ -75,7 +75,7 @@ PyTorch tabanlı Dataset ve DataLoader yapıları oluşturulmuş, görüntü yen
 
 İlk model olarak ImageNet üzerinde önceden eğitilmiş VGG16 mimarisi regresyon problemine adapte edilmiştir. Orijinal sınıflandırma katmanı kaldırılmış ve tek sürekli görüş mesafesi değeri üreten regresyon başlığı eklenmiştir.
 
-VGG16 modeli 20 epoch boyunca eğitilmiş ve do?rulama (validation) MAE değerine göre en başarılı checkpoint seçilmiştir.
+VGG16 modeli 20 epoch boyunca eğitilmiş ve doğrulama (validation) MAE değerine göre en başarılı checkpoint seçilmiştir.
 
 VGG16 sonuçları:
 
@@ -116,7 +116,7 @@ CBAM sonucu:
 | Validation MAE | **69.3274 m** |
 | Test MAE | 67.6214 m |
 
-CBAM do?rulama (validation) MAE değerinde küçük bir iyileşme sağlamış olsa da ayr?lm?? ba??ms?z test MAE açısından VGG16 temel (baseline) modelinin gerisinde kalmıştır.
+CBAM doğrulama (validation) MAE değerinde küçük bir iyileşme sağlamış olsa da ayrılmış bağımsız test MAE açısından VGG16 temel (baseline) modelinin gerisinde kalmıştır.
 
 Araştırma önerisinde belirlenen risk yönetimi planına uygun olarak alternatif attention yaklaşımı olarak Squeeze-and-Excitation (SE) mekanizması da uygulanmıştır.
 
@@ -136,7 +136,7 @@ Nihai sentetik model karşılaştırması:
 | VGG16 + SE | 72.4412 m |
 | ResNet50 | 124.6181 m |
 
-Attention mekanizmaları mevcut veri ve deney koşullarında VGG16 temel (baseline) test performansını iyileştirmemiştir. Bu nedenle gerçek dünya fine-tuning aşamasının başlangıç model kontrol noktas? (checkpoint) olarak VGG16 temel (baseline) modeli korunmuştur.
+Attention mekanizmaları mevcut veri ve deney koşullarında VGG16 temel (baseline) test performansını iyileştirmemiştir. Bu nedenle gerçek dünya fine-tuning aşamasının başlangıç model kontrol noktası (checkpoint) olarak VGG16 temel (baseline) modeli korunmuştur.
 
 ---
 
@@ -165,7 +165,7 @@ elde edilmiştir.
 
 Ayrıca Benchmark-Visibility veri setinde gerçekleştirilen stres testi, daha geniş hedef aralığında model tahminlerinin dar bir aralığa sıkıştığını ve yüksek görüş mesafelerinde belirgin eksik tahmin oluştuğunu göstermiştir.
 
-Bu deneyler final FVEI modelinin seçilmesinde kullanılmamış, veri da??l?m? farkl?l??? (domain shift) davranışının incelenmesi amacıyla yardımcı deneyler olarak tutulmuştur.
+Bu deneyler final FVEI modelinin seçilmesinde kullanılmamış, veri dağılımı farklılığı (domain shift) davranışının incelenmesi amacıyla yardımcı deneyler olarak tutulmuştur.
 
 FHVI veri setine proje sürecinde erişim sağlanamadığından nihai model geliştirme aşamasında kullanılmamıştır.
 
@@ -195,7 +195,7 @@ Kesin etiketli örneklerin dağılımı:
 | Seviye 2 | 793 | 101-199 m |
 | Seviye 3 | 785 | 201-499 m |
 
-Kesin etiketli örnekler g?r?? mesafesi seviyesi bazında stratified şekilde train, validation ve test alt kümelerine ayrılmıştır.
+Kesin etiketli örnekler görüş mesafesi seviyesi bazında stratified şekilde train, validation ve test alt kümelerine ayrılmıştır.
 
 Cross-split similarity kontrolü sonucunda validation tarafında bulunan iki şüpheli örnek çıkarılmıştır. Held-out test seti değiştirilmemiştir.
 
@@ -205,11 +205,11 @@ Nihai FVEI veri dağılımı:
 |---|---:|
 | Train | 2245 |
 | Validation | 480 |
-| Ayr?lm?? Ba??ms?z Test | 482 |
+| Ayrılmış Bağımsız Test | 482 |
 | Similarity nedeniyle çıkarılan | 2 |
 | 500 m ayrı analiz grubu | 900 |
 
-FVEI veri setinde güvenilir scene/camera kimlik bilgileri mevcut i? ak??? içerisinde bulunmadığından örnekler arasındaki olası artık bağımlılık tamamen dışlanamamaktadır.
+FVEI veri setinde güvenilir scene/camera kimlik bilgileri mevcut ış akışı içerisinde bulunmadığından örnekler arasındaki olası artık bağımlılık tamamen dışlanamamaktadır.
 
 500 m etiketi taşıyan 900 görüntü kesin etiketli regresyon metriklerinden ayrı değerlendirilmiştir.
 
@@ -221,7 +221,7 @@ Gerçek dünya fine-tuning aşamasının başlangıç noktası olarak sentetik d
 
 `vgg16_baseline_best.pth`
 
-model kontrol noktas? (checkpoint) kullanılmıştır.
+model kontrol noktası (checkpoint) kullanılmıştır.
 
 Fine-tuning sırasında:
 
@@ -259,13 +259,13 @@ elde edilmiştir.
 
 ![FVEI fine-tuning eğrisi](../../figures/fvei_finetuning_mae_curve.png)
 
-Epoch 12 sonrasında eğitim MAE değeri düşmeye devam ederken do?rulama (validation) MAE kalıcı bir iyileşme göstermemiştir. Bu nedenle epoch 12 nihai checkpoint olarak korunmuştur.
+Epoch 12 sonrasında eğitim MAE değeri düşmeye devam ederken doğrulama (validation) MAE kalıcı bir iyileşme göstermemiştir. Bu nedenle epoch 12 nihai checkpoint olarak korunmuştur.
 
 ---
 
 ## 2.7. Nihai Held-Out Test Değerlendirmesi
 
-Model seçimi validation seti kullanılarak tamamlandıktan sonra daha önce model geliştirme sürecinde kullanılmamış 482 görüntülük ayr?lm?? ba??ms?z FVEI test seti açılmıştır.
+Model seçimi validation seti kullanılarak tamamlandıktan sonra daha önce model geliştirme sürecinde kullanılmamış 482 görüntülük ayrılmış bağımsız FVEI test seti açılmıştır.
 
 Nihai test sonuçları:
 
@@ -275,13 +275,13 @@ Nihai test sonuçları:
 | MAE | **25.1347 m** |
 | RMSE | **38.4440 m** |
 | R² | **0.894442** |
-| Ortalama Yanl?l?k (Bias) | **+3.4534 m** |
+| Ortalama Yanlılık (Bias) | **+3.4534 m** |
 
-Test sonuçları görüldükten sonra model model kontrol noktas? (checkpoint) veya hiperparametreler üzerinde yeniden tuning yapılmamıştır.
+Test sonuçları görüldükten sonra model kontrol noktası (checkpoint) veya hiperparametreler üzerinde yeniden tuning yapılmamıştır.
 
 Level bazlı hata analizi:
 
-| Level | N | MAE | RMSE | Ortalama Yanl?l?k (Bias) |
+| Level | N | MAE | RMSE | Ortalama Yanlılık (Bias) |
 |---|---:|---:|---:|---:|
 | Seviye 0 | 118 | 11.1879 m | 14.2664 m | +7.5328 m |
 | Seviye 1 | 127 | 12.5699 m | 15.7690 m | -3.7466 m |
@@ -326,7 +326,7 @@ Flask API için oluşturulan otomatik test paketi:
 
 sonucunu vermiştir.
 
-Gerçek final checkpoint ile ayrıca gerçekleştirilen uçtan uca u?tan uca i?lev testite `/predict` endpoint'i HTTP 200 yanıtı üretmiş ve ??kar?m (inference) zincirinin çalıştığı doğrulanmıştır.
+Gerçek final checkpoint ile ayrıca gerçekleştirilen uçtan uca işlev testinde `/predict` endpoint'i HTTP 200 yanıtı üretmiş ve çıkarım (inference) zincirinin çalıştığı doğrulanmıştır.
 
 ---
 
@@ -343,7 +343,7 @@ elde edilmiştir.
 
 Dolayısıyla araştırma önerisinde ResNet50'nin VGG16'dan daha düşük hata üretmesi yönünde kurulan başlangıç hipotezi mevcut deney sonuçları tarafından **desteklenmemiştir**.
 
-VGG16 üzerinde uygulanan CBAM ve SE attention mekanizmaları da baseline modelin ayr?lm?? ba??ms?z test MAE değerini iyileştirmemiştir. CBAM **67.6214 m**, SE ise **72.4412 m** test MAE üretmiştir.
+VGG16 üzerinde uygulanan CBAM ve SE attention mekanizmaları da baseline modelin ayrılmış bağımsız test MAE değerini iyileştirmemiştir. CBAM **67.6214 m**, SE ise **72.4412 m** test MAE üretmiştir.
 
 FVEI gerçek dünya verisi üzerinde gerçekleştirilen fine-tuning sonucunda epoch 12 validation tabanlı nihai checkpoint olarak seçilmiştir.
 
@@ -352,7 +352,7 @@ Nihai FVEI held-out testinde:
 - MAE: **25.1347 m**
 - RMSE: **38.4440 m**
 - R²: **0.894442**
-- Ortalama Yanl?l?k (Bias): **+3.4534 m**
+- Ortalama Yanlılık (Bias): **+3.4534 m**
 
 elde edilmiştir.
 
@@ -379,7 +379,7 @@ Son aşamada geliştirilen Flask tabanlı prototip ile nihai FVEI modeli fonksiy
 
 Proje kapsamında aşağıdaki bilimsel ve teknik çıktılar elde edilmiştir:
 
-- FRIDA/FRIDA2 tabanlı sürekli görüş mesafesi regresyon veri i? ak???'ı
+- FRIDA/FRIDA2 tabanlı sürekli görüş mesafesi regresyon veri işleme akışı
 - Scene-based sentetik veri ayrımı
 - VGG16 regresyon modeli
 - ResNet50 regresyon modeli
@@ -388,9 +388,9 @@ Proje kapsamında aşağıdaki bilimsel ve teknik çıktılar elde edilmiştir:
 - SE attention modeli
 - CIDET yardımcı gerçek dünya fine-tuning deneyleri
 - Benchmark-Visibility stres testi
-- FVEI veri seti denetimi i? ak???'ı
-- FVEI stratified split ve similarity screening i? ak???'ı
-- FVEI fine-tuning i? ak???'ı
+- FVEI veri seti denetimi ış akışı
+- FVEI stratified split ve similarity screening ış akışı
+- FVEI fine-tuning ış akışı
 - Locked held-out test değerlendirmesi
 - Level-based hata analizi
 - Sonuç tabloları ve grafikler

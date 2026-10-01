@@ -2,55 +2,137 @@
 
 TÜBİTAK 2209-A kapsamında yürütülen bu araştırma projesi, sisli hava koşullarında görüntü tabanlı **sürekli görüş mesafesi tahmini** için transfer öğrenme tabanlı CNN mimarilerini incelemektedir.
 
-Çalışmada:
+> **Project Status: Core research and software development completed.**
 
-- VGG16 ve ResNet50 sentetik FRIDA/FRIDA2 verisi üzerinde karşılaştırıldı.
-- VGG16 üzerinde CBAM ve SE attention mekanizmaları değerlendirildi.
-- Sentetik aşamada seçilen VGG16 baseline modeli gerçek dünya FVEI verisi üzerinde fine-tune edildi.
-- Validation ile seçilen final model bağımsız held-out FVEI test setinde değerlendirildi.
-- CIDET ve Benchmark-Visibility deneyleri yardımcı / B-plan domain-shift ve cross-dataset çalışmaları olarak korundu.
-- Final FVEI modeli Flask tabanlı web prototipine entegre edildi.
+Çalışma kapsamında VGG16 ve ResNet50 mimarileri karşılaştırılmış, CBAM ve SE attention mekanizmaları değerlendirilmiş, seçilen VGG16 modeli gerçek dünya FVEI verisi üzerinde fine-tune edilmiş ve validation ile seçilen nihai model bağımsız held-out test setinde değerlendirilmiştir.
+
+Final model Flask tabanlı web prototipine entegre edilmiştir.
 
 ---
 
-# TÜBİTAK 2209-A Araştırma Projesi
+# TÜBİTAK 2209-A Research Project
 
-## Proje Başlığı
+## Project Title
 
 > **Transfer Öğrenme Temelli CNN Mimarilerinin Görüş Mesafesi Tahmininde Karşılaştırmalı Analizi**
 
-## Temel Amaçlar
+## Project Status
 
-- Görüntülerden metre cinsinden sürekli görüş mesafesi tahmini yapmak
-- Transfer öğrenme ile VGG16 ve ResNet50 mimarilerini karşılaştırmak
-- Attention mekanizmalarının katkısını incelemek
-- Sentetik ve gerçek dünya görüntüleri arasındaki domain shift'i araştırmak
-- Gerçek dünya verisi üzerinde kontrollü fine-tuning gerçekleştirmek
-- Modeli bağımsız held-out veri üzerinde değerlendirmek
-- Eğitilmiş modeli Flask tabanlı çalışan bir prototipe entegre etmek
+**Teknik geliştirme tamamlandı.**
 
-Birincil model seçim metriği:
+Tamamlanan ana aşamalar:
+
+- FRIDA / FRIDA2 veri hazırlama
+- VGG16 baseline
+- ResNet50 baseline
+- Baseline comparison
+- CBAM attention
+- SE attention
+- CIDET auxiliary real-world experiments
+- Benchmark-Visibility stress test
+- FVEI dataset audit
+- FVEI similarity screening
+- FVEI reproducible split
+- FVEI fine-tuning
+- Validation-based checkpoint selection
+- Locked held-out FVEI test
+- Level-wise error analysis
+- Flask API
+- Web interface
+- Checkpoint-independent automated API tests
+- Real-checkpoint end-to-end inference test
+- Final result tables
+- Final result figures
+- Research journal
+- Weekly progress documentation
+- Final results summary
+- TÜBİTAK final report drafts
+- Repository-wide quality control
+
+Proje şu anda **final raporlama, danışman kontrolü ve yayın hazırlığı** aşamasındadır.
+
+---
+
+# Final Model
+
+Final real-world inference model:
+
+> **VGG16 FVEI Block5 Fine-Tuned**
+
+Checkpoint:
+
+```text
+vgg16_fvei_block5_best.pth
+```
+
+Selected epoch:
+
+**12**
+
+## Final FVEI Results
+
+| Metric | Result |
+|---|---:|
+| Validation MAE | **26.4428 m** |
+| Held-Out Test MAE | **25.1347 m** |
+| Held-Out Test RMSE | **38.4440 m** |
+| Held-Out Test R² | **0.894442** |
+| Held-Out Test Bias | **+3.4534 m** |
+| Test Samples | **482** |
+
+The held-out test split was not used during checkpoint selection or hyperparameter tuning.
+
+No additional model tuning was performed after observing the final test results.
+
+---
+
+# Research Objectives
+
+The main objectives of the project were:
+
+1. Estimate continuous visibility distance from foggy images.
+2. Adapt VGG16 and ResNet50 using transfer learning.
+3. Compare the architectures using MAE.
+4. Evaluate attention mechanisms on the selected baseline.
+5. Examine synthetic-to-real domain shift.
+6. Fine-tune the selected model using real-world data.
+7. Evaluate the final model on an independent held-out test set.
+8. Integrate the final model into a functional Flask prototype.
+
+Primary model-selection metric:
 
 > **Mean Absolute Error — MAE**
 
 ---
 
-# Güncel Araştırma Akışı
+# Research Workflow
 
 ```text
 FRIDA / FRIDA2
         ↓
 Synthetic Dataset Preparation
         ↓
-VGG16 vs ResNet50 Baseline Comparison
+Scene-Based Split
         ↓
-Synthetic Baseline Selection: VGG16
+VGG16 Baseline
         ↓
-CBAM + SE Attention Experiments
+ResNet50 Baseline
+        ↓
+Baseline Comparison
+        ↓
+Selected Synthetic Baseline: VGG16
+        ↓
+CBAM Attention
+        ↓
+SE Attention
         ↓
 VGG16 Baseline Retained
         ↓
-FVEI Dataset Audit and Leakage Screening
+CIDET / Benchmark Auxiliary Experiments
+        ↓
+FVEI Dataset Audit
+        ↓
+FVEI Similarity Screening
         ↓
 FVEI Train / Validation / Locked Test Split
         ↓
@@ -65,31 +147,29 @@ Final FVEI Model
 Flask Inference Prototype
 ```
 
-CIDET ve Benchmark-Visibility deneyleri ayrıca yardımcı gerçek dünya ve cross-dataset genelleme çalışmaları olarak repository'de korunmaktadır.
-
 ---
 
-# 1. Sentetik Veri — FRIDA / FRIDA2
+# 1. Synthetic Dataset — FRIDA / FRIDA2
 
-Kontrollü mimari karşılaştırması FRIDA ve FRIDA2 tabanlı sentetik sis görüntüleri üzerinde gerçekleştirilmiştir.
+The controlled architecture comparison was performed using synthetic fog images derived from FRIDA and FRIDA2.
 
-## Veri Kümesi
-
-| Özellik | Değer |
+| Property | Value |
 |---|---:|
-| FRIDA temel sahne | 18 |
-| FRIDA2 temel sahne | 66 |
-| Toplam sahne | 84 |
-| Görüş mesafesi seviyesi | 8 |
-| Toplam görüntü | 672 |
+| FRIDA Base Scenes | 18 |
+| FRIDA2 Base Scenes | 66 |
+| Total Scenes | 84 |
+| Visibility Levels | 8 |
+| Total Images | 672 |
 
-Görüş mesafesi seviyeleri:
+Visibility levels:
 
-**50, 80, 100, 150, 200, 300, 500 ve 800 metre**
+**50, 80, 100, 150, 200, 300, 500 and 800 metres**
 
-Aynı temel sahneye ait farklı sis seviyelerinin farklı veri split'lerine dağılmasını önlemek için **scene-based splitting** uygulanmıştır.
+A **scene-based split** was used to reduce the risk of different fog variants of the same scene appearing in different dataset partitions.
 
-| Split | Görüntü |
+## Synthetic Split
+
+| Split | Images |
 |---|---:|
 | Train | 464 |
 | Validation | 96 |
@@ -101,108 +181,171 @@ Random seed:
 
 ---
 
-# 2. Synthetic Baseline Comparison
+# 2. VGG16 vs ResNet50
 
-ImageNet üzerinde önceden eğitilmiş VGG16 ve ResNet50 modelleri sürekli görüş mesafesi regresyonuna uyarlanmıştır.
+ImageNet-pretrained VGG16 and ResNet50 architectures were adapted to continuous visibility regression.
 
-## Sonuçlar
+## Baseline Results
 
 | Model | Best Validation MAE | Test MAE |
 |---|---:|---:|
 | **VGG16** | **69.9705 m** | **66.7227 m** |
 | ResNet50 | 121.8414 m | 124.6181 m |
 
-VGG16 mevcut sentetik veri, split ve deney koşullarında daha düşük MAE üretmiştir.
+Under the current FRIDA/FRIDA2 experimental configuration, VGG16 produced the lower held-out test MAE.
 
-Bu nedenle:
+Selected synthetic baseline:
 
-> **Selected Synthetic Baseline: VGG16**
+> **VGG16**
 
-olarak belirlenmiştir.
+The initial research hypothesis expected ResNet50 to produce the lower error because of its residual architecture. The experimental results did **not** support this hypothesis under the current dataset and training configuration.
 
-Bu sonuç VGG16'nın genel olarak ResNet50'den üstün olduğu anlamına gelmemektedir.
+This result should not be interpreted as a general claim that VGG16 is superior to ResNet50.
 
 ---
 
 # 3. Attention Experiments
 
-VGG16 baseline üzerinde iki attention yaklaşımı değerlendirilmiştir:
+Two attention approaches were evaluated on the selected VGG16 baseline:
 
 - **CBAM — Convolutional Block Attention Module**
 - **SE — Squeeze-and-Excitation**
 
-## Sentetik Test Sonuçları
+## Synthetic Test Results
 
-| Model | Test MAE |
-|---|---:|
-| **VGG16 Baseline** | **66.7227 m** |
-| VGG16 + CBAM | 67.6214 m |
-| VGG16 + SE | 72.4412 m |
-| ResNet50 Baseline | 124.6181 m |
+| Model | Validation MAE | Test MAE |
+|---|---:|---:|
+| **VGG16 Baseline** | 69.9705 m | **66.7227 m** |
+| VGG16 + CBAM | **69.3274 m** | 67.6214 m |
+| VGG16 + SE | 70.6083 m | 72.4412 m |
+| ResNet50 Baseline | 121.8414 m | 124.6181 m |
 
-Attention mekanizmaları teknik olarak başarıyla uygulanmış olsa da mevcut sentetik test koşullarında VGG16 baseline test MAE değerini iyileştirmemiştir.
+CBAM slightly reduced validation MAE but did not improve the held-out synthetic test MAE.
 
-Bu nedenle gerçek dünya adaptasyonunun başlangıç checkpoint'i olarak VGG16 baseline korunmuştur.
+SE also did not improve the baseline result.
+
+Therefore, the original VGG16 baseline checkpoint was retained as the starting point for real-world adaptation.
 
 ---
 
-# 4. FVEI Real-World Dataset
+# 4. Synthetic Model Comparison Figure
 
-FVEI verisine erişim sağlandıktan sonra orijinal ZIP arşivi için ayrı bir audit ve hazırlama pipeline'ı geliştirilmiştir.
+![Synthetic model comparison](figures/synthetic_model_test_mae_comparison.png)
 
-## Dataset Audit
+---
 
-| Kategori | Örnek |
+# 5. Auxiliary Real-World Experiments
+
+Before the final FVEI workflow was available, CIDET and Benchmark-Visibility were used as auxiliary real-world experiments.
+
+These experiments were retained because they provide useful evidence about synthetic-to-real domain shift and cross-dataset target-range sensitivity.
+
+They were **not** used to select the final FVEI checkpoint.
+
+## CIDET Zero-Shot Evaluation
+
+Synthetic VGG16 zero-shot MAE:
+
+> **2258.8934 m**
+
+This result showed a substantial domain and target-range shift between the synthetic training setup and CIDET.
+
+## CIDET Fine-Tuning
+
+| Strategy | Validation MAE |
 |---|---:|
-| Retained total | 4109 |
-| Exact-label samples | 3209 |
-| Level-4 / 500 m analysis group | 900 |
-| Conflicting duplicate images rejected | 229 |
-| Outside level range rejected | 32 |
-| Redundant identical images removed | 130 |
+| Head-only + L1 | 446.5714 m |
+| Block5 + L1 | 326.6640 m |
+| Block5 + Balanced Sampling + L1 | 334.9808 m |
+| Block5 + Huber | **324.1948 m** |
 
-Kaynak ZIP SHA256:
+---
+
+# 6. Benchmark-Visibility Stress Test
+
+The CIDET development model was additionally evaluated on Benchmark-Visibility without further adaptation.
+
+| Metric | Result |
+|---|---:|
+| MAE | 11314.7801 m |
+| RMSE | 13148.0802 m |
+| Mean Signed Error | -11310.9893 m |
+| Pearson Correlation | 0.585183 |
+| Prediction Range | 97.43–1308.30 m |
+| Target Range | 112–20000 m |
+
+The experiment showed substantial prediction-range compression and systematic underestimation under a much broader target range.
+
+This negative result was retained as a cross-dataset generalization finding and was not used for final FVEI model tuning.
+
+---
+
+# 7. FVEI Dataset Audit
+
+After access to FVEI was obtained, a dedicated audit and preparation pipeline was developed for the original ZIP archive.
+
+Source ZIP SHA256:
 
 ```text
 07a04256b5e7df5319549e9546cf91da47817d978f52a36b6b53f6e43f36154d
 ```
 
-Exact-label visibility seviyeleri:
+## Audit Summary
 
-| Level | Visibility |
+| Category | Samples |
 |---|---:|
-| 0 | 0–49 m |
-| 1 | 50–99 m |
-| 2 | 100–199 m |
-| 3 | 200–499 m |
+| Retained | 4109 |
+| Exact-label | 3209 |
+| Level-4 / 500 m analysis group | 900 |
+| Conflicting duplicates rejected | 229 |
+| Outside-level-range rejected | 32 |
+| Redundant identical images removed | 130 |
 
-Level-4 / 500 m örnekleri exact-label regresyon metriklerinden ayrı tutulmaktadır.
+## Exact-Label Distribution
 
-> **Not:** Level-4 / 500 m etiketinin ceiling/censored semantiği final bilimsel yayın öncesinde kaynak dokümantasyondan ayrıca doğrulanmalıdır.
+| Level | Samples | Observed Range |
+|---|---:|---:|
+| Level 0 | 785 | 12–49 m |
+| Level 1 | 846 | 51–99 m |
+| Level 2 | 793 | 101–199 m |
+| Level 3 | 785 | 201–499 m |
+
+The 900 images carrying the 500 m label were kept separate from exact-label regression metrics.
+
+> **Methodological note:** the precise ceiling/censored semantics of the 500 m group should be independently verified from the official dataset documentation before publication.
 
 ---
 
-# 5. FVEI Split Strategy
+# 8. FVEI Split Strategy
 
-Exact-label örneklerde visibility-level stratified split uygulanmıştır.
+Exact-label samples were split using visibility-level stratification.
 
-Temel ayarlar:
+Initial target proportions:
 
-- Random seed: **42**
-- Train target: **70%**
-- Validation target: **15%**
-- Test target: **15%**
+```text
+Train       70%
+Validation  15%
+Test        15%
+```
 
-Pre-training similarity screening sonucunda validation tarafındaki iki potansiyel near-duplicate örnek çıkarılmıştır:
+Random seed:
 
-- `fog open data/0/0-381-47.jpg`
-- `fog open data/1/1-00073-62.jpg`
+**42**
 
-Test seti değiştirilmemiştir.
+Strict pre-training cross-split similarity screening identified two suspicious validation-side samples:
 
-## Final Split
+```text
+fog open data/0/0-381-47.jpg
+fog open data/1/1-00073-62.jpg
+```
 
-| Split | Örnek |
+These two validation samples were excluded.
+
+The test split was not changed.
+
+## Final FVEI Split
+
+| Split | Samples |
 |---|---:|
 | Train | 2245 |
 | Validation | 480 |
@@ -210,7 +353,7 @@ Test seti değiştirilmemiştir.
 | Similarity Exclusions | 2 |
 | Level-4 / 500 m Analysis | 900 |
 
-### Exact-Label Level Distribution
+## Exact-Label Level Distribution
 
 | Split | Level 0 | Level 1 | Level 2 | Level 3 |
 |---|---:|---:|---:|---:|
@@ -218,19 +361,21 @@ Test seti değiştirilmemiştir.
 | Validation | 117 | 126 | 119 | 118 |
 | Test | 118 | 127 | 119 | 118 |
 
-Held-out test split model selection veya hyperparameter tuning sırasında kullanılmamıştır.
+Reliable scene/camera identifiers were not available in the current FVEI pipeline.
+
+Therefore, residual sample dependence cannot be completely excluded even after similarity screening.
 
 ---
 
-# 6. FVEI Fine-Tuning
+# 9. FVEI Fine-Tuning
 
-Başlangıç modeli:
+Starting checkpoint:
 
 ```text
 vgg16_baseline_best.pth
 ```
 
-Fine-tuning stratejisi:
+Fine-tuning strategy:
 
 ```text
 VGG16 Blocks 1–4 → Frozen
@@ -240,9 +385,9 @@ Regression Head   → Trainable
 
 ## Training Configuration
 
-| Ayar | Değer |
+| Parameter | Value |
 |---|---:|
-| Epoch | 20 |
+| Epochs | 20 |
 | Batch Size | 16 |
 | Block 5 Learning Rate | 1e-5 |
 | Regression Head Learning Rate | 1e-4 |
@@ -252,22 +397,22 @@ Regression Head   → Trainable
 
 Trainable parameters:
 
-| Parametre Grubu | Sayı |
+| Parameter Group | Count |
 |---|---:|
 | Block 5 | 7,079,424 |
 | Regression Head | 12,911,361 |
 
-Model development sırasında yalnızca FVEI train ve validation split'leri kullanılmıştır.
+Only the train and validation splits were used during development.
 
-Held-out test split training pipeline tarafından açılmamıştır.
+The locked test split remained unavailable to the training pipeline.
 
 ---
 
-# 7. FVEI Model Selection
+# 10. FVEI Model Selection
 
-20 epoch eğitim sonunda en iyi checkpoint validation MAE üzerinden seçilmiştir.
+The checkpoint was selected using validation MAE.
 
-| Metrik | Sonuç |
+| Metric | Result |
 |---|---:|
 | Best Epoch | **12** |
 | Best Validation MAE | **26.4428 m** |
@@ -278,19 +423,23 @@ Final checkpoint:
 vgg16_fvei_block5_best.pth
 ```
 
-Epoch 12 sonrasında training MAE düşmeye devam ederken validation MAE kalıcı biçimde iyileşmemiştir.
+Training MAE continued to decrease after epoch 12, while validation MAE did not show a sustained improvement.
 
-Bu nedenle final model olarak epoch 20 yerine validation-selected **epoch 12** checkpoint'i kullanılmıştır.
+This behaviour is consistent with mild overfitting after the validation-selected checkpoint.
+
+## Fine-Tuning Curve
+
+![FVEI fine-tuning curve](figures/fvei_finetuning_mae_curve.png)
 
 ---
 
-# 8. Locked FVEI Test Evaluation
+# 11. Locked FVEI Test Evaluation
 
-Model seçimi tamamlandıktan sonra epoch 12 checkpoint'i daha önce model selection sırasında kullanılmamış olan 482 görüntülük held-out test split'i üzerinde değerlendirilmiştir.
+After checkpoint selection was completed, the validation-selected epoch 12 checkpoint was evaluated on the previously unused 482-image exact-label test split.
 
 ## Final Test Results
 
-| Metrik | Sonuç |
+| Metric | Result |
 |---|---:|
 | Test Samples | 482 |
 | **MAE** | **25.1347 m** |
@@ -300,19 +449,17 @@ Model seçimi tamamlandıktan sonra epoch 12 checkpoint'i daha önce model selec
 
 Validation MAE:
 
-**26.4428 m**
+> **26.4428 m**
 
 Held-out Test MAE:
 
-**25.1347 m**
+> **25.1347 m**
 
-Validation ve test MAE değerlerinin birbirine yakın olması, mevcut split koşullarında validation-selected modelin held-out test üzerinde benzer hata düzeyini koruduğunu göstermektedir.
-
-Test sonucu görüldükten sonra model seçimi veya hyperparameter tuning yapılmamıştır.
+No checkpoint selection, hyperparameter tuning or training-strategy modification was performed after observing the locked test results.
 
 ---
 
-# 9. Level-Wise FVEI Test Results
+# 12. Level-Wise FVEI Test Results
 
 | Level | N | MAE | RMSE | Bias |
 |---|---:|---:|---:|---:|
@@ -321,17 +468,21 @@ Test sonucu görüldükten sonra model seçimi veya hyperparameter tuning yapıl
 | Level 2 | 119 | 21.8013 m | 29.4082 m | +8.4794 m |
 | Level 3 | 118 | 55.9664 m | 68.5106 m | +2.0548 m |
 
-Level 3 mevcut FVEI held-out testinde en yüksek hata seviyesini üretmiştir.
+Level 3 produced the highest MAE and RMSE in the current held-out FVEI test.
 
-Level 3 bias değerinin düşük olmasına rağmen MAE ve RMSE değerlerinin yüksek olması, temel problemin yalnızca tek yönlü sistematik bias değil, örnekler arası hata yayılımının artması olduğunu göstermektedir.
+The relatively small Level 3 bias compared with MAE and RMSE suggests that the larger error is not explained only by a one-direction systematic offset.
+
+## Level-Wise Error Figure
+
+![FVEI level-wise error comparison](figures/fvei_levelwise_error_comparison.png)
 
 ---
 
-# 10. Level-4 / 500 m Separate Analysis
+# 13. Level-4 / 500 m Separate Analysis
 
-900 adet Level-4 / 500 m örneği exact-label MAE, RMSE veya R² hesaplarına dahil edilmemiştir.
+The 900 samples in this group were evaluated separately from exact-label MAE, RMSE and R².
 
-| Metrik | Sonuç |
+| Metric | Result |
 |---|---:|
 | Samples | 900 |
 | Mean Prediction | 563.4542 m |
@@ -340,100 +491,15 @@ Level 3 bias değerinin düşük olmasına rağmen MAE ve RMSE değerlerinin yü
 | Fraction ≥ 500 m | 93.33% |
 | Mean Shortfall Below 500 m | 1.6444 m |
 
-Bu bölüm separate analysis olarak tutulmaktadır.
-
-Bu grup exact 500 m regression ground truth olarak değerlendirilmemiştir.
-
----
-
-# 11. Auxiliary / B-Plan Real-World Experiments
-
-FVEI veri erişimi sağlanmadan önce CIDET ve Benchmark-Visibility üzerinde ek deneyler gerçekleştirilmiştir.
-
-Bu çalışmalar silinmemiş ve araştırmanın domain-shift / cross-dataset bulguları olarak korunmuştur.
-
-## CIDET
-
-Synthetic VGG16 modelinin CIDET üzerinde zero-shot aktarımı ciddi domain ve target-range shift göstermiştir.
-
-### CIDET Fine-Tuning Validation Results
-
-| Strateji | Validation MAE |
-|---|---:|
-| Head-only + L1 | 446.5714 m |
-| Block5 + L1 | 326.6640 m |
-| Block5 + Balanced Sampling + L1 | 334.9808 m |
-| Block5 + Huber | 324.1948 m |
-
-CIDET deneyleri artık final Flask checkpoint seçimi için kullanılmamaktadır.
-
----
-
-# 12. Benchmark-Visibility Stress Test
-
-CIDET validation aşamasında seçilmiş Block5 + Huber modeli bağımsız Benchmark-Visibility veri setinde ek adaptasyon yapılmadan değerlendirilmiştir.
-
-| Metrik | Sonuç |
-|---|---:|
-| MAE | 11314.7801 m |
-| RMSE | 13148.0802 m |
-| Mean Signed Error | -11310.9893 m |
-| Pearson Correlation | 0.585183 |
-| Prediction Range | 97.43–1308.30 m |
-| Target Range | 112–20000 m |
-
-Sonuç, geniş target-range değişiminde prediction-range compression ve ciddi sistematik underestimation davranışı göstermiştir.
-
-Bu negatif sonuç model tuning için kullanılmamış, cross-dataset generalization bulgusu olarak korunmuştur.
-
----
-
-# 13. Final Model
-
-Projenin güncel gerçek dünya inference modeli:
-
-> **VGG16 + FVEI Block5 Fine-Tuning**
-
-Checkpoint:
-
-```text
-vgg16_fvei_block5_best.pth
-```
-
-Selected Epoch:
-
-**12**
-
-Validation MAE:
-
-**26.4428 m**
-
-Held-Out Test MAE:
-
-**25.1347 m**
-
-Held-Out Test R²:
-
-**0.894442**
+These values are reported separately and are not interpreted as standard exact-label regression metrics.
 
 ---
 
 # 14. Flask Web Prototype
 
-Final FVEI modeli Flask tabanlı web prototipine entegre edilmiştir.
+The final FVEI checkpoint is integrated into a Flask-based research prototype.
 
-Web uygulaması:
-
-- JPG / JPEG / PNG görüntü yükleme
-- Görüntü önizleme
-- Model inference
-- Metre cinsinden visibility prediction
-- REST-style prediction endpoint
-- Health endpoint
-
-özelliklerini desteklemektedir.
-
-## Kullanılan Model
+## Final Inference Model
 
 ```text
 VGG16 FVEI Block5 Fine-Tuned
@@ -447,9 +513,16 @@ GET  /health
 POST /predict
 ```
 
-`POST /predict` multipart form üzerinden `image` alanı kabul eder.
+The web application supports:
 
-Örnek response:
+- JPG / JPEG / PNG upload
+- Image preview
+- Model inference
+- Visibility prediction in metres
+- REST-style prediction endpoint
+- Health endpoint
+
+Example `/predict` response:
 
 ```json
 {
@@ -460,17 +533,69 @@ POST /predict
 }
 ```
 
-Flask API testleri:
+Automated API tests:
+
+> **6 / 6 passed**
+
+The automated API test suite is checkpoint-independent.
+
+A separate local smoke test using the real final checkpoint also verified the full:
 
 ```text
-6 passed
+upload
+  ↓
+image decoding
+  ↓
+preprocessing
+  ↓
+VGG16 FVEI inference
+  ↓
+JSON response
+```
+
+workflow successfully.
+
+---
+
+# 15. Running the Flask Prototype
+
+Create and activate a Python environment, then install the project dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+The trained checkpoint is intentionally not tracked by Git.
+
+Place the final checkpoint at:
+
+```text
+results/checkpoints/vgg16_fvei_block5_best.pth
+```
+
+Run the application from the repository root:
+
+```bash
+python -m src.api.app
+```
+
+Default local address:
+
+```text
+http://127.0.0.1:5000
+```
+
+Health endpoint:
+
+```text
+http://127.0.0.1:5000/health
 ```
 
 ---
 
-# 15. Preprocessing
+# 16. Preprocessing
 
-Ortak inference pipeline:
+Common inference pipeline:
 
 ```text
 RGB Conversion
@@ -495,24 +620,24 @@ Std  = [0.229, 0.224, 0.225]
 
 ---
 
-# 16. Reproducibility
+# 17. Reproducibility
 
-Temel random seed:
+The primary experimental configuration uses:
 
-**42**
+> **Random Seed: 42**
 
-Kontrollü deneylerde mümkün olduğu ölçüde:
+Reproducibility measures include:
 
-- sabit veri split'leri
-- aynı preprocessing pipeline
+- fixed dataset splits
+- common preprocessing
 - validation-based checkpoint selection
-- ayrı training ve evaluation scriptleri
-- ayrı checkpoint'ler
-- sabit random seed
+- separate training and evaluation scripts
+- explicit experiment reports
+- deterministic settings where supported
 
-kullanılmıştır.
+During GPU training, strict deterministic execution was not available for every CUDA operation used by VGG16.
 
-GPU eğitimi sırasında VGG16'nın `AdaptiveAvgPool2d` backward CUDA operasyonunun strict deterministic implementation sunmaması nedeniyle:
+The training utilities therefore use:
 
 ```python
 torch.use_deterministic_algorithms(
@@ -521,13 +646,11 @@ torch.use_deterministic_algorithms(
 )
 ```
 
-kullanılmıştır.
-
-Dolayısıyla desteklenen deterministic işlemler korunmuş olsa da GPU training run'larının bit-bit identical olması garanti edilmemektedir.
+Bit-for-bit identical GPU reproduction is therefore not guaranteed.
 
 ---
 
-# 17. Technology Stack
+# 18. Technology Stack
 
 - Python
 - PyTorch
@@ -539,7 +662,6 @@ Dolayısıyla desteklenen deterministic işlemler korunmuş olsa da GPU training
 - SciPy
 - Scikit-learn
 - Matplotlib
-- OpenCV
 - HTML
 - CSS
 - JavaScript
@@ -547,7 +669,7 @@ Dolayısıyla desteklenen deterministic işlemler korunmuş olsa da GPU training
 
 ---
 
-# 18. Repository Structure
+# 19. Repository Structure
 
 ```text
 .
@@ -579,64 +701,75 @@ Dolayısıyla desteklenen deterministic işlemler korunmuş olsa da GPU training
 └── requirements.txt
 ```
 
----
-
-# 19. Important Research Reports
-
-Detaylı araştırma kayıtları `docs/reports/` altında tutulmaktadır.
-
-Önemli raporlar:
-
-- `docs/reports/baseline_comparison.md`
-- `docs/reports/attention_comparison.md`
-- `docs/reports/se_attention_comparison.md`
-- `docs/reports/fvei_real_world_evaluation.md`
-- `docs/reports/cidet_real_world_evaluation.md`
-- `docs/reports/benchmark_visibility_external_evaluation.md`
-
-Araştırma günlüğü:
-
-```text
-docs/research_notes/arastirma_gunlugu.md
-```
+Datasets, checkpoints and generated experiment outputs are intentionally excluded from Git tracking.
 
 ---
 
-# 20. Current Research Findings
+# 20. Important Research Documents
 
-1. VGG16 mevcut sentetik FRIDA/FRIDA2 koşullarında ResNet50'den daha düşük test MAE üretmiştir.
+## Final Project Documents
 
-2. Sentetik VGG16 baseline test MAE değeri **66.7227 m**'dir.
+- [`final_results_summary.md`](docs/reports/final_results_summary.md)
+- [`tubitak_final_report_draft.md`](docs/reports/tubitak_final_report_draft.md)
+- [`tubitak_final_report_official_format.md`](docs/reports/tubitak_final_report_official_format.md)
+- [`weekly_progress_log.md`](docs/reports/weekly_progress_log.md)
 
-3. CBAM ve SE attention mekanizmaları teknik olarak uygulanmış ancak mevcut sentetik test MAE'sini iyileştirmemiştir.
+## Experiment Reports
 
-4. Bu nedenle sentetik aşamada VGG16 baseline korunmuştur.
+- [`baseline_comparison.md`](docs/reports/baseline_comparison.md)
+- [`attention_comparison.md`](docs/reports/attention_comparison.md)
+- [`se_attention_comparison.md`](docs/reports/se_attention_comparison.md)
+- [`fvei_real_world_evaluation.md`](docs/reports/fvei_real_world_evaluation.md)
+- [`cidet_real_world_evaluation.md`](docs/reports/cidet_real_world_evaluation.md)
+- [`benchmark_visibility_external_evaluation.md`](docs/reports/benchmark_visibility_external_evaluation.md)
 
-5. FVEI üzerinde Block5 + regression head fine-tuning uygulanmıştır.
+## Research Journal
 
-6. En iyi FVEI checkpoint validation MAE üzerinden epoch 12'de seçilmiştir.
+[`docs/research_notes/arastirma_gunlugu.md`](docs/research_notes/arastirma_gunlugu.md)
 
-7. FVEI validation MAE **26.4428 m**'dir.
-
-8. Locked FVEI test MAE **25.1347 m**'dir.
-
-9. Locked FVEI test RMSE **38.4440 m** ve R² **0.894442**'dir.
-
-10. FVEI testinde en yüksek hata Level 3 grubunda gözlenmiştir.
-
-11. CIDET deneyleri sentetik → gerçek dünya domain shift'in güçlü olabileceğini göstermiştir.
-
-12. Benchmark-Visibility deneyleri büyük target-range değişiminde cross-dataset calibration problemini göstermiştir.
-
-13. Final Flask prototipi artık CIDET checkpoint'i yerine **FVEI final checkpoint'ini** kullanmaktadır.
+The final results summary, TÜBİTAK report drafts, weekly progress log and research journal are synchronized with the final technical state of the project.
 
 ---
 
-# 21. Completed Work
+# 21. Main Research Findings
+
+1. VGG16 produced a lower held-out synthetic test MAE than ResNet50 under the current FRIDA/FRIDA2 experimental configuration.
+
+2. The initial hypothesis expecting ResNet50 to outperform VGG16 was not supported.
+
+3. VGG16 synthetic Test MAE was **66.7227 m**.
+
+4. CBAM slightly improved validation MAE but did not improve held-out test MAE.
+
+5. SE did not improve the VGG16 baseline.
+
+6. CIDET experiments demonstrated substantial synthetic-to-real domain shift.
+
+7. Benchmark-Visibility demonstrated major target-range sensitivity and prediction-range compression.
+
+8. FVEI fine-tuning selected epoch 12 using validation MAE.
+
+9. FVEI Validation MAE was **26.4428 m**.
+
+10. Locked FVEI Test MAE was **25.1347 m**.
+
+11. Locked FVEI Test RMSE was **38.4440 m**.
+
+12. Locked FVEI Test R² was **0.894442**.
+
+13. Level 3 was the most difficult exact-label FVEI group.
+
+14. The final Flask prototype uses the validation-selected FVEI checkpoint.
+
+15. The project target of **MAE < 100 m** was achieved in both the selected synthetic baseline and final FVEI evaluation.
+
+---
+
+# 22. Completed Work
 
 - [x] Literature review
 - [x] FRIDA / FRIDA2 analysis
-- [x] Synthetic fog dataset preparation
+- [x] Synthetic dataset preparation
 - [x] Scene-based splitting
 - [x] VGG16 baseline
 - [x] ResNet50 baseline
@@ -645,79 +778,89 @@ docs/research_notes/arastirma_gunlugu.md
 - [x] CBAM implementation and evaluation
 - [x] SE implementation and evaluation
 - [x] Attention comparison
-- [x] CIDET auxiliary real-world experiments
-- [x] Benchmark-Visibility external stress test
+- [x] CIDET auxiliary experiments
+- [x] Benchmark-Visibility stress test
 - [x] FVEI dataset audit
-- [x] FVEI duplicate and similarity screening
-- [x] FVEI reproducible split
+- [x] Duplicate and similarity screening
+- [x] Reproducible FVEI split
 - [x] FVEI DataLoader
 - [x] FVEI fine-tuning pipeline
 - [x] GPU fine-tuning
-- [x] Validation-based FVEI model selection
+- [x] Validation-based model selection
 - [x] Locked FVEI final test
-- [x] Level-wise FVEI error analysis
+- [x] Level-wise error analysis
 - [x] Level-4 / 500 m separate analysis
 - [x] Final FVEI inference wrapper
-- [x] Flask inference API
+- [x] Flask API
 - [x] Web interface
-- [x] Flask API tests
-- [x] FVEI research report
+- [x] Checkpoint-independent Flask tests
+- [x] Real-checkpoint inference smoke test
+- [x] Final result tables
+- [x] Final result figures
+- [x] Final results summary
+- [x] Research journal update
+- [x] Weekly progress log
+- [x] Repository quality control
+- [x] TÜBİTAK final report content draft
+- [x] TÜBİTAK official-format report draft
+
+> **Core research and software development are complete.**
 
 ---
 
-# 22. Remaining Work
+# 23. Remaining Work
 
-Ana deneysel model geliştirme aşaması tamamlanmıştır.
+The remaining tasks are related to **submission and publication preparation**, not core software development.
 
-Kalan temel çalışmalar:
+- [ ] Complete the TÜBİTAK expenditure section using official BİDEB records
+- [ ] Complete final date and signature fields
+- [ ] Apply advisor revisions
+- [ ] Prepare final DOCX / PDF submission files
+- [ ] Prepare publication-oriented manuscript
 
-- [ ] Araştırma günlüğünü final FVEI aşamasına kadar güncellemek
-- [ ] Weekly progress documentation'ı güncellemek
-- [ ] Final TÜBİTAK project report
-- [ ] Final result tables and figures
-- [ ] Publication-oriented manuscript
-- [ ] Final repository documentation polish
+Optional future work:
 
-FHVI verisine ek erişim sağlanması durumunda ayrı bir external real-world evaluation gelecekte eklenebilir.
+- [ ] Perform an additional external real-world evaluation if FHVI access becomes available
 
----
-
-# 23. Methodological Notes
-
-Sonuçlar yorumlanırken:
-
-- Sentetik ve gerçek dünya MAE değerleri doğrudan aynı veri dağılımının performansı olarak karşılaştırılmamalıdır.
-- FVEI test seti model selection sırasında kullanılmamıştır.
-- FVEI test sonucu görüldükten sonra checkpoint veya hyperparameter tuning yapılmamıştır.
-- FVEI split'i visibility level bazında stratified olarak oluşturulmuştur.
-- Güvenilir scene/camera identity bilgisi mevcut FVEI pipeline'ında kullanılabilir durumda değildir.
-- Similarity screening uygulanmış olsa da residual sample dependence tamamen dışlanamaz.
-- İki validation örneği similarity screening sonucunda çıkarılmış, test split değiştirilmemiştir.
-- Tek temel split ve seed kullanılmıştır.
-- Bazı CUDA operasyonları strict deterministic değildir.
-- Level-4 / 500 m semantiği final yayın öncesinde kaynak dokümantasyonla ayrıca doğrulanmalıdır.
-- CIDET ve Benchmark sonuçları FVEI final model seçimini etkilememektedir.
+The current locked FVEI test set should not be reused for future model tuning while still being described as an independent final test set.
 
 ---
 
-# 24. Disclaimer
+# 24. Methodological Notes
 
-Bu repository, TÜBİTAK 2209-A kapsamında geliştirilen akademik bir araştırma projesidir.
+Results should be interpreted with the following limitations in mind:
 
-Model performansı kullanılan veri dağılımına, kamera koşullarına ve visibility range'e bağlıdır.
+- Synthetic and real-world MAE values belong to different data distributions and should not be treated as directly equivalent performance measurements.
+- The FVEI locked test split was not used during model selection.
+- No additional tuning was performed after observing the locked test result.
+- The FVEI split is stratified by visibility level.
+- Reliable FVEI scene/camera identity information was not available in the current pipeline.
+- Similarity screening reduces but cannot completely eliminate residual sample dependence.
+- Two suspicious validation samples were excluded; the test split was not modified.
+- The main experiments use one primary split and random seed 42.
+- Statistical significance between architectures is not claimed.
+- Some CUDA operations are not strictly deterministic.
+- Level-4 / 500 m label semantics require independent source verification before publication.
+- CIDET and Benchmark results did not influence final FVEI checkpoint selection.
 
-Flask prototipi bir araştırma demonstrasyonudur ve sertifikalı meteorolojik görüş sensörünün yerine geçmez.
+---
 
-Repository'de raporlanan MAE, RMSE ve R² değerleri ilgili deney veri setlerinin toplu performans metrikleridir; tek bir yüklenen görüntü için garanti edilen hata payı değildir.
+# 25. Disclaimer
+
+This repository contains an academic research project developed within the scope of the **TÜBİTAK 2209-A University Students Research Projects Support Program**.
+
+Model performance depends on dataset distribution, camera characteristics, environmental conditions and visibility range.
+
+The Flask application is a research prototype and does not replace a certified meteorological visibility sensor.
+
+Reported MAE, RMSE and R² values represent aggregate dataset-level performance and should not be interpreted as a guaranteed error bound for an individual uploaded image.
 
 ---
 
 # License and Dataset Usage
 
-Bu proje TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı kapsamında akademik araştırma amacıyla geliştirilmektedir.
+Software and documentation originally developed for this repository are distributed under the **MIT License**.
 
-Üçüncü taraf veri setlerinin kendi lisans, kullanım ve atıf koşulları geçerlidir.
+Third-party datasets, pretrained model components and external resources remain subject to their own licenses, terms of use and citation requirements.
 
-Repository kapsamında proje için özgün olarak geliştirilen yazılım ve dokümantasyon **MIT License** altında lisanslanmıştır.
-
-Üçüncü taraf veri setleri, pretrained model bileşenleri ve diğer harici kaynaklar MIT License kapsamında yeniden lisanslanmamaktadır.
+Dataset files and trained checkpoints are not redistributed through this repository.

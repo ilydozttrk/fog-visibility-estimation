@@ -463,7 +463,7 @@ POST /predict
 Flask API testleri:
 
 ```text
-4 passed
+6 passed
 ```
 
 ---

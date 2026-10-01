@@ -2105,7 +2105,7 @@ Flask API testleri yeniden çalıştırıldı.
 
 Sonuç:
 
-**4 passed**
+**6 passed**
 
 ## FVEI Research Report
 
@@ -2190,7 +2190,7 @@ Final FVEI checkpoint Flask inference prototipine başarıyla entegre edilmişti
 
 API test sonucu:
 
-**4 passed**
+**6 passed**
 
 ## Tamamlanan Ana Araştırma Aşamaları
 

@@ -607,7 +607,7 @@ Flask API testleri yeniden çalıştırıldı.
 Sonuç:
 
 ```text
-4 passed
+6 passed
 ```
 
 Ana sayfanın FVEI model bilgisi ile başarılı şekilde render edildiği doğrulandı.

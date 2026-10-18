@@ -1,0 +1,345 @@
+{
+  "synthetic": {
+    "unit_of_analysis": "scene (source_dataset + scene_id)",
+    "n_images": 112,
+    "n_scenes": 14,
+    "bootstrap": {
+      "type": "scene-level cluster bootstrap",
+      "n_resamples": 10000,
+      "seed": 42
+    },
+    "per_model_test_mae_m": {
+      "VGG16 Baseline": {
+        "estimate": 66.72273012569973,
+        "ci95_lower": 58.36789186341422,
+        "ci95_upper": 75.53916798148836
+      },
+      "ResNet50 Baseline": {
+        "estimate": 124.61814853123256,
+        "ci95_lower": 115.26813106196268,
+        "ci95_upper": 134.01389836158071
+      },
+      "VGG16 + CBAM": {
+        "estimate": 67.62139991351536,
+        "ci95_lower": 57.45431524515152,
+        "ci95_upper": 78.20684666378156
+      },
+      "VGG16 + SE": {
+        "estimate": 72.44119385310582,
+        "ci95_lower": 63.084097863095145,
+        "ci95_upper": 82.16210906335286
+      }
+    },
+    "comparisons_vs_reference": [
+      {
+        "reference": "VGG16 Baseline",
+        "model": "ResNet50 Baseline",
+        "mae_difference_m": {
+          "estimate": 57.89541840553284,
+          "ci95_lower": 48.84146358881678,
+          "ci95_upper": 67.29495126434733
+        },
+        "difference_definition": "MAE(ResNet50 Baseline) - MAE(VGG16 Baseline)",
+        "n_images": 112,
+        "n_scenes": 14,
+        "scenes_where_reference_is_better": 14,
+        "scene_level_wilcoxon": {
+          "statistic": 0.0,
+          "p_value": 0.0001220703125,
+          "n": 14,
+          "p_value_holm": 0.0003662109375
+        },
+        "image_level_wilcoxon": {
+          "statistic": 1396.0,
+          "p_value": 2.855699669754713e-07,
+          "n": 112
+        },
+        "significant_at_0_05_holm": true
+      },
+      {
+        "reference": "VGG16 Baseline",
+        "model": "VGG16 + CBAM",
+        "mae_difference_m": {
+          "estimate": 0.8986697878156384,
+          "ci95_lower": -3.241709670850208,
+          "ci95_upper": 5.386136416878019
+        },
+        "difference_definition": "MAE(VGG16 + CBAM) - MAE(VGG16 Baseline)",
+        "n_images": 112,
+        "n_scenes": 14,
+        "scenes_where_reference_is_better": 8,
+        "scene_level_wilcoxon": {
+          "statistic": 47.0,
+          "p_value": 0.7608642578125,
+          "n": 14,
+          "p_value_holm": 0.7608642578125
+        },
+        "image_level_wilcoxon": {
+          "statistic": 3045.0,
+          "p_value": 0.7297394156837342,
+          "n": 112
+        },
+        "significant_at_0_05_holm": false
+      },
+      {
+        "reference": "VGG16 Baseline",
+        "model": "VGG16 + SE",
+        "mae_difference_m": {
+          "estimate": 5.718463727406093,
+          "ci95_lower": 3.286386789594379,
+          "ci95_upper": 7.952476188966206
+        },
+        "difference_definition": "MAE(VGG16 + SE) - MAE(VGG16 Baseline)",
+        "n_images": 112,
+        "n_scenes": 14,
+        "scenes_where_reference_is_better": 13,
+        "scene_level_wilcoxon": {
+          "statistic": 5.0,
+          "p_value": 0.001220703125,
+          "n": 14,
+          "p_value_holm": 0.00244140625
+        },
+        "image_level_wilcoxon": {
+          "statistic": 1528.0,
+          "p_value": 2.039032598578601e-06,
+          "n": 112
+        },
+        "significant_at_0_05_holm": true
+      }
+    ],
+    "multiple_comparison_correction": "Holm-Bonferroni"
+  },
+  "fvei": {
+    "unit_of_analysis": "image (scene/camera identifiers unavailable)",
+    "bootstrap": {
+      "type": "image-level bootstrap stratified by visibility level",
+      "n_resamples": 10000,
+      "seed": 42
+    },
+    "per_run": {
+      "VGG16 FVEI Block5 (final)": {
+        "n": 482,
+        "mae_m": {
+          "estimate": 25.13473190608361,
+          "ci95_lower": 23.116764484995134,
+          "ci95_upper": 27.19587800314812
+        },
+        "rmse_m": {
+          "estimate": 38.4440315216752,
+          "ci95_lower": 34.52318082797314,
+          "ci95_upper": 42.31859467924259
+        },
+        "r2": {
+          "estimate": 0.8944421751272331,
+          "ci95_lower": 0.8676996803319345,
+          "ci95_upper": 0.9166562867373091
+        }
+      },
+      "resnet50_fvei_synthetic_lastblock_s42": {
+        "n": 482,
+        "mae_m": {
+          "estimate": 27.477001756058687,
+          "ci95_lower": 25.40993936704897,
+          "ci95_upper": 29.655989053140534
+        },
+        "rmse_m": {
+          "estimate": 41.381095474175616,
+          "ci95_lower": 37.34287915434094,
+          "ci95_upper": 45.56249025299522
+        },
+        "r2": {
+          "estimate": 0.8776971576779788,
+          "ci95_lower": 0.8511084282276766,
+          "ci95_upper": 0.9005429891675399
+        }
+      },
+      "vgg16_fvei_imagenet_lastblock_s42": {
+        "n": 482,
+        "mae_m": {
+          "estimate": 24.33302662481411,
+          "ci95_lower": 22.392934342637595,
+          "ci95_upper": 26.319179813792598
+        },
+        "rmse_m": {
+          "estimate": 37.47866808049719,
+          "ci95_lower": 33.64572264975942,
+          "ci95_upper": 41.281080273090495
+        },
+        "r2": {
+          "estimate": 0.8996769146103726,
+          "ci95_lower": 0.8782912859453071,
+          "ci95_upper": 0.9190942156973547
+        }
+      }
+    },
+    "comparisons_vs_reference": [
+      {
+        "reference": "VGG16 FVEI Block5 (final)",
+        "model": "resnet50_fvei_synthetic_lastblock_s42",
+        "mae_difference_m": {
+          "estimate": 2.3422698499750787,
+          "ci95_lower": 0.6166738298424036,
+          "ci95_upper": 4.091678901628834
+        },
+        "difference_definition": "MAE(resnet50_fvei_synthetic_lastblock_s42) - MAE(VGG16 FVEI Block5 (final))",
+        "image_level_wilcoxon": {
+          "statistic": 51633.0,
+          "p_value": 0.031801530653094656,
+          "n": 482,
+          "p_value_holm": 0.06360306130618931
+        },
+        "significant_at_0_05_holm": false
+      },
+      {
+        "reference": "VGG16 FVEI Block5 (final)",
+        "model": "vgg16_fvei_imagenet_lastblock_s42",
+        "mae_difference_m": {
+          "estimate": -0.8017052812695016,
+          "ci95_lower": -1.9561719906280655,
+          "ci95_upper": 0.38117459483166416
+        },
+        "difference_definition": "MAE(vgg16_fvei_imagenet_lastblock_s42) - MAE(VGG16 FVEI Block5 (final))",
+        "image_level_wilcoxon": {
+          "statistic": 52657.0,
+          "p_value": 0.06995456340922214,
+          "n": 482,
+          "p_value_holm": 0.06995456340922214
+        },
+        "significant_at_0_05_holm": false
+      }
+    ],
+    "limitation": "Images may share cameras or scenes; image-level intervals can therefore be narrower than the true uncertainty."
+  },
+  "multiseed": {
+    "groups": {
+      "resnet50_e20": {
+        "n_seeds": 5,
+        "seeds": [
+          123,
+          2024,
+          3407,
+          42,
+          7
+        ],
+        "test_mae_m_per_seed": [
+          131.40627942766463,
+          126.61995690209525,
+          125.80499621800014,
+          122.94264210973468,
+          131.45056860787528
+        ],
+        "best_epoch_per_seed": [
+          20,
+          20,
+          20,
+          20,
+          20
+        ],
+        "test_mae_mean_m": 127.64488865307399,
+        "test_mae_std_m": 3.7140972085657897,
+        "test_mae_min_m": 122.94264210973468,
+        "test_mae_max_m": 131.45056860787528
+      },
+      "resnet50_e50": {
+        "n_seeds": 5,
+        "seeds": [
+          123,
+          2024,
+          3407,
+          42,
+          7
+        ],
+        "test_mae_m_per_seed": [
+          88.8458973126752,
+          84.96239415662629,
+          87.21680785076958,
+          83.70191948860884,
+          86.73230635268348
+        ],
+        "best_epoch_per_seed": [
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "test_mae_mean_m": 86.29186503227268,
+        "test_mae_std_m": 2.002991474762718,
+        "test_mae_min_m": 83.70191948860884,
+        "test_mae_max_m": 88.8458973126752
+      },
+      "vgg16_e20": {
+        "n_seeds": 5,
+        "seeds": [
+          123,
+          2024,
+          3407,
+          42,
+          7
+        ],
+        "test_mae_m_per_seed": [
+          61.84733969824655,
+          63.69104313850403,
+          64.45008373260498,
+          65.05736712047032,
+          64.91361515862602
+        ],
+        "best_epoch_per_seed": [
+          20,
+          20,
+          20,
+          19,
+          19
+        ],
+        "test_mae_mean_m": 63.991889769690374,
+        "test_mae_std_m": 1.3119036826031552,
+        "test_mae_min_m": 61.84733969824655,
+        "test_mae_max_m": 65.05736712047032
+      }
+    },
+    "paired_by_seed": [
+      {
+        "reference": "vgg16_e20",
+        "model": "resnet50_e20",
+        "paired_seeds": [
+          7,
+          42,
+          123,
+          2024,
+          3407
+        ],
+        "difference_definition": "test MAE(resnet50_e20) - test MAE(vgg16_e20), per training seed",
+        "mae_difference_per_seed_m": [
+          66.53695344924927,
+          57.88527498926436,
+          69.55893972941809,
+          62.928913763591225,
+          61.35491248539516
+        ],
+        "mae_difference_mean_m": 63.652998883383624,
+        "seeds_where_vgg16_is_better": 5
+      },
+      {
+        "reference": "vgg16_e20",
+        "model": "resnet50_e50",
+        "paired_seeds": [
+          7,
+          42,
+          123,
+          2024,
+          3407
+        ],
+        "difference_definition": "test MAE(resnet50_e50) - test MAE(vgg16_e20), per training seed",
+        "mae_difference_per_seed_m": [
+          21.818691194057465,
+          18.64455236813852,
+          26.998557614428655,
+          21.27135101812226,
+          22.766724118164603
+        ],
+        "mae_difference_mean_m": 22.2999752625823,
+        "seeds_where_vgg16_is_better": 5
+      }
+    ]
+  }
+}

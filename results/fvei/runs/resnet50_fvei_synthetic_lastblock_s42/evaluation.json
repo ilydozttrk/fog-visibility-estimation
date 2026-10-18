@@ -1,0 +1,67 @@
+{
+  "run_name": "resnet50_fvei_synthetic_lastblock_s42",
+  "dataset": "FVEI",
+  "arch": "resnet50",
+  "init": "synthetic",
+  "checkpoint": "results/checkpoints/fvei_runs/resnet50_fvei_synthetic_lastblock_s42_best.pth",
+  "selected_epoch": 7,
+  "selection_validation_mae_m": 27.58590224583944,
+  "evaluated_at": "2026-10-18T16:42:01",
+  "held_out_test": {
+    "used_for_model_selection": false,
+    "metrics": {
+      "n": 482,
+      "mae_m": 27.477001756058687,
+      "rmse_m": 41.381095474175616,
+      "r2": 0.8776971576779788,
+      "bias_m": -2.465296207127235
+    },
+    "level_metrics": {
+      "0": {
+        "n": 118,
+        "mae_m": 12.173785274311648,
+        "rmse_m": 15.899991842520485,
+        "r2": -3.7337593048152797,
+        "bias_m": 9.984130131996285
+      },
+      "1": {
+        "n": 127,
+        "mae_m": 12.766841467909925,
+        "rmse_m": 16.364896979681436,
+        "r2": -0.7752100994504665,
+        "bias_m": -3.3436077147956906
+      },
+      "2": {
+        "n": 119,
+        "mae_m": 24.66743007627856,
+        "rmse_m": 31.377661293744286,
+        "r2": -0.5272701133255899,
+        "bias_m": 7.13364596326812
+      },
+      "3": {
+        "n": 118,
+        "mae_m": 61.44572151313394,
+        "rmse_m": 73.89689689189605,
+        "r2": 0.14534220953817978,
+        "bias_m": -23.649710315769003
+      }
+    }
+  },
+  "ceiling_eval": {
+    "n": 900,
+    "label_interpretation": "ceiling/censored at 500 m; not treated as exact regression ground truth",
+    "mean_prediction_m": 401.10916907416447,
+    "median_prediction_m": 402.4403076171875,
+    "min_prediction_m": 309.5418701171875,
+    "max_prediction_m": 505.0689697265625,
+    "predictions_at_or_above_500": 1,
+    "predictions_below_500": 899,
+    "fraction_at_or_above_500": 0.0011111111111111111,
+    "mean_shortfall_below_500_m": 98.89646311442057
+  },
+  "notes": [
+    "Exact-label test metrics use only FVEI levels 0-3.",
+    "Level-4 500 m samples are analysed separately as ceiling labels.",
+    "Same metric code as evaluate_vgg16_fvei_final.py."
+  ]
+}

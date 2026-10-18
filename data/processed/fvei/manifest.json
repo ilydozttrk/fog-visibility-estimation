@@ -1,0 +1,12 @@
+{
+  "source_sha256": "07a04256b5e7df5319549e9546cf91da47817d978f52a36b6b53f6e43f36154d",
+  "retained": 4109,
+  "exact": 3209,
+  "ceiling": 900,
+  "rejected": {
+    "conflicting_duplicate_images": 229,
+    "outside_level_range": 32,
+    "redundant_identical_images": 130
+  },
+  "policy": "External evaluation only; 500 m ceiling excluded from exact-label MAE."
+}

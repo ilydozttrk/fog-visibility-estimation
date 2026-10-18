@@ -1,4 +1,4 @@
-﻿# Fog Visibility Estimation using Transfer Learning
+# Fog Visibility Estimation using Transfer Learning
 
 TÜBİTAK 2209-A kapsamında yürütülen bu araştırma projesi, sisli hava koşullarında görüntü tabanlı **sürekli görüş mesafesi tahmini** için transfer öğrenme tabanlı CNN mimarilerini incelemektedir.
 
@@ -696,12 +696,18 @@ Bit-for-bit identical GPU reproduction is therefore not guaranteed.
 │   ├── evaluation/
 │   ├── models/
 │   └── training/
+├── scripts/
+│   └── sanitize_result_paths.py
 ├── tests/
+├── .github/workflows/tests.yml
+├── pytest.ini
 ├── README.md
 └── requirements.txt
 ```
 
-Datasets, checkpoints and generated experiment outputs are intentionally excluded from Git tracking.
+Datasets and model checkpoints are intentionally excluded from Git tracking. The FVEI split manifest and six image-level FVEI prediction CSVs are also kept local until redistribution permission is confirmed. Aggregate FVEI metrics, statistical summaries, training histories and plots are published, together with the synthetic experiment results. See [`docs/DATASETS.md`](docs/DATASETS.md) for data access and the exact reproduction limits.
+
+A public checkout can recompute synthetic and multi-seed statistics with `python -m src.evaluation.statistical_analysis --no-figure --output-dir results/ci_statistics`. Missing FVEI prediction files are skipped; this command writes to a separate directory and preserves the published full report. Recomputing FVEI bootstrap intervals requires the original private prediction CSVs. Reproducing the same FVEI split also requires the existing private locked manifest; it must not be regenerated.
 
 ---
 
@@ -723,11 +729,45 @@ Datasets, checkpoints and generated experiment outputs are intentionally exclude
 - [`cidet_real_world_evaluation.md`](docs/reports/cidet_real_world_evaluation.md)
 - [`benchmark_visibility_external_evaluation.md`](docs/reports/benchmark_visibility_external_evaluation.md)
 
+## Statistics, Data and Reproducibility
+
+- [`statistical_analysis.md`](docs/reports/statistical_analysis.md)
+- [`DATASETS.md`](docs/DATASETS.md)
+- [`REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md)
+
 ## Research Journal
 
 [`docs/research_notes/arastirma_gunlugu.md`](docs/research_notes/arastirma_gunlugu.md)
 
 The final results summary, TÜBİTAK report drafts, weekly progress log and research journal are synchronized with the final technical state of the project.
+
+---
+
+# Statistical Analysis and Validation Experiments
+
+The research proposal formulated the hypothesis in terms of a *statistically significant* MAE difference. This is now tested directly from the saved predictions with [`src/evaluation/statistical_analysis.py`](src/evaluation/statistical_analysis.py) (no retraining). Full report: [`docs/reports/statistical_analysis.md`](docs/reports/statistical_analysis.md).
+
+The 8 fog variants of a scene are not independent, so the **scene** is the unit of analysis on the synthetic test set (112 images, 14 scenes): scene-level Wilcoxon signed-rank test, scene-level cluster bootstrap 95% CI, Holm correction.
+
+| Comparison vs VGG16 Baseline | MAE difference [95% CI] | Scenes where VGG16 is better | Holm-adjusted p |
+|---|---:|---:|---:|
+| ResNet50 Baseline | +57.90 m [48.84, 67.29] | 14 / 14 | 3.7 × 10⁻⁴ |
+| VGG16 + CBAM | +0.90 m [−3.24, 5.39] | 8 / 14 | 0.76 |
+| VGG16 + SE | +5.72 m [3.29, 7.95] | 13 / 14 | 0.0024 |
+
+- The difference between VGG16 and ResNet50 is statistically significant **in the opposite direction** to the hypothesis.
+- CBAM is statistically indistinguishable from the baseline.
+- SE is significantly worse than the baseline.
+- FVEI locked test MAE: **25.13 m [23.12, 27.20]** (image-level, level-stratified bootstrap; scene/camera IDs are unavailable, so this interval may be slightly optimistic).
+
+These results hold for one scene split and training seed 42. The following experiments extend them; see [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md):
+
+| Open point from the proposal | Script |
+|---|---|
+| Seed sensitivity of the VGG16 vs ResNet50 gap | `src/training/train_synthetic_multiseed.py` |
+| ResNet50 selected its last epoch (20/20): undertraining check | `train_synthetic_multiseed.py --arch resnet50 --epochs 50` |
+| Research question asks for the comparison on real-world data too: ResNet50 on FVEI | `src/training/finetune_fvei.py --arch resnet50` + `src/evaluation/evaluate_fvei.py` |
+| Does the staged synthetic → real strategy help? (ImageNet → FVEI ablation) | `src/training/finetune_fvei.py --arch vgg16 --init imagenet` |
 
 ---
 
@@ -818,6 +858,27 @@ The remaining tasks are related to **submission and publication preparation**, n
 - [ ] Prepare final DOCX / PDF submission files
 - [ ] Prepare publication-oriented manuscript
 
+Validation experiments completed on 2026-10-18 (see `docs/REPRODUCIBILITY.md`):
+
+- [x] Local runtime verification: 24 tests passed; synthetic VGG16 and FVEI ResNet50 dry runs passed on CUDA (2026-10-18)
+- [x] CI workflow installed at `.github/workflows/tests.yml`
+- [x] Statistical significance analysis of the synthetic comparisons
+- [x] Multi-seed synthetic training (VGG16, ResNet50, ResNet50 50 epochs)
+- [x] ResNet50 fine-tuning and locked evaluation on FVEI
+- [x] VGG16 ImageNet → FVEI ablation (contribution of the synthetic stage)
+
+| Validation experiment | Test MAE (m) |
+|---|---:|
+| Synthetic VGG16, 20 epochs, 5 seeds | 63.99 ± 1.31 |
+| Synthetic ResNet50, 20 epochs, 5 seeds | 127.64 ± 3.71 |
+| Synthetic ResNet50, 50 epochs, 5 seeds | 86.29 ± 2.00 |
+| ResNet50 synthetic → FVEI, seed 42 | 27.48 |
+| VGG16 ImageNet → FVEI, seed 42 | 24.33 |
+
+The synthetic values are means ± sample standard deviations across training seeds with the scene split fixed. VGG16 had lower test MAE in all five paired seeds, including against the 50-epoch ResNet50 runs. Longer training narrowed the gap, but all five ResNet50 runs still selected epoch 50; convergence beyond that budget remains untested.
+
+On FVEI, the original VGG16 reference has MAE 25.13 m. Relative to that reference, the ResNet50 MAE difference was +2.34 m (95% bootstrap CI 0.62–4.09; Holm-adjusted Wilcoxon p = 0.0636), and the ImageNet-only VGG16 difference was −0.80 m (95% CI −1.96–0.38; adjusted p = 0.0700). Neither comparison reached significance under the adjusted Wilcoxon tests. This ablation did not establish a benefit from the synthetic stage. These FVEI experiments use one training seed; their image-level intervals cannot account for unknown scene/camera dependence. The original deployment checkpoint is retained under the locked-test protocol. Full results: [`statistical_analysis.md`](docs/reports/statistical_analysis.md).
+
 Optional future work:
 
 - [ ] Perform an additional external real-world evaluation if FHVI access becomes available
@@ -838,7 +899,7 @@ Results should be interpreted with the following limitations in mind:
 - Similarity screening reduces but cannot completely eliminate residual sample dependence.
 - Two suspicious validation samples were excluded; the test split was not modified.
 - The main experiments use one primary split and random seed 42.
-- Statistical significance between architectures is not claimed.
+- Statistical tests (Section "Statistical Analysis and Validation Experiments") use one split and seed 42; seed variability is assessed separately with the multi-seed experiments.
 - Some CUDA operations are not strictly deterministic.
 - Level-4 / 500 m label semantics require independent source verification before publication.
 - CIDET and Benchmark results did not influence final FVEI checkpoint selection.

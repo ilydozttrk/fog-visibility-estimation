@@ -1,0 +1,13 @@
+{
+  "model": "VGG16",
+  "dataset_split": "test",
+  "test_samples": 112,
+  "test_mae_m": 66.7227,
+  "mean_signed_error_m": -17.3877,
+  "maximum_absolute_error_m": 392.8829,
+  "minimum_absolute_error_m": 0.8415,
+  "checkpoint_epoch": 18,
+  "checkpoint_validation_mae_m": 69.9705,
+  "random_seed": 42,
+  "checkpoint_path": "results/checkpoints/vgg16_baseline_best.pth"
+}

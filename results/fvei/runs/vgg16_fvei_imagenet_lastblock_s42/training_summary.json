@@ -1,0 +1,29 @@
+{
+  "run_name": "vgg16_fvei_imagenet_lastblock_s42",
+  "dataset": "FVEI",
+  "arch": "vgg16",
+  "init": "imagenet",
+  "source": "ImageNet",
+  "source_checkpoint": null,
+  "output_checkpoint": "results/checkpoints/fvei_runs/vgg16_fvei_imagenet_lastblock_s42_best.pth",
+  "fine_tuning_strategy": "VGG16 Block 5 + regression head",
+  "trainable_parameters": {
+    "last_block": 7079424,
+    "head": 12911361,
+    "frozen": 7635264
+  },
+  "training_samples": 2245,
+  "validation_samples": 480,
+  "held_out_test_samples": 482,
+  "test_used_for_selection": false,
+  "best_epoch": 17,
+  "best_validation_mae": 25.973343944549562,
+  "epochs": 20,
+  "batch_size": 16,
+  "last_block_learning_rate": 1e-05,
+  "head_learning_rate": 0.0001,
+  "weight_decay": 1e-05,
+  "loss_function": "L1Loss",
+  "random_seed": 42,
+  "device": "cuda"
+}

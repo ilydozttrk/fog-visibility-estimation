@@ -1,0 +1,20 @@
+{
+  "arch": "resnet50",
+  "model": "ResNet50",
+  "training_seed": 42,
+  "split_seed": 42,
+  "epochs": 20,
+  "best_epoch": 20,
+  "best_epoch_is_last": true,
+  "best_validation_mae_m": 119.15507380167644,
+  "test_mae_m": 122.94264210973468,
+  "test_bias_m": -75.62419724464417,
+  "test_samples": 112,
+  "frozen_backbone": true,
+  "learning_rate": 0.0001,
+  "weight_decay": 1e-05,
+  "batch_size": 16,
+  "loss_function": "L1Loss",
+  "device": "cuda",
+  "dry_run": false
+}

@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "completed": [
+    "vgg16_multiseed_e20",
+    "resnet50_multiseed_e20",
+    "resnet50_multiseed_e50",
+    "resnet50_fvei_train",
+    "resnet50_fvei_evaluate",
+    "vgg16_imagenet_fvei_train",
+    "vgg16_imagenet_fvei_evaluate",
+    "statistics",
+    "sanitize"
+  ],
+  "active": null,
+  "updated_at": "2026-10-18T14:10:07.496781+00:00"
+}

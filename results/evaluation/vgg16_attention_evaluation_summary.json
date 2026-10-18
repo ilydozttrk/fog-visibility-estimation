@@ -1,0 +1,13 @@
+{
+    "test_samples": 112,
+    "test_mae_m": 67.62139991351536,
+    "mean_signed_error_m": -10.85008100100926,
+    "min_absolute_error_m": 0.4316520690917969,
+    "max_absolute_error_m": 439.50970458984375,
+    "checkpoint_epoch": 17,
+    "checkpoint_validation_mae_m": 69.32742055257161,
+    "random_seed": 42,
+    "model_name": "VGG16_CBAM",
+    "cbam_reduction_ratio": 16,
+    "cbam_spatial_kernel_size": 7
+}

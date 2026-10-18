@@ -1,0 +1,13 @@
+{
+  "model": "ResNet50",
+  "dataset_split": "test",
+  "test_samples": 112,
+  "test_mae_m": 124.6181,
+  "mean_signed_error_m": -77.346,
+  "maximum_absolute_error_m": 602.6687,
+  "minimum_absolute_error_m": 0.7323,
+  "checkpoint_epoch": 20,
+  "checkpoint_validation_mae_m": 121.8414,
+  "random_seed": 42,
+  "checkpoint_path": "results/checkpoints/resnet50_baseline_best.pth"
+}

@@ -1,0 +1,12 @@
+{
+    "test_samples": 112,
+    "test_mae_m": 72.44119385310582,
+    "mean_signed_error_m": -12.9773941721235,
+    "min_absolute_error_m": 0.12551498413085938,
+    "max_absolute_error_m": 423.1352844238281,
+    "checkpoint_epoch": 19,
+    "checkpoint_validation_mae_m": 70.60830307006836,
+    "random_seed": 42,
+    "model_name": "VGG16_SE",
+    "se_reduction_ratio": 16
+}

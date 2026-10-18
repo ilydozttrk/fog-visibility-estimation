@@ -1,0 +1,17 @@
+{
+  "dataset": "FVEI",
+  "source_checkpoint": "results/checkpoints/vgg16_baseline_best.pth",
+  "output_checkpoint": "results/checkpoints/vgg16_fvei_block5_best.pth",
+  "training_samples": 2245,
+  "validation_samples": 480,
+  "held_out_test_samples": 482,
+  "test_used_for_selection": false,
+  "best_epoch": 12,
+  "best_validation_mae": 26.442758973439535,
+  "epochs": 20,
+  "batch_size": 16,
+  "block5_learning_rate": 1e-05,
+  "head_learning_rate": 0.0001,
+  "loss_function": "L1Loss",
+  "random_seed": 42
+}

@@ -1,0 +1,31 @@
+{
+  "run_name": "resnet50_fvei_synthetic_lastblock_s42",
+  "dataset": "FVEI",
+  "arch": "resnet50",
+  "init": "synthetic",
+  "source": "synthetic FRIDA/FRIDA2",
+  "source_checkpoint": "results/checkpoints/resnet50_baseline_best.pth",
+  "source_epoch": 20,
+  "source_validation_mae_m": 121.8413912455241,
+  "output_checkpoint": "results/checkpoints/fvei_runs/resnet50_fvei_synthetic_lastblock_s42_best.pth",
+  "fine_tuning_strategy": "ResNet50 layer4 + regression head",
+  "trainable_parameters": {
+    "last_block": 14964736,
+    "head": 1114881,
+    "frozen": 8543296
+  },
+  "training_samples": 2245,
+  "validation_samples": 480,
+  "held_out_test_samples": 482,
+  "test_used_for_selection": false,
+  "best_epoch": 7,
+  "best_validation_mae": 27.58590224583944,
+  "epochs": 20,
+  "batch_size": 16,
+  "last_block_learning_rate": 1e-05,
+  "head_learning_rate": 0.0001,
+  "weight_decay": 1e-05,
+  "loss_function": "L1Loss",
+  "random_seed": 42,
+  "device": "cuda"
+}

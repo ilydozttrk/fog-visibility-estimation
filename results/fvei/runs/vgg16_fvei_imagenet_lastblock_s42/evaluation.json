@@ -1,0 +1,67 @@
+{
+  "run_name": "vgg16_fvei_imagenet_lastblock_s42",
+  "dataset": "FVEI",
+  "arch": "vgg16",
+  "init": "imagenet",
+  "checkpoint": "results/checkpoints/fvei_runs/vgg16_fvei_imagenet_lastblock_s42_best.pth",
+  "selected_epoch": 17,
+  "selection_validation_mae_m": 25.973343944549562,
+  "evaluated_at": "2026-10-18T17:09:53",
+  "held_out_test": {
+    "used_for_model_selection": false,
+    "metrics": {
+      "n": 482,
+      "mae_m": 24.33302662481411,
+      "rmse_m": 37.47866808049719,
+      "r2": 0.8996769146103726,
+      "bias_m": -3.935671264205236
+    },
+    "level_metrics": {
+      "0": {
+        "n": 118,
+        "mae_m": 9.633438595270706,
+        "rmse_m": 12.264782584913489,
+        "r2": -1.8166447615005032,
+        "bias_m": 5.263845443725586
+      },
+      "1": {
+        "n": 127,
+        "mae_m": 12.952903387114757,
+        "rmse_m": 16.125378146809886,
+        "r2": -0.723625951149224,
+        "bias_m": -6.555247689795307
+      },
+      "2": {
+        "n": 119,
+        "mae_m": 20.168469853761817,
+        "rmse_m": 26.416798537928916,
+        "r2": -0.08251788452794218,
+        "bias_m": 5.496026560038078
+      },
+      "3": {
+        "n": 118,
+        "mae_m": 55.48056301828158,
+        "rmse_m": 67.84978909471951,
+        "r2": 0.27949523663219034,
+        "bias_m": -19.82744081141585
+      }
+    }
+  },
+  "ceiling_eval": {
+    "n": 900,
+    "label_interpretation": "ceiling/censored at 500 m; not treated as exact regression ground truth",
+    "mean_prediction_m": 503.1723425971137,
+    "median_prediction_m": 503.8646545410156,
+    "min_prediction_m": 371.4544982910156,
+    "max_prediction_m": 593.7903442382812,
+    "predictions_at_or_above_500": 487,
+    "predictions_below_500": 413,
+    "fraction_at_or_above_500": 0.5411111111111111,
+    "mean_shortfall_below_500_m": 12.648584560818142
+  },
+  "notes": [
+    "Exact-label test metrics use only FVEI levels 0-3.",
+    "Level-4 500 m samples are analysed separately as ceiling labels.",
+    "Same metric code as evaluate_vgg16_fvei_final.py."
+  ]
+}

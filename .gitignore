@@ -21,10 +21,18 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Veri setleri
+# Veri setleri (lisans gereği görüntüler paylaşılmaz)
 data/raw/*
 data/interim/*
+data/splits/
+data/generated/images/
+
+# FVEI örnek düzeyindeki manifest yerelde korunur; yeniden dağıtım izni
+# doğrulanana kadar yalnızca toplu denetim özeti izlenir.
 data/processed/*
+!data/processed/fvei/
+data/processed/fvei/*
+!data/processed/fvei/manifest.json
 
 !data/raw/.gitkeep
 !data/interim/.gitkeep
@@ -33,6 +41,7 @@ data/processed/*
 # Modeller ve checkpointler
 models/*
 !models/.gitkeep
+checkpoints/
 *.h5
 *.keras
 *.pt
@@ -42,24 +51,21 @@ models/*
 
 # Deney çıktıları
 logs/
+!results/logs/
 runs/
+!results/fvei/runs/
 wandb/
 
 # Geçici dosyalar
 *.tmp
 *.log
 
-# Processed datasets
-data/processed/
-
-# Dataset splits
-data/splits/
-
-# Model checkpoints
-checkpoints/
-
-# Training outputs
-results/
-
-# Generated synthetic dataset
-data/generated/images/
+# Sonuçlar: küçük metrik/tahmin dosyaları (json, csv, md, png, xlsx) izlenir.
+# Model ağırlıkları ve veri setinden türetilmiş görüntüler izlenmez.
+results/checkpoints/
+results/multiseed/_dry_run/
+results/ci_statistics/
+results/fvei/*_predictions.csv
+results/fvei/runs/*/*_predictions.csv
+results/**/*.jpg
+results/**/*.jpeg

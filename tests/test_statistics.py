@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from src.evaluation.statistical_analysis import (
+    analyse_multiseed,
+    protocol_decision,
     cluster_bootstrap_mean,
     holm_correction,
     mae,
@@ -110,3 +112,72 @@ def test_separate_output_directory_preserves_published_fvei_results(tmp_path, mo
     assert not (output / "statistical_mae_differences.png").exists()
     for path, content in existing.items():
         assert path.read_text(encoding="utf-8") == content
+
+
+def _seed_summary(seed, mae_value, best_epoch, epochs, **extra):
+    return {
+        "training_seed": seed,
+        "test_mae_m": mae_value,
+        "best_epoch": best_epoch,
+        "epochs": epochs,
+        **extra,
+    }
+
+
+def test_multiseed_pairs_only_groups_with_the_same_stopping_rule():
+    groups = {
+        "vgg16_e20": [_seed_summary(1, 60.0, 19, 20), _seed_summary(2, 62.0, 20, 20)],
+        "resnet50_e50": [_seed_summary(1, 90.0, 50, 50), _seed_summary(2, 80.0, 50, 50)],
+        "vgg16_e200_p20": [
+            _seed_summary(1, 55.0, 80, 200, stopped_epoch=100, converged_within_budget=True)
+        ],
+        "resnet50_e200_p20": [
+            _seed_summary(1, 58.0, 150, 200, stopped_epoch=170, converged_within_budget=True)
+        ],
+    }
+
+    result = analyse_multiseed(groups)
+    pairs = {(c["reference"], c["model"]) for c in result["paired_by_seed"]}
+
+    assert pairs == {
+        ("vgg16_e20", "resnet50_e50"),
+        ("vgg16_e200_p20", "resnet50_e200_p20"),
+    }
+
+    fixed = next(c for c in result["paired_by_seed"] if c["model"] == "resnet50_e50")
+    assert fixed["mae_difference_mean_m"] == pytest.approx(24.0)
+    assert fixed["seeds_where_vgg16_is_better"] == 2
+
+    assert result["groups"]["resnet50_e50"]["seeds_converged_within_budget"] == 0
+    assert result["groups"]["vgg16_e20"]["seeds_converged_within_budget"] == 1
+    assert result["groups"]["resnet50_e200_p20"]["stopped_epoch_per_seed"] == [170]
+
+
+def test_protocol_decision_requires_all_three_criteria():
+    favour_vgg = [5.0, 6.0, 4.0, 7.0, 5.5]
+
+    assert protocol_decision(favour_vgg, 2.0, 9.0, 0.001, True) == (
+        "VGG16 anlamlı düzeyde daha iyi"
+    )
+    assert protocol_decision([-d for d in favour_vgg], -9.0, -2.0, 0.001, True) == (
+        "ResNet50 anlamlı düzeyde daha iyi"
+    )
+    # One seed in the other direction -> no significance claim.
+    assert protocol_decision([5.0, 6.0, -1.0, 7.0, 5.5], 1.0, 9.0, 0.01, True).startswith(
+        "Kısmi kanıt"
+    )
+    assert protocol_decision([1.0, -1.0, 0.5, -0.5, 0.2], -2.0, 2.0, 0.6, True) == (
+        "Anlamlı fark yok"
+    )
+
+
+def test_protocol_decision_flags_unconverged_runs():
+    verdict = protocol_decision([5.0] * 5, 2.0, 9.0, 0.001, False)
+    assert verdict.startswith("VGG16 anlamlı düzeyde daha iyi")
+    assert "yakınsamadı" in verdict
+
+
+@pytest.mark.parametrize("differences", [[], [5.0], [5.0] * 4, [-5.0] * 4, [5.0] * 6])
+def test_protocol_decision_cannot_declare_a_winner_without_five_seeds(differences):
+    verdict = protocol_decision(differences, 2.0, 9.0, 0.001, True)
+    assert verdict.startswith("Kısmi kanıt")

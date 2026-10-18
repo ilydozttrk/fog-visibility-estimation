@@ -151,7 +151,16 @@ python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 50
 
 Son komut, orijinal ResNet50 eğitiminde en iyi epoch'un son epoch (20/20) olması nedeniyle yetersiz eğitim olasılığını kontrol eder. Yarıda kalan bir çalıştırma tekrar başlatıldığında tamamlanmış seed'ler atlanır.
 
-Çıktı: `results/multiseed/<arch>_e<epochs>/seed_<n>/`
+50 epoch'luk ResNet50 çalıştırmalarında da 5 seed'in hepsinde en iyi epoch son epoch (50/50) olmuştur. Yakınsamış modelleri karşılaştırmak için iki omurga da validation tabanlı erken durdurma ile eğitilir (en fazla 200 epoch; validation MAE 20 epoch boyunca iyileşmezse durur). Model seçimi yine yalnızca validation MAE ile yapılır, test her seed için bir kez değerlendirilir.
+
+Karar kuralı [`MODEL_SELECTION_PROTOCOL.md`](MODEL_SELECTION_PROTOCOL.md) dosyasındadır ve yeni eğitimlerden önce commit edilir. Önceki 20/50 epoch sonuçları ön kayıt kapsamında değildir. Protokol kodunun deney öncesi doğrulamasında **36 test geçti**; bunlar beş seed şartını ve erken durmadan epoch bütçesine ulaşan koşuların yakınsamış sayılmamasını da kapsar.
+
+```bash
+python -m src.training.train_synthetic_multiseed --arch vgg16 --epochs 200 --patience 20
+python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 200 --patience 20
+```
+
+Çıktı: `results/multiseed/<arch>_e<epochs>[_p<patience>]/seed_<n>/`. İstatistik raporu, erken durdurmalı grupları yalnızca aynı patience değerine sahip gruplarla eşleştirir ve her grup için bütçe içinde yakınsayan seed sayısını gösterir.
 
 ### 5.2 ResNet50'nin FVEI üzerinde ince ayarı
 

@@ -369,6 +369,9 @@ def load_multiseed_summaries() -> dict[str, list[dict]]:
         if summary.get("dry_run"):
             continue
 
+        predictions = path.parent / "test_predictions.csv"
+        summary["_predictions_path"] = str(predictions) if predictions.exists() else None
+
         groups.setdefault(group, []).append(summary)
 
     return groups
@@ -539,6 +542,81 @@ def analyse_fvei(runs: dict[str, pd.DataFrame]) -> dict:
     }
 
 
+def seed_averaged_errors(
+    summaries: list[dict],
+    seeds: list[int],
+) -> pd.DataFrame | None:
+    """
+    Per-image absolute error averaged over the given training seeds.
+
+    Returns a frame indexed by filename with columns scene_key and
+    error, or None when a seed has no saved prediction file.
+    """
+
+    by_seed = {s["training_seed"]: s.get("_predictions_path") for s in summaries}
+    frames = []
+
+    for seed in seeds:
+        path = by_seed.get(seed)
+        if not path:
+            return None
+        frame = pd.read_csv(path).set_index("filename").sort_index()
+        frames.append(frame)
+
+    reference = frames[0]
+    for frame in frames[1:]:
+        if not frame.index.equals(reference.index):
+            raise ValueError("Multi-seed runs were not evaluated on the same test images.")
+
+    errors = np.mean([f["absolute_error_m"].to_numpy(float) for f in frames], axis=0)
+
+    return pd.DataFrame(
+        {
+            "scene_key": (
+                reference["source_dataset"].astype(str)
+                + "_"
+                + reference["scene_id"].astype(str)
+            ).to_numpy(),
+            "error": errors,
+        },
+        index=reference.index,
+    )
+
+
+def protocol_decision(
+    seed_differences: list[float],
+    ci_lower: float,
+    ci_upper: float,
+    p_holm: float,
+    all_converged: bool,
+) -> str:
+    """
+    Pre-registered decision rule (docs/MODEL_SELECTION_PROTOCOL.md).
+
+    Differences are MAE(ResNet50) - MAE(VGG16): positive favours VGG16.
+    """
+
+    differences = np.asarray(seed_differences, dtype=float)
+    five_seeds = differences.size == 5 and bool(np.all(np.isfinite(differences)))
+    vgg_all = five_seeds and bool(np.all(differences > 0))
+    resnet_all = five_seeds and bool(np.all(differences < 0))
+    excludes_zero = ci_lower > 0 or ci_upper < 0
+
+    if vgg_all and ci_lower > 0 and p_holm < ALPHA:
+        verdict = "VGG16 anlamlı düzeyde daha iyi"
+    elif resnet_all and ci_upper < 0 and p_holm < ALPHA:
+        verdict = "ResNet50 anlamlı düzeyde daha iyi"
+    elif excludes_zero or p_holm < ALPHA:
+        verdict = "Kısmi kanıt (tüm ölçütler sağlanmadı); anlamlı fark iddia edilmez"
+    else:
+        verdict = "Anlamlı fark yok"
+
+    if not all_converged:
+        verdict += " (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"
+
+    return verdict
+
+
 def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
     output = {}
 
@@ -546,12 +624,20 @@ def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
         values = np.array([s["test_mae_m"] for s in summaries], dtype=float)
         seeds = [s["training_seed"] for s in summaries]
         epochs = [s["best_epoch"] for s in summaries]
+        converged = [
+            s.get("converged_within_budget", s["best_epoch"] < s["epochs"])
+            for s in summaries
+        ]
 
         output[group] = {
             "n_seeds": int(len(values)),
             "seeds": seeds,
             "test_mae_m_per_seed": values.tolist(),
             "best_epoch_per_seed": epochs,
+            "stopped_epoch_per_seed": [
+                s.get("stopped_epoch", s["epochs"]) for s in summaries
+            ],
+            "seeds_converged_within_budget": int(sum(converged)),
             "test_mae_mean_m": float(values.mean()),
             "test_mae_std_m": (
                 float(values.std(ddof=1)) if len(values) > 1 else 0.0
@@ -565,8 +651,16 @@ def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
     vgg_groups = [g for g in groups if g.startswith("vgg16_")]
     resnet_groups = [g for g in groups if g.startswith("resnet50_")]
 
+    def _patience_suffix(group: str) -> str:
+        return group.rsplit("_p", 1)[1] if "_p" in group else ""
+
     for vgg_group in vgg_groups:
         for resnet_group in resnet_groups:
+            # Compare early-stopping groups only with the same patience,
+            # and fixed-budget groups only with fixed-budget groups.
+            if _patience_suffix(vgg_group) != _patience_suffix(resnet_group):
+                continue
+
             vgg = {s["training_seed"]: s["test_mae_m"] for s in groups[vgg_group]}
             resnet = {
                 s["training_seed"]: s["test_mae_m"] for s in groups[resnet_group]
@@ -578,8 +672,51 @@ def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
 
             differences = np.array([resnet[s] - vgg[s] for s in seeds])
 
+            pooled = None
+            vgg_errors = seed_averaged_errors(groups[vgg_group], seeds)
+            resnet_errors = seed_averaged_errors(groups[resnet_group], seeds)
+
+            if vgg_errors is not None and resnet_errors is not None:
+                resnet_errors = resnet_errors.loc[vgg_errors.index]
+                clusters = vgg_errors["scene_key"].to_numpy()
+                image_difference = (
+                    resnet_errors["error"].to_numpy() - vgg_errors["error"].to_numpy()
+                )
+                scene = pd.DataFrame(
+                    {
+                        "scene_key": clusters,
+                        "vgg": vgg_errors["error"].to_numpy(),
+                        "resnet": resnet_errors["error"].to_numpy(),
+                    }
+                ).groupby("scene_key").mean()
+
+                pooled = {
+                    "description": (
+                        "per-image errors averaged over paired seeds; "
+                        "scene is the unit of analysis"
+                    ),
+                    "n_scenes": int(len(scene)),
+                    "mae_difference_m": cluster_bootstrap_mean(
+                        image_difference, clusters
+                    ).as_dict(),
+                    "scenes_where_vgg16_is_better": int(
+                        (scene["resnet"] > scene["vgg"]).sum()
+                    ),
+                    "scene_level_wilcoxon": paired_wilcoxon(
+                        scene["vgg"].to_numpy(), scene["resnet"].to_numpy()
+                    ),
+                }
+
+            converged = all(
+                s.get("converged_within_budget", s["best_epoch"] < s["epochs"])
+                for s in groups[vgg_group] + groups[resnet_group]
+                if s["training_seed"] in seeds
+            )
+
             comparisons.append(
                 {
+                    "all_seeds_converged_within_budget": converged,
+                    "pooled_scene_level": pooled,
                     "reference": vgg_group,
                     "model": resnet_group,
                     "paired_seeds": seeds,
@@ -592,6 +729,22 @@ def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
                     "seeds_where_vgg16_is_better": int((differences > 0).sum()),
                 }
             )
+
+    tested = [c for c in comparisons if c["pooled_scene_level"] is not None]
+    adjusted = holm_correction(
+        [c["pooled_scene_level"]["scene_level_wilcoxon"]["p_value"] for c in tested]
+    )
+
+    for comparison, p_adjusted in zip(tested, adjusted):
+        pooled = comparison["pooled_scene_level"]
+        pooled["scene_level_wilcoxon"]["p_value_holm"] = p_adjusted
+        comparison["protocol_decision"] = protocol_decision(
+            comparison["mae_difference_per_seed_m"],
+            pooled["mae_difference_m"]["ci95_lower"],
+            pooled["mae_difference_m"]["ci95_upper"],
+            p_adjusted,
+            comparison["all_seeds_converged_within_budget"],
+        )
 
     return {"groups": output, "paired_by_seed": comparisons}
 
@@ -757,8 +910,8 @@ def write_markdown(results: dict, path: Path) -> None:
             "değiştirilmiştir.",
             "",
             "| Deney Grubu | Seed Sayısı | Test MAE Ort. ± SS (m) | Min–Maks "
-            "(m) | En İyi Epoch'lar |",
-            "|---|---:|---:|---:|---|",
+            "(m) | En İyi Epoch'lar | Bütçe içinde yakınsayan seed |",
+            "|---|---:|---:|---:|---|---:|",
         ]
 
         for group, row in multiseed["groups"].items():
@@ -766,7 +919,8 @@ def write_markdown(results: dict, path: Path) -> None:
                 f"| {group} | {row['n_seeds']} | "
                 f"{row['test_mae_mean_m']:.2f} ± {row['test_mae_std_m']:.2f} | "
                 f"{row['test_mae_min_m']:.2f}–{row['test_mae_max_m']:.2f} | "
-                f"{', '.join(str(e) for e in row['best_epoch_per_seed'])} |"
+                f"{', '.join(str(e) for e in row['best_epoch_per_seed'])} | "
+                f"{row['seeds_converged_within_budget']}/{row['n_seeds']} |"
             )
 
         if multiseed["paired_by_seed"]:
@@ -776,24 +930,52 @@ def write_markdown(results: dict, path: Path) -> None:
                 "(fark = ResNet50 − VGG16):",
                 "",
                 "| VGG16 grubu | ResNet50 grubu | Ortak seed | Ortalama fark "
-                "(m) | VGG16'nın daha iyi olduğu seed |",
-                "|---|---|---:|---:|---:|",
+                "(m) | VGG16'nın daha iyi olduğu seed | Fark [95% GA] (sahne, "
+                "seed ortalaması) | VGG16'nın daha iyi olduğu sahne | Holm p "
+                "| Protokol kararı |",
+                "|---|---|---:|---:|---:|---:|---:|---:|---|",
             ]
 
             for c in multiseed["paired_by_seed"]:
+                pooled = c.get("pooled_scene_level")
+                if pooled:
+                    extra = (
+                        f"{_ci(pooled['mae_difference_m'])} | "
+                        f"{pooled['scenes_where_vgg16_is_better']}/"
+                        f"{pooled['n_scenes']} | "
+                        f"{_fmt_p(pooled['scene_level_wilcoxon']['p_value_holm'])} | "
+                        f"{c['protocol_decision']}"
+                    )
+                else:
+                    extra = "– | – | – | tahmin dosyası yok"
                 lines.append(
                     f"| {c['reference']} | {c['model']} | "
                     f"{len(c['paired_seeds'])} | "
                     f"{c['mae_difference_mean_m']:.2f} | "
                     f"{c['seeds_where_vgg16_is_better']}/"
-                    f"{len(c['paired_seeds'])} |"
+                    f"{len(c['paired_seeds'])} | {extra} |"
                 )
 
             lines += [
                 "",
-                "Not: Az sayıda seed ile (ör. 5) Wilcoxon testinin ulaşabileceği "
-                "en küçük iki yönlü p değeri 0.0625 olduğundan seed düzeyinde "
-                "anlamlılık testi yerine yön tutarlılığı raporlanmıştır.",
+                "Gruplar yalnızca aynı durdurma kuralına sahip gruplarla "
+                "eşleştirilir (sabit bütçe ↔ sabit bütçe, aynı patience ↔ "
+                "aynı patience).",
+                "",
+                "\"Bütçe içinde yakınsayan seed\": erken durdurmalı koşularda "
+                "epoch bütçesine ulaşmadan patience kuralıyla duran seed sayısı. "
+                "Eski sabit bütçeli koşularda en iyi validation epoch'unun son "
+                "epoch'tan önce olması yalnızca bir yakınsama göstergesi olarak kullanılır.",
+                "",
+                "Anlamlılık testi: her görüntünün hatası eşleştirilmiş seed'ler "
+                "üzerinden ortalanır, ardından 14 test sahnesinde eşleştirilmiş "
+                "Wilcoxon testi uygulanır (Holm düzeltmeli); güven aralığı sahne "
+                "düzeyinde küme bootstrap ile hesaplanır. Seed düzeyinde doğrudan "
+                "test yapılmaz, çünkü 5 seed ile ulaşılabilecek en küçük iki yönlü "
+                "p değeri 0.0625'tir.",
+                "",
+                "Karar kuralı: [`docs/MODEL_SELECTION_PROTOCOL.md`]"
+                "(../MODEL_SELECTION_PROTOCOL.md).",
             ]
 
         lines.append("")
@@ -829,6 +1011,16 @@ def plot_differences(results: dict, path: Path) -> None:
     fvei = results.get("fvei") or {}
     for c in fvei.get("comparisons_vs_reference", []):
         rows.append((f"FVEI: {c['model']}", c["mae_difference_m"]))
+
+    multiseed = results.get("multiseed") or {}
+    for c in multiseed.get("paired_by_seed", []):
+        if c.get("pooled_scene_level"):
+            rows.append(
+                (
+                    f"Çoklu seed: {c['model']} vs {c['reference']}",
+                    c["pooled_scene_level"]["mae_difference_m"],
+                )
+            )
 
     if not rows:
         return

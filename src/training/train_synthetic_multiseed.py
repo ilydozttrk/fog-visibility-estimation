@@ -10,6 +10,10 @@ All architecture comparisons were made with a single training seed
 (42). Seed-to-seed variation shows whether the VGG16 vs ResNet50 gap
 is robust. In addition, the original ResNet50 run selected its last
 epoch (20/20), so it may not have converged; --epochs 50 checks this.
+The 50-epoch ResNet50 runs again selected their last epoch in every
+seed, so --patience adds validation-based early stopping: training
+runs until validation MAE has not improved for <patience> epochs (or
+--epochs is reached), letting both backbones train to convergence.
 
 Protocol
 --------
@@ -26,10 +30,12 @@ Usage
 python -m src.training.train_synthetic_multiseed --arch vgg16
 python -m src.training.train_synthetic_multiseed --arch resnet50
 python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 50
+python -m src.training.train_synthetic_multiseed --arch vgg16 --epochs 200 --patience 20
+python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 200 --patience 20
 
 Outputs (per seed)
 ------------------
-results/multiseed/<arch>_e<epochs>/seed_<n>/summary.json
+results/multiseed/<arch>_e<epochs>[_p<patience>]/seed_<n>/summary.json
 results/multiseed/<arch>_e<epochs>/seed_<n>/history.csv
 results/multiseed/<arch>_e<epochs>/seed_<n>/test_predictions.csv
 
@@ -142,6 +148,7 @@ def train_one_seed(
     output_dir: Path,
     save_checkpoint: bool,
     max_batches: int | None = None,
+    patience: int | None = None,
 ) -> dict:
     set_seed(training_seed)
 
@@ -188,6 +195,8 @@ def train_one_seed(
     best_epoch = 0
     best_state = None
     history = []
+    epochs_without_improvement = 0
+    stopped_epoch = epochs
 
     for epoch in range(1, epochs + 1):
         train_mae = run_epoch(model, train_loader, loss_function, optimizer, max_batches)
@@ -208,6 +217,17 @@ def train_one_seed(
             best_state = copy.deepcopy(
                 {k: v.detach().cpu() for k, v in model.state_dict().items()}
             )
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
+
+        if patience is not None and epochs_without_improvement >= patience:
+            stopped_epoch = epoch
+            print(
+                f"  early stop at epoch {epoch}: no validation improvement "
+                f"for {patience} epochs (best epoch {best_epoch})"
+            )
+            break
 
     model.load_state_dict(best_state)
 
@@ -282,6 +302,12 @@ def train_one_seed(
         "epochs": epochs,
         "best_epoch": best_epoch,
         "best_epoch_is_last": best_epoch == epochs,
+        "patience": patience,
+        "stopped_epoch": stopped_epoch,
+        "early_stopped": patience is not None and stopped_epoch < epochs,
+        "converged_within_budget": (
+            stopped_epoch < epochs if patience is not None else best_epoch < stopped_epoch
+        ),
         "best_validation_mae_m": best_validation_mae,
         "test_mae_m": test_mae,
         "test_bias_m": float(np.mean(errors)),
@@ -311,6 +337,15 @@ def main() -> None:
     parser.add_argument("--seeds", type=int, nargs="+", default=list(DEFAULT_SEEDS))
     parser.add_argument("--epochs", type=int, default=NUM_EPOCHS)
     parser.add_argument("--split-seed", type=int, default=RANDOM_SEED)
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=None,
+        help=(
+            "Stop when validation MAE has not improved for this many epochs. "
+            "Selection still uses validation MAE only; test is evaluated once."
+        ),
+    )
     parser.add_argument("--save-checkpoints", action="store_true")
     parser.add_argument(
         "--dry-run",
@@ -323,7 +358,8 @@ def main() -> None:
         group_dir = OUTPUT_ROOT / "_dry_run"
         seeds, epochs, max_batches = args.seeds[:1], 1, 2
     else:
-        group_dir = OUTPUT_ROOT / f"{args.arch}_e{args.epochs}"
+        suffix = f"_p{args.patience}" if args.patience is not None else ""
+        group_dir = OUTPUT_ROOT / f"{args.arch}_e{args.epochs}{suffix}"
         seeds, epochs, max_batches = args.seeds, args.epochs, None
 
     print("=" * 64)
@@ -353,6 +389,7 @@ def main() -> None:
                 seed_dir,
                 args.save_checkpoints,
                 max_batches,
+                args.patience,
             )
         )
 
@@ -362,6 +399,7 @@ def main() -> None:
     for s in summaries:
         print(
             f"seed {s['training_seed']:>5} | best epoch {s['best_epoch']:>2} "
+            f"| stopped {s.get('stopped_epoch', s['epochs']):>3} "
             f"| val {s['best_validation_mae_m']:.2f} m | test {s['test_mae_m']:.2f} m"
         )
     std = values.std(ddof=1) if len(values) > 1 else 0.0

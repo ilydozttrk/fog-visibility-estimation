@@ -739,7 +739,7 @@ A public checkout can recompute synthetic and multi-seed statistics with `python
 
 [`docs/research_notes/arastirma_gunlugu.md`](docs/research_notes/arastirma_gunlugu.md)
 
-The final results summary, TÜBİTAK report drafts, weekly progress log and research journal are synchronized with the final technical state of the project.
+The final results summary and TÜBİTAK report drafts retain their original content. The later validation experiments and statistical findings are documented separately in [`docs/reports/statistical_analysis.md`](docs/reports/statistical_analysis.md) and the sections below; those drafts still need corresponding editorial updates before submission.
 
 ---
 
@@ -760,14 +760,20 @@ The 8 fog variants of a scene are not independent, so the **scene** is the unit 
 - SE is significantly worse than the baseline.
 - FVEI locked test MAE: **25.13 m [23.12, 27.20]** (image-level, level-stratified bootstrap; scene/camera IDs are unavailable, so this interval may be slightly optimistic).
 
-These results hold for one scene split and training seed 42. The following experiments extend them; see [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md):
+The table above describes the original seed-42 experiments. The extended experiments use the frozen [`model selection protocol`](docs/MODEL_SELECTION_PROTOCOL.md); commands and registration chronology are in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
-| Open point from the proposal | Script |
-|---|---|
-| Seed sensitivity of the VGG16 vs ResNet50 gap | `src/training/train_synthetic_multiseed.py` |
-| ResNet50 selected its last epoch (20/20): undertraining check | `train_synthetic_multiseed.py --arch resnet50 --epochs 50` |
-| Research question asks for the comparison on real-world data too: ResNet50 on FVEI | `src/training/finetune_fvei.py --arch resnet50` + `src/evaluation/evaluate_fvei.py` |
-| Does the staged synthetic → real strategy help? (ImageNet → FVEI ablation) | `src/training/finetune_fvei.py --arch vgg16 --init imagenet` |
+| Validation comparison | Test MAE (m) | Difference vs reference [95% CI] | Holm p / outcome |
+|---|---|---|---|
+| **Primary: VGG16 vs ResNet50, maximum 200 epochs, patience 20, 5 seeds** | VGG16 **53.87 ± 0.81**; ResNet50 **81.41 ± 1.94** | ResNet50 − VGG16: **+27.53 [7.94, 48.91] m** | **0.0419**; VGG16 better in 5/5 seeds; convergence warning below |
+| Sensitivity: both architectures, 20 epochs, 5 seeds | VGG16 63.99 ± 1.31; ResNet50 127.64 ± 3.71 | +63.65 [54.43, 72.84] m | 0.000366; ResNet50 did not converge in any seed |
+| Sensitivity: VGG16 20 vs ResNet50 50 epochs, 5 seeds | VGG16 63.99 ± 1.31; ResNet50 86.29 ± 2.00 | +22.30 [11.75, 32.42] m | 0.00464; ResNet50 did not converge in any seed |
+| Conditional ResNet50 + CBAM / SE | Full experiments not run | Trigger condition was not met | Existing VGG16 attention results remain applicable |
+| FVEI: ResNet50 synthetic → real vs final VGG16, seed 42 | ResNet50 27.48; VGG16 25.13 | +2.34 [0.62, 4.09] m | 0.0636; no significant difference after Holm correction |
+| FVEI ablation: VGG16 ImageNet → real vs staged final VGG16, seed 42 | ImageNet → real 24.33; staged 25.13 | −0.80 [−1.96, 0.38] m | 0.0700; a benefit from the synthetic stage was not established |
+
+The exact primary protocol decision is **“VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı)”**. VGG16 early-stopped in 5/5 seeds (58–96 epochs), ResNet50 in 3/5 (132–179 epochs); ResNet50 seeds 7 and 123 reached the 200-epoch cap. The budget was not increased. The statistical conditions favor VGG16 within this registered budget, but this is not a comparison in which every ResNet50 seed demonstrably converged. The ResNet50 superiority hypothesis is rejected in the opposite direction within this experiment, with that limitation.
+
+Synthetic values are means ± sample standard deviations over five training seeds on one fixed scene split. Confidence intervals and tests use 14 scenes after averaging errors over paired seeds; they do not establish performance across new scene splits. Earlier fixed-budget results were already known before registration, so the new runs are not an independent test-set replication. CBAM/SE full training was skipped because the required exact ResNet50-winning decision was not obtained. The secondary complexity comparison was not triggered because the primary decision was neither partial evidence nor no significant difference.
 
 ---
 
@@ -802,6 +808,18 @@ These results hold for one scene split and training seed 42. The following exper
 14. The final Flask prototype uses the validation-selected FVEI checkpoint.
 
 15. The project target of **MAE < 100 m** was achieved in both the selected synthetic baseline and final FVEI evaluation.
+
+16. Under the registered 200-epoch / patience-20 protocol, VGG16 achieved **53.87 ± 0.81 m**, versus **81.41 ± 1.94 m** for ResNet50, and was better in all five paired seeds. The scene-level difference was **27.53 m [7.94, 48.91]**, Holm p = **0.0419**. The ResNet50 superiority hypothesis was rejected in the opposite direction within this budget, with a convergence warning: two ResNet50 seeds reached the cap.
+
+17. The architecture gap depends on the training budget. All ResNet50 seeds selected the last epoch under both old fixed budgets (20 and 50); the registered early-stopping experiment converged in 3/5 ResNet50 seeds and 5/5 VGG16 seeds. The primary comparison uses both early-stopping groups; fixed-budget comparisons are sensitivity analyses.
+
+18. ResNet50 + CBAM/SE full experiments were not run because the registered trigger condition was not met. The existing VGG16 attention comparisons remain the available attention evidence.
+
+19. On FVEI, ResNet50 had a modestly higher MAE than final VGG16 (+2.34 m); the difference was not significant after Holm correction (p = 0.0636). These single-seed results are secondary evidence.
+
+20. The ImageNet → FVEI ablation did not establish a measurable benefit from the synthetic training stage: its difference from staged VGG16 was −0.80 m [−1.96, 0.38], Holm p = 0.0700. This does not establish equivalence.
+
+21. The final deployment model remains `vgg16_fvei_block5_best.pth`; it was not changed in response to any locked-test result.
 
 ---
 
@@ -860,10 +878,13 @@ The remaining tasks are related to **submission and publication preparation**, n
 
 Validation experiments completed on 2026-10-18 (see `docs/REPRODUCIBILITY.md`):
 
-- [x] Local runtime verification: 24 tests passed; synthetic VGG16 and FVEI ResNet50 dry runs passed on CUDA (2026-10-18)
+- [x] Local runtime verification: 41 tests passed; synthetic VGG16 and ResNet50 + CBAM early-stopping dry runs passed on CUDA; the FVEI ResNet50 dry run also passed (2026-10-18)
+- [x] Model selection and conditional attention protocols registered in commits `a15671d` and `1594009`, both pushed before the definitive convergence runs
 - [x] CI workflow installed at `.github/workflows/tests.yml`
 - [x] Statistical significance analysis of the synthetic comparisons
 - [x] Multi-seed synthetic training (VGG16, ResNet50, ResNet50 50 epochs)
+- [x] Registered early-stopping experiments: 5 seeds per architecture, maximum 200 epochs, patience 20; VGG16 5/5 and ResNet50 3/5 early-stopped before the cap
+- [x] Conditional ResNet50 attention step checked: full training skipped because the trigger condition was not met
 - [x] ResNet50 fine-tuning and locked evaluation on FVEI
 - [x] VGG16 ImageNet → FVEI ablation (contribution of the synthetic stage)
 
@@ -872,10 +893,12 @@ Validation experiments completed on 2026-10-18 (see `docs/REPRODUCIBILITY.md`):
 | Synthetic VGG16, 20 epochs, 5 seeds | 63.99 ± 1.31 |
 | Synthetic ResNet50, 20 epochs, 5 seeds | 127.64 ± 3.71 |
 | Synthetic ResNet50, 50 epochs, 5 seeds | 86.29 ± 2.00 |
+| **Primary synthetic VGG16, max 200 epochs / patience 20, 5 seeds** | **53.87 ± 0.81** |
+| **Primary synthetic ResNet50, max 200 epochs / patience 20, 5 seeds** | **81.41 ± 1.94** |
 | ResNet50 synthetic → FVEI, seed 42 | 27.48 |
 | VGG16 ImageNet → FVEI, seed 42 | 24.33 |
 
-The synthetic values are means ± sample standard deviations across training seeds with the scene split fixed. VGG16 had lower test MAE in all five paired seeds, including against the 50-epoch ResNet50 runs. Longer training narrowed the gap, but all five ResNet50 runs still selected epoch 50; convergence beyond that budget remains untested.
+The synthetic values are means ± sample standard deviations across training seeds with the scene split fixed. VGG16 had lower test MAE in all five paired seeds in each comparison. ResNet50 improved substantially with longer training. The primary early-stopping comparison still favored VGG16 (difference +27.53 m, 95% CI 7.94–48.91; Holm p = 0.0419), with a warning because two ResNet50 seeds reached the 200-epoch cap. No budget extension was made.
 
 On FVEI, the original VGG16 reference has MAE 25.13 m. Relative to that reference, the ResNet50 MAE difference was +2.34 m (95% bootstrap CI 0.62–4.09; Holm-adjusted Wilcoxon p = 0.0636), and the ImageNet-only VGG16 difference was −0.80 m (95% CI −1.96–0.38; adjusted p = 0.0700). Neither comparison reached significance under the adjusted Wilcoxon tests. This ablation did not establish a benefit from the synthetic stage. These FVEI experiments use one training seed; their image-level intervals cannot account for unknown scene/camera dependence. The original deployment checkpoint is retained under the locked-test protocol. Full results: [`statistical_analysis.md`](docs/reports/statistical_analysis.md).
 

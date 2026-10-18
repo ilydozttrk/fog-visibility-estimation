@@ -171,6 +171,24 @@ python -m src.training.train_synthetic_multiseed --arch resnet50_se --epochs 200
 
 Çıktı: `results/multiseed/<arch>_e<epochs>[_p<patience>]/seed_<n>/`. İstatistik raporu, erken durdurmalı grupları yalnızca aynı patience değerine sahip gruplarla eşleştirir ve her grup için bütçe içinde yakınsayan seed sayısını gösterir.
 
+#### Tamamlanan ön kayıtlı deneyler
+
+Ön kayıt commit'leri `a15671d` ve `1594009`, kesin deneyler başlamadan önce `main` dalına push edildi; ikinci commit'in GitHub Actions testleri geçti. Yukarıdaki iki dry-run CUDA'da geçti. VGG16 koşuları bu push'tan sonra baştan başlatıldı ve ardından ResNet50 koşuları çalıştırıldı. Protokol, eğitim, model ve istatistik kaynaklarının SHA-256 değerleri deney boyunca değiştirilmedi.
+
+| Seed | VGG16 en iyi / durma epoch'u | VGG16 test MAE (m) | ResNet50 en iyi / durma epoch'u | ResNet50 test MAE (m) |
+|---|---:|---:|---:|---:|
+| 42 | 38 / 58 | 54.29 | 137 / 157 | 81.50 |
+| 7 | 49 / 69 | 54.89 | 186 / 200* | 83.43 |
+| 123 | 76 / 96 | 53.19 | 199 / 200* | 81.32 |
+| 2024 | 52 / 72 | 52.92 | 159 / 179 | 82.50 |
+| 3407 | 49 / 69 | 54.07 | 112 / 132 | 78.28 |
+
+\* Erken durmadan bütçe sınırına ulaşıldı; bütçe artırılmadı. VGG16 5/5, ResNet50 3/5 seed'de bütçe içinde erken durdu. Her koşuda en düşük validation MAE epoch'u seçildi; seçilen ağırlıklarla 112 sentetik test görüntüsü bir kez değerlendirildi. Kaydedilmiş geçmişler, en iyi epoch, patience kuralı, tahminlerin benzersizliği ve sonlu olması, 14 adet sekizer görüntülü sahne grubu ve tahminlerden yeniden hesaplanan MAE doğrulandı.
+
+Birincil sonuç: VGG16 **53,87 ± 0,81 m**, ResNet50 **81,41 ± 1,94 m**. ResNet50 − VGG16 farkı **27,53 m [%95 GA 7,94–48,91]**, sahne düzeyinde Holm p = **0,0419**. Protokol kararı: **"VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"**. ResNet50 üstünlüğü hipotezi bu bütçede ters yönde reddedildi; iki seed'in yakınsama sınırlaması korunur. Bu veriler yeni bir sahne ayrımı veya bağımsız test kümesi değildir.
+
+Koşullu ResNet50 + CBAM/SE tam eğitimleri **koşul sağlanmadığı için çalıştırılmadı**; yalnızca deney öncesi CBAM dry-run yapıldı. Karar "Anlamlı fark yok" veya "Kısmi kanıt" olmadığından ikincil karmaşıklık/çıkarım süresi karşılaştırması tetiklenmedi. Kilitli FVEI testleri yeniden çalıştırılmadı; istatistik raporu yereldeki mevcut tahminlerden yeniden üretildi. Nihai FVEI checkpoint'i ve split manifesti korundu.
+
 ### 5.2 ResNet50'nin FVEI üzerinde ince ayarı
 
 Araştırma sorusu karşılaştırmayı hem sentetik hem gerçek dünya verisinde istemektedir. ResNet50, VGG16 ile aynı protokolle (son evrişim aşaması + regresyon başlığı, 20 epoch, validation MAE ile seçim) FVEI'ye uyarlanır:

@@ -235,10 +235,54 @@
           20,
           20
         ],
+        "stopped_epoch_per_seed": [
+          20,
+          20,
+          20,
+          20,
+          20
+        ],
+        "seeds_converged_within_budget": 0,
         "test_mae_mean_m": 127.64488865307399,
         "test_mae_std_m": 3.7140972085657897,
         "test_mae_min_m": 122.94264210973468,
         "test_mae_max_m": 131.45056860787528
+      },
+      "resnet50_e200_p20": {
+        "n_seeds": 5,
+        "seeds": [
+          123,
+          2024,
+          3407,
+          42,
+          7
+        ],
+        "test_mae_m_per_seed": [
+          81.32202776840755,
+          82.49789204767772,
+          78.27817366165775,
+          81.50047711815152,
+          83.43151273046222
+        ],
+        "best_epoch_per_seed": [
+          199,
+          159,
+          112,
+          137,
+          186
+        ],
+        "stopped_epoch_per_seed": [
+          200,
+          179,
+          132,
+          157,
+          200
+        ],
+        "seeds_converged_within_budget": 3,
+        "test_mae_mean_m": 81.40601666527135,
+        "test_mae_std_m": 1.9425630574075352,
+        "test_mae_min_m": 78.27817366165775,
+        "test_mae_max_m": 83.43151273046222
       },
       "resnet50_e50": {
         "n_seeds": 5,
@@ -263,6 +307,14 @@
           50,
           50
         ],
+        "stopped_epoch_per_seed": [
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "seeds_converged_within_budget": 0,
         "test_mae_mean_m": 86.29186503227268,
         "test_mae_std_m": 2.002991474762718,
         "test_mae_min_m": 83.70191948860884,
@@ -291,16 +343,81 @@
           19,
           19
         ],
+        "stopped_epoch_per_seed": [
+          20,
+          20,
+          20,
+          20,
+          20
+        ],
+        "seeds_converged_within_budget": 2,
         "test_mae_mean_m": 63.991889769690374,
         "test_mae_std_m": 1.3119036826031552,
         "test_mae_min_m": 61.84733969824655,
         "test_mae_max_m": 65.05736712047032
+      },
+      "vgg16_e200_p20": {
+        "n_seeds": 5,
+        "seeds": [
+          123,
+          2024,
+          3407,
+          42,
+          7
+        ],
+        "test_mae_m_per_seed": [
+          53.1898604461125,
+          52.92273334094456,
+          54.06540666307722,
+          54.29002618789673,
+          54.8882109778268
+        ],
+        "best_epoch_per_seed": [
+          76,
+          52,
+          49,
+          38,
+          49
+        ],
+        "stopped_epoch_per_seed": [
+          96,
+          72,
+          69,
+          58,
+          69
+        ],
+        "seeds_converged_within_budget": 5,
+        "test_mae_mean_m": 53.87124752317156,
+        "test_mae_std_m": 0.8079689833791689,
+        "test_mae_min_m": 52.92273334094456,
+        "test_mae_max_m": 54.8882109778268
       }
     },
     "paired_by_seed": [
       {
+        "family": "architecture",
         "reference": "vgg16_e20",
         "model": "resnet50_e20",
+        "reference_arch": "vgg16",
+        "model_arch": "resnet50",
+        "all_seeds_converged_within_budget": false,
+        "pooled_scene_level": {
+          "description": "per-image errors averaged over paired seeds; scene is the unit of analysis",
+          "n_scenes": 14,
+          "mae_difference_m": {
+            "estimate": 63.652998883383624,
+            "ci95_lower": 54.42731964588165,
+            "ci95_upper": 72.84215039287295
+          },
+          "scenes_where_reference_is_better": 14,
+          "scene_level_wilcoxon": {
+            "statistic": 0.0,
+            "p_value": 0.0001220703125,
+            "n": 14,
+            "p_value_holm": 0.0003662109375
+          },
+          "scenes_where_vgg16_is_better": 14
+        },
         "paired_seeds": [
           7,
           42,
@@ -317,11 +434,34 @@
           61.35491248539516
         ],
         "mae_difference_mean_m": 63.652998883383624,
-        "seeds_where_vgg16_is_better": 5
+        "seeds_where_reference_is_better": 5,
+        "seeds_where_vgg16_is_better": 5,
+        "protocol_decision": "VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"
       },
       {
+        "family": "architecture",
         "reference": "vgg16_e20",
         "model": "resnet50_e50",
+        "reference_arch": "vgg16",
+        "model_arch": "resnet50",
+        "all_seeds_converged_within_budget": false,
+        "pooled_scene_level": {
+          "description": "per-image errors averaged over paired seeds; scene is the unit of analysis",
+          "n_scenes": 14,
+          "mae_difference_m": {
+            "estimate": 22.299975262582304,
+            "ci95_lower": 11.748945939945326,
+            "ci95_upper": 32.423181193061176
+          },
+          "scenes_where_reference_is_better": 12,
+          "scene_level_wilcoxon": {
+            "statistic": 7.0,
+            "p_value": 0.0023193359375,
+            "n": 14,
+            "p_value_holm": 0.004638671875
+          },
+          "scenes_where_vgg16_is_better": 12
+        },
         "paired_seeds": [
           7,
           42,
@@ -338,7 +478,53 @@
           22.766724118164603
         ],
         "mae_difference_mean_m": 22.2999752625823,
-        "seeds_where_vgg16_is_better": 5
+        "seeds_where_reference_is_better": 5,
+        "seeds_where_vgg16_is_better": 5,
+        "protocol_decision": "VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"
+      },
+      {
+        "family": "architecture",
+        "reference": "vgg16_e200_p20",
+        "model": "resnet50_e200_p20",
+        "reference_arch": "vgg16",
+        "model_arch": "resnet50",
+        "all_seeds_converged_within_budget": false,
+        "pooled_scene_level": {
+          "description": "per-image errors averaged over paired seeds; scene is the unit of analysis",
+          "n_scenes": 14,
+          "mae_difference_m": {
+            "estimate": 27.534769142099794,
+            "ci95_lower": 7.941784040129608,
+            "ci95_upper": 48.90805669307708
+          },
+          "scenes_where_reference_is_better": 10,
+          "scene_level_wilcoxon": {
+            "statistic": 20.0,
+            "p_value": 0.0418701171875,
+            "n": 14,
+            "p_value_holm": 0.0418701171875
+          },
+          "scenes_where_vgg16_is_better": 10
+        },
+        "paired_seeds": [
+          7,
+          42,
+          123,
+          2024,
+          3407
+        ],
+        "difference_definition": "test MAE(resnet50_e200_p20) - test MAE(vgg16_e200_p20), per training seed",
+        "mae_difference_per_seed_m": [
+          28.543301752635415,
+          27.210450930254794,
+          28.132167322295054,
+          29.575158706733163,
+          24.212766998580527
+        ],
+        "mae_difference_mean_m": 27.534769142099787,
+        "seeds_where_reference_is_better": 5,
+        "seeds_where_vgg16_is_better": 5,
+        "protocol_decision": "VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"
       }
     ]
   }

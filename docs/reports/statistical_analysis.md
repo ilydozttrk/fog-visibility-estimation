@@ -59,17 +59,26 @@ Fark = MAE(çalıştırma) − MAE(VGG16 FVEI Block5 (final)).
 
 Sahne ayrımı sabit (seed 42) tutulmuş, yalnızca eğitim tohumu değiştirilmiştir.
 
-| Deney Grubu | Seed Sayısı | Test MAE Ort. ± SS (m) | Min–Maks (m) | En İyi Epoch'lar |
-|---|---:|---:|---:|---|
-| resnet50_e20 | 5 | 127.64 ± 3.71 | 122.94–131.45 | 20, 20, 20, 20, 20 |
-| resnet50_e50 | 5 | 86.29 ± 2.00 | 83.70–88.85 | 50, 50, 50, 50, 50 |
-| vgg16_e20 | 5 | 63.99 ± 1.31 | 61.85–65.06 | 20, 20, 20, 19, 19 |
+| Deney Grubu | Seed Sayısı | Test MAE Ort. ± SS (m) | Min–Maks (m) | En İyi Epoch'lar | Bütçe içinde yakınsayan seed |
+|---|---:|---:|---:|---|---:|
+| resnet50_e20 | 5 | 127.64 ± 3.71 | 122.94–131.45 | 20, 20, 20, 20, 20 | 0/5 |
+| resnet50_e200_p20 | 5 | 81.41 ± 1.94 | 78.28–83.43 | 199, 159, 112, 137, 186 | 3/5 |
+| resnet50_e50 | 5 | 86.29 ± 2.00 | 83.70–88.85 | 50, 50, 50, 50, 50 | 0/5 |
+| vgg16_e20 | 5 | 63.99 ± 1.31 | 61.85–65.06 | 20, 20, 20, 19, 19 | 2/5 |
+| vgg16_e200_p20 | 5 | 53.87 ± 0.81 | 52.92–54.89 | 76, 52, 49, 38, 49 | 5/5 |
 
-Seed bazında eşleştirilmiş karşılaştırma (fark = ResNet50 − VGG16):
+Seed bazında eşleştirilmiş karşılaştırmalar. Fark = MAE(karşılaştırılan) − MAE(referans); pozitif değer referans lehinedir. Holm düzeltmesi her aile (mimari: VGG16 ↔ ResNet50; dikkat: ResNet50 ↔ ResNet50 + CBAM/SE) içinde ayrı uygulanır.
 
-| VGG16 grubu | ResNet50 grubu | Ortak seed | Ortalama fark (m) | VGG16'nın daha iyi olduğu seed |
-|---|---|---:|---:|---:|
-| vgg16_e20 | resnet50_e20 | 5 | 63.65 | 5/5 |
-| vgg16_e20 | resnet50_e50 | 5 | 22.30 | 5/5 |
+| Aile | Referans grubu | Karşılaştırılan grup | Ortak seed | Ortalama fark (m) | Referansın daha iyi olduğu seed | Fark [95% GA] (sahne, seed ortalaması) | Referansın daha iyi olduğu sahne | Holm p | Protokol kararı |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| Mimari | vgg16_e20 | resnet50_e20 | 5 | 63.65 | 5/5 | 63.65 [54.43, 72.84] | 14/14 | 3.66e-04 | VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı) |
+| Mimari | vgg16_e20 | resnet50_e50 | 5 | 22.30 | 5/5 | 22.30 [11.75, 32.42] | 12/14 | 0.0046 | VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı) |
+| Mimari | vgg16_e200_p20 | resnet50_e200_p20 | 5 | 27.53 | 5/5 | 27.53 [7.94, 48.91] | 10/14 | 0.0419 | VGG16 anlamlı düzeyde daha iyi (uyarı: tüm seed'ler bütçe içinde yakınsamadı) |
 
-Not: Az sayıda seed ile (ör. 5) Wilcoxon testinin ulaşabileceği en küçük iki yönlü p değeri 0.0625 olduğundan seed düzeyinde anlamlılık testi yerine yön tutarlılığı raporlanmıştır.
+Gruplar yalnızca aynı durdurma kuralına sahip gruplarla eşleştirilir (sabit bütçe ↔ sabit bütçe, aynı patience ↔ aynı patience).
+
+"Bütçe içinde yakınsayan seed": erken durdurmalı koşularda epoch bütçesine ulaşmadan patience kuralıyla duran seed sayısı. Eski sabit bütçeli koşularda en iyi validation epoch'unun son epoch'tan önce olması yalnızca bir yakınsama göstergesi olarak kullanılır.
+
+Anlamlılık testi: her görüntünün hatası eşleştirilmiş seed'ler üzerinden ortalanır, ardından 14 test sahnesinde eşleştirilmiş Wilcoxon testi uygulanır (Holm düzeltmeli); güven aralığı sahne düzeyinde küme bootstrap ile hesaplanır. Seed düzeyinde doğrudan test yapılmaz, çünkü 5 seed ile ulaşılabilecek en küçük iki yönlü p değeri 0.0625'tir.
+
+Karar kuralı: [`docs/MODEL_SELECTION_PROTOCOL.md`](../MODEL_SELECTION_PROTOCOL.md).

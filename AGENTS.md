@@ -26,19 +26,24 @@ TÜBİTAK 2209-A projesi: VGG16 / ResNet50 transfer öğrenme ile sisli görünt
 
 ## Bekleyen işler (sırayla)
 
-1. `pytest -q`. Değişen/eklenen dosyalar: `src/training/train_synthetic_multiseed.py` (`--patience`), `src/evaluation/statistical_analysis.py` (yakınsama sütunu, seed ortalamalı sahne düzeyi Wilcoxon + bootstrap, `protocol_decision`), `tests/test_statistics.py`, `docs/MODEL_SELECTION_PROTOCOL.md`, `docs/REPRODUCIBILITY.md`, `AGENTS.md`.
-2. **Deneylerden ÖNCE** bu dosyaları commit et (mesaj: "Pre-register model selection protocol and early stopping"). Protokolün sonuçlardan önce yazıldığı git geçmişinde görünmelidir. Push için kullanıcıya sor; kullanıcı onaylarsa deneylerden önce push et.
-3. Dry-run: `python -m src.training.train_synthetic_multiseed --arch vgg16 --dry-run --patience 20`
+1. `pytest -q`. Yeni değişiklikler: `src/models/regression_models.py` (`resnet50_cbam`, `resnet50_se` varyantları), `src/evaluation/statistical_analysis.py` (dikkat karşılaştırma ailesi, gerçek mimari adına göre eşleştirme), `src/training/finetune_fvei.py` (yalnızca vgg16/resnet50), `tests/test_regression_models.py`, `tests/test_statistics.py`, `docs/MODEL_SELECTION_PROTOCOL.md` (Bölüm 7: koşullu dikkat deneyi), `docs/REPRODUCIBILITY.md`, `AGENTS.md`.
+2. **Deneylerden ÖNCE** bu değişiklikleri ikinci bir ön kayıt commit'i olarak kaydet (mesaj: "Pre-register conditional ResNet50 attention experiment"). Önceki `a15671d` commit'ini değiştirme (amend etme). Kullanıcı push'u onayladı: `main` dalını (her iki ön kayıt commit'iyle) deneylerden önce push et. Push öncesi `git show --stat` ile FVEI manifesti, FVEI görüntü bazlı tahmin CSV'leri, `*.pth` veya `.tmp` dosyası olmadığını doğrula. `codex/private-fvei-validation-backup` dalını push etme.
+3. Dry-run: `python -m src.training.train_synthetic_multiseed --arch vgg16 --dry-run --patience 20` ve `python -m src.training.train_synthetic_multiseed --arch resnet50_cbam --dry-run --patience 20`
 4. Yakınsama deneyleri (GPU, 5 seed):
    - `python -m src.training.train_synthetic_multiseed --arch vgg16 --epochs 200 --patience 20`
    - `python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 200 --patience 20`
    Bir seed 200 epoch'a erken durmadan ulaşırsa (`converged_within_budget: false`) bütçeyi kendiliğinden artırma; durumu kullanıcıya bildir.
-5. `python -m src.evaluation.statistical_analysis` (çıktı dizini vermeden). `docs/reports/statistical_analysis.md` içindeki `vgg16_e200_p20` / `resnet50_e200_p20` satırının "Protokol kararı" birincil sonuçtur.
-6. Protokol kararı "Anlamlı fark yok" veya "Kısmi kanıt" ise protokol Bölüm 5'teki ikincil ölçütleri ölç (toplam parametre sayısı, aynı GPU'da görüntü başına ortalama çıkarım süresi, yakınsama epoch'u) ve küçük bir tablo olarak `docs/reports/statistical_analysis_secondary.md` dosyasına yaz.
-7. README güncellemesi:
-   - "Statistical Analysis and Validation Experiments" bölümündeki "Open point / Script" tablosunu sonuç tablosuyla değiştir: birincil karşılaştırma (erken durdurmalı gruplar, protokol kararı), sabit bütçeli duyarlılık sonuçları (`e20`, `e50`, yakınsama uyarısıyla), FVEI ResNet50 vs VGG16 (MAE, fark, 95% GA, Holm p), ImageNet→FVEI ablasyonu. `docs/MODEL_SELECTION_PROTOCOL.md` dosyasına bağlantı ver.
-   - "Main Research Findings" bölümüne yeni maddeler ekle: (a) protokol kararı ve hipotezin durumu (protokol Bölüm 4 tablosuna göre), (b) sabit bütçede ResNet50'nin yakınsamadığı ve farkın bütçeye duyarlı olduğu, (c) FVEI'de iki mimari arasındaki farkın küçük ve Holm sonrası anlamlı olmadığı, (d) sentetik ön eğitimin FVEI'de ölçülebilir fayda sağlamadığı, (e) nihai modelin test sonucuna göre değiştirilmediği.
+5. `python -m src.evaluation.statistical_analysis` (çıktı dizini vermeden). `docs/reports/statistical_analysis.md` içindeki "Mimari" ailesinde `vgg16_e200_p20` / `resnet50_e200_p20` satırının "Protokol kararı" birincil sonuçtur.
+6. **Koşullu adım (protokol Bölüm 7):** Birincil karar tam olarak "ResNet50 anlamlı düzeyde daha iyi" ise:
+   - `python -m src.training.train_synthetic_multiseed --arch resnet50_cbam --epochs 200 --patience 20`
+   - `python -m src.training.train_synthetic_multiseed --arch resnet50_se --epochs 200 --patience 20`
+   - `python -m src.evaluation.statistical_analysis` ile raporu yeniden üret ("Dikkat" ailesi satırları).
+   Karar başka bir şeyse bu adımı atla ve README'de "koşul sağlanmadığı için çalıştırılmadı" diye belirt. Dikkat varyantlarını FVEI'de eğitme veya değerlendirme.
+7. Protokol kararı "Anlamlı fark yok" veya "Kısmi kanıt" ise protokol Bölüm 5'teki ikincil ölçütleri ölç (toplam parametre sayısı, aynı GPU'da görüntü başına ortalama çıkarım süresi, yakınsama epoch'u) ve küçük bir tablo olarak `docs/reports/statistical_analysis_secondary.md` dosyasına yaz.
+8. README güncellemesi:
+   - "Statistical Analysis and Validation Experiments" bölümündeki "Open point / Script" tablosunu sonuç tablosuyla değiştir: birincil karşılaştırma (erken durdurmalı gruplar, protokol kararı), sabit bütçeli duyarlılık sonuçları (`e20`, `e50`, yakınsama uyarısıyla), varsa ResNet50 + CBAM/SE sonuçları, FVEI ResNet50 vs VGG16 (MAE, fark, 95% GA, Holm p), ImageNet→FVEI ablasyonu. `docs/MODEL_SELECTION_PROTOCOL.md` dosyasına bağlantı ver.
+   - "Main Research Findings" bölümüne yeni maddeler ekle: (a) protokol kararı ve hipotezin durumu (protokol Bölüm 4 tablosuna göre), (b) sabit bütçede ResNet50'nin yakınsamadığı ve farkın bütçeye duyarlı olduğu, (c) koşullu dikkat deneyi çalıştırıldıysa sonucu (Bölüm 7 tablosuna göre), (d) FVEI'de iki mimari arasındaki farkın küçük ve Holm sonrası anlamlı olmadığı, (e) sentetik ön eğitimin FVEI'de ölçülebilir fayda sağlamadığı, (f) nihai modelin test sonucuna göre değiştirilmediği.
    - Sonuç VGG16 lehine çıkmazsa bunu olduğu gibi raporla.
    - "Validation experiments" listesindeki test sayısını gerçek `pytest` çıktısıyla düzelt.
-8. Depo kökündeki geçici `.tmp` dosyalarını (`.publication_snapshot.tmp` vb.) ve `results/ci_statistics/` klasörünü sil; gerekli değillerse kullanıcıya listeleyip onay al.
-9. `python scripts/sanitize_result_paths.py`, ardından commit. Push etmeden önce kullanıcıya sor.
+9. Depo kökündeki geçici `.tmp` dosyalarını (`.publication_snapshot.tmp` vb.) ve `results/ci_statistics/` klasörünü sil; gerekli değillerse kullanıcıya listeleyip onay al.
+10. `python scripts/sanitize_result_paths.py`, ardından commit. Bu son push için yine kullanıcıya sor.

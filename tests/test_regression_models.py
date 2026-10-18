@@ -102,3 +102,27 @@ def test_forward_returns_one_value_per_image(arch):
         output = model(torch.zeros(2, 3, 224, 224))
 
     assert output.shape == (2, 1)
+
+
+@pytest.mark.parametrize("arch", ["resnet50_cbam", "resnet50_se"])
+def test_resnet50_attention_variant_trains_only_attention_and_head(arch):
+    model = build_regression_model(arch, pretrained=False)
+    freeze_all_but_head(model, arch)
+
+    trainable = {
+        name.split(".")[0] + "." + name.split(".")[1]
+        if name.startswith("layer4.") else name.split(".")[0]
+        for name, parameter in model.named_parameters()
+        if parameter.requires_grad
+    }
+
+    assert trainable == {"layer4.attention", "fc"}
+
+    with torch.no_grad():
+        assert model.eval()(torch.zeros(1, 3, 224, 224)).shape == (1, 1)
+
+
+def test_attention_variants_cannot_use_fvei_last_block_finetuning():
+    model = build_regression_model("resnet50_se", pretrained=False)
+    with pytest.raises(ValueError):
+        configure_last_block_finetuning(model, "resnet50_se")

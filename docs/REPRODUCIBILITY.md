@@ -155,9 +155,18 @@ Son komut, orijinal ResNet50 eğitiminde en iyi epoch'un son epoch (20/20) olmas
 
 Karar kuralı [`MODEL_SELECTION_PROTOCOL.md`](MODEL_SELECTION_PROTOCOL.md) dosyasındadır ve yeni eğitimlerden önce commit edilir. Önceki 20/50 epoch sonuçları ön kayıt kapsamında değildir. Protokol kodunun deney öncesi doğrulamasında **36 test geçti**; bunlar beş seed şartını ve erken durmadan epoch bütçesine ulaşan koşuların yakınsamış sayılmamasını da kapsar.
 
+Koşullu ResNet50 dikkat uzantısının deney öncesi doğrulamasında **41 test geçti**. İlk ön kayıt (`a15671d`) sonrasında başlayan VGG16 seed 42 ön koşusu, koşullu deney protokole eklenince 28. epoch'ta, test değerlendirmesi yapılmadan durduruldu; bu koşu sonuçlara dahil edilmedi. İlk commit değiştirilmez. İkinci ön kayıt commit'i de oluşturulup iki commit birlikte push edildikten sonra yakınsama deneyleri aynı seed'lerle baştan çalıştırılır. Kesilen ön koşunun logu yerelde `results/logs/convergence_vgg16_before_second_registration.log` dosyasında saklanır.
+
 ```bash
 python -m src.training.train_synthetic_multiseed --arch vgg16 --epochs 200 --patience 20
 python -m src.training.train_synthetic_multiseed --arch resnet50 --epochs 200 --patience 20
+```
+
+Yalnızca bu birincil karşılaştırmanın protokol kararı "ResNet50 anlamlı düzeyde daha iyi" çıkarsa, dikkat mekanizmaları ResNet50 üzerinde aynı protokolle denenir ([`MODEL_SELECTION_PROTOCOL.md`](MODEL_SELECTION_PROTOCOL.md) Bölüm 7):
+
+```bash
+python -m src.training.train_synthetic_multiseed --arch resnet50_cbam --epochs 200 --patience 20
+python -m src.training.train_synthetic_multiseed --arch resnet50_se --epochs 200 --patience 20
 ```
 
 Çıktı: `results/multiseed/<arch>_e<epochs>[_p<patience>]/seed_<n>/`. İstatistik raporu, erken durdurmalı grupları yalnızca aynı patience değerine sahip gruplarla eşleştirir ve her grup için bütçe içinde yakınsayan seed sayısını gösterir.

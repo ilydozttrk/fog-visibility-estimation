@@ -59,7 +59,7 @@ from torch.utils.data import DataLoader
 from src.models.regression_models import (
     DISPLAY_NAMES,
     LAST_BLOCK_NAMES,
-    SUPPORTED_ARCHITECTURES,
+    BASE_ARCHITECTURES,
     build_regression_model,
     configure_last_block_finetuning,
     last_block_parameter_groups,
@@ -229,7 +229,7 @@ def main() -> None:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--arch", choices=SUPPORTED_ARCHITECTURES, required=True)
+    parser.add_argument("--arch", choices=BASE_ARCHITECTURES, required=True)
     parser.add_argument(
         "--init", choices=("synthetic", "imagenet"), default="synthetic"
     )

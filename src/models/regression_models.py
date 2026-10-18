@@ -27,6 +27,8 @@ Project: TUBITAK 2209-A
 
 from __future__ import annotations
 
+from collections import OrderedDict
+
 import torch.nn as nn
 from torchvision.models import ResNet50_Weights, resnet50
 
@@ -35,16 +37,33 @@ from src.training.config import (
     REGRESSION_HIDDEN_DIM_1,
     REGRESSION_HIDDEN_DIM_2,
 )
+from src.models.attention import CBAM, SEBlock
 from src.training.train_vgg16 import build_vgg16_regression_model
 
 
-SUPPORTED_ARCHITECTURES = ("vgg16", "resnet50")
+# Backbones used for the architecture comparison and FVEI fine-tuning.
+BASE_ARCHITECTURES = ("vgg16", "resnet50")
+
+# ResNet50 + attention variants (synthetic multi-seed only). They mirror
+# the VGG16 CBAM / SE experiments: the attention module is applied to
+# the output of the last convolutional stage (ResNet50 layer4, 2048
+# channels; VGG16: last conv block, 512 channels), the backbone stays
+# frozen and only the attention module and the regression head train.
+# CBAM: reduction ratio 16, spatial kernel 7. SE: reduction ratio 16.
+ATTENTION_ARCHITECTURES = ("resnet50_cbam", "resnet50_se")
+
+SUPPORTED_ARCHITECTURES = BASE_ARCHITECTURES + ATTENTION_ARCHITECTURES
+
+ATTENTION_REDUCTION_RATIO = 16
+CBAM_SPATIAL_KERNEL_SIZE = 7
 
 VGG16_BLOCK5_START_INDEX = 24
 
 DISPLAY_NAMES = {
     "vgg16": "VGG16",
     "resnet50": "ResNet50",
+    "resnet50_cbam": "ResNet50 + CBAM",
+    "resnet50_se": "ResNet50 + SE",
 }
 
 LAST_BLOCK_NAMES = {
@@ -92,8 +111,32 @@ def build_regression_model(arch: str, pretrained: bool = True) -> nn.Module:
         return build_vgg16_regression_model(pretrained=pretrained)
 
     model = resnet50(weights=ResNet50_Weights.DEFAULT if pretrained else None)
-    model.fc = _regression_head(model.fc.in_features)
+    channels = model.fc.in_features
+    model.fc = _regression_head(channels)
+
+    if arch in ATTENTION_ARCHITECTURES:
+        if arch == "resnet50_cbam":
+            attention = CBAM(
+                channels=channels,
+                reduction_ratio=ATTENTION_REDUCTION_RATIO,
+                spatial_kernel_size=CBAM_SPATIAL_KERNEL_SIZE,
+            )
+        else:
+            attention = SEBlock(
+                channels=channels,
+                reduction_ratio=ATTENTION_REDUCTION_RATIO,
+            )
+
+        model.layer4 = nn.Sequential(
+            OrderedDict(block=model.layer4, attention=attention)
+        )
+
     return model
+
+
+def get_attention(model: nn.Module, arch: str) -> nn.Module | None:
+    _check_arch(arch)
+    return model.layer4.attention if arch in ATTENTION_ARCHITECTURES else None
 
 
 def get_head(model: nn.Module, arch: str) -> nn.Module:
@@ -107,11 +150,17 @@ def get_last_block(model: nn.Module, arch: str) -> nn.Module:
     if arch == "vgg16":
         return model.features[VGG16_BLOCK5_START_INDEX:]
 
+    if arch in ATTENTION_ARCHITECTURES:
+        return model.layer4.block
+
     return model.layer4
 
 
 def freeze_all_but_head(model: nn.Module, arch: str) -> None:
-    """Synthetic-stage protocol: frozen backbone, trainable head."""
+    """
+    Synthetic-stage protocol: frozen backbone, trainable head
+    (plus the attention module for the attention variants).
+    """
 
     for parameter in model.parameters():
         parameter.requires_grad = False
@@ -119,9 +168,17 @@ def freeze_all_but_head(model: nn.Module, arch: str) -> None:
     for parameter in get_head(model, arch).parameters():
         parameter.requires_grad = True
 
+    attention = get_attention(model, arch)
+    if attention is not None:
+        for parameter in attention.parameters():
+            parameter.requires_grad = True
+
 
 def configure_last_block_finetuning(model: nn.Module, arch: str) -> None:
     """Freeze everything except the last convolutional stage and head."""
+
+    if arch not in BASE_ARCHITECTURES:
+        raise ValueError("Last-block fine-tuning is defined for vgg16 and resnet50 only.")
 
     freeze_all_but_head(model, arch)
 

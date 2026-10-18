@@ -181,3 +181,31 @@ def test_protocol_decision_flags_unconverged_runs():
 def test_protocol_decision_cannot_declare_a_winner_without_five_seeds(differences):
     verdict = protocol_decision(differences, 2.0, 9.0, 0.001, True)
     assert verdict.startswith("Kısmi kanıt")
+
+
+def test_protocol_decision_uses_given_model_names():
+    verdict = protocol_decision([-3.0] * 5, -6.0, -1.0, 0.01, True, "ResNet50", "ResNet50 + CBAM")
+    assert verdict == "ResNet50 + CBAM anlamlı düzeyde daha iyi"
+
+
+def test_attention_variants_are_compared_only_with_same_budget_resnet50():
+    def run(seed, value, arch):
+        return _seed_summary(seed, value, 50, 200, arch=arch, stopped_epoch=70,
+                             converged_within_budget=True)
+
+    groups = {
+        "vgg16_e200_p20": [run(s, 60.0, "vgg16") for s in range(5)],
+        "resnet50_e200_p20": [run(s, 55.0, "resnet50") for s in range(5)],
+        "resnet50_e50": [_seed_summary(s, 80.0, 50, 50, arch="resnet50") for s in range(5)],
+        "resnet50_cbam_e200_p20": [run(s, 50.0, "resnet50_cbam") for s in range(5)],
+        "resnet50_se_e200_p20": [run(s, 58.0, "resnet50_se") for s in range(5)],
+    }
+
+    result = analyse_multiseed(groups)
+    pairs = {(c["family"], c["reference"], c["model"]) for c in result["paired_by_seed"]}
+
+    assert pairs == {
+        ("architecture", "vgg16_e200_p20", "resnet50_e200_p20"),
+        ("resnet50_attention", "resnet50_e200_p20", "resnet50_cbam_e200_p20"),
+        ("resnet50_attention", "resnet50_e200_p20", "resnet50_se_e200_p20"),
+    }

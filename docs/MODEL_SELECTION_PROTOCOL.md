@@ -95,3 +95,31 @@ Bu kural `src/evaluation/statistical_analysis.py` içindeki `protocol_decision` 
 - Nihai gerçek dünya modeli (`results/checkpoints/vgg16_fvei_block5_best.pth`) bu protokolün sonucundan bağımsız olarak değişmez. Bu model, önerideki iş akışına uygun olarak validation ile seçilmiş ve kilitli testte değerlendirilmiştir. Mimari karşılaştırmasının sonucu bir bulgu olarak raporlanır.
 - FVEI kilitli test kümesi hiçbir yeni karar için kullanılmaz.
 - 20 ve 50 epoch'luk sabit bütçeli çoklu seed sonuçları duyarlılık analizi olarak raporlanır; birincil karar erken durdurmalı gruplara dayanır.
+
+---
+
+## 7. Koşullu deney: ResNet50 kazanırsa dikkat mekanizmaları
+
+**Dayanak:** Öneriye göre dikkat mekanizması "seçilen en iyi mimariye" entegre edilir (Bölüm 1.1 madde 2 ve Yöntem 1.4); dikkat mekanizması iyileşme sağlamazsa B planı olarak SE-Net denenir (Risk Yönetimi). CBAM ve SE, ilk deneylerde VGG16 en iyi mimari olarak seçildiği için VGG16'ya uygulanmıştı.
+
+**Tetikleyici:** Bu deney yalnızca Bölüm 2'deki birincil karşılaştırmanın (`vgg16_e200_p20` ↔ `resnet50_e200_p20`) protokol kararı tam olarak **"ResNet50 anlamlı düzeyde daha iyi"** ise çalıştırılır. Karar "VGG16 anlamlı düzeyde daha iyi", "Kısmi kanıt" veya "Anlamlı fark yok" ise çalıştırılmaz; bu durumda VGG16 üzerindeki mevcut CBAM/SE sonuçları geçerli kalır.
+
+**Model:** VGG16 deneylerinin birebir karşılığıdır. Dikkat modülü son evrişim aşamasının çıkışına eklenir (ResNet50 `layer4`, 2048 kanal), ardından ortalama havuzlama ve aynı regresyon başlığı gelir. Omurga dondurulmuştur; yalnızca dikkat modülü ve regresyon başlığı eğitilir. CBAM: indirgeme oranı 16, uzamsal çekirdek 7. SE: indirgeme oranı 16. Uygulama: `src/models/regression_models.py` (`resnet50_cbam`, `resnet50_se`).
+
+**Eğitim:** Bölüm 2 ile aynı (Adam, LR 1e-4, weight decay 1e-5, L1, batch 16, en fazla 200 epoch, patience 20, seed'ler 42, 7, 123, 2024, 3407, split seed 42).
+
+```bash
+python -m src.training.train_synthetic_multiseed --arch resnet50_cbam --epochs 200 --patience 20
+python -m src.training.train_synthetic_multiseed --arch resnet50_se --epochs 200 --patience 20
+python -m src.evaluation.statistical_analysis
+```
+
+**Karar:** Bölüm 3–4'teki ölçüt ve kural, referans `resnet50_e200_p20` olacak şekilde aynen uygulanır. İki karşılaştırma (ResNet50 ↔ +CBAM, ResNet50 ↔ +SE) ayrı bir Holm ailesi oluşturur; mimari karşılaştırmasının p değerlerini etkilemez.
+
+| Protokol kararı | Yorum |
+|---|---|
+| "ResNet50 + CBAM/SE anlamlı düzeyde daha iyi" | Dikkat mekanizması ResNet50'yi iyileştirdi |
+| "ResNet50 anlamlı düzeyde daha iyi" | Dikkat mekanizması performansı düşürdü |
+| "Kısmi kanıt" / "Anlamlı fark yok" | İyileştirme gösterilemedi |
+
+**Sınırlar:** Dikkat varyantları FVEI üzerinde eğitilmez ve kilitli FVEI testinde değerlendirilmez. Nihai gerçek dünya modeli (Bölüm 6) değişmez. Sonuçlar bir bulgu olarak raporlanır.

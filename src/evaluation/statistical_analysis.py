@@ -589,23 +589,26 @@ def protocol_decision(
     ci_upper: float,
     p_holm: float,
     all_converged: bool,
+    reference_name: str = "VGG16",
+    model_name: str = "ResNet50",
 ) -> str:
     """
     Pre-registered decision rule (docs/MODEL_SELECTION_PROTOCOL.md).
 
-    Differences are MAE(ResNet50) - MAE(VGG16): positive favours VGG16.
+    Differences are MAE(model) - MAE(reference): positive favours the
+    reference (by default VGG16 vs ResNet50).
     """
 
     differences = np.asarray(seed_differences, dtype=float)
     five_seeds = differences.size == 5 and bool(np.all(np.isfinite(differences)))
-    vgg_all = five_seeds and bool(np.all(differences > 0))
-    resnet_all = five_seeds and bool(np.all(differences < 0))
+    reference_all = five_seeds and bool(np.all(differences > 0))
+    model_all = five_seeds and bool(np.all(differences < 0))
     excludes_zero = ci_lower > 0 or ci_upper < 0
 
-    if vgg_all and ci_lower > 0 and p_holm < ALPHA:
-        verdict = "VGG16 anlamlı düzeyde daha iyi"
-    elif resnet_all and ci_upper < 0 and p_holm < ALPHA:
-        verdict = "ResNet50 anlamlı düzeyde daha iyi"
+    if reference_all and ci_lower > 0 and p_holm < ALPHA:
+        verdict = f"{reference_name} anlamlı düzeyde daha iyi"
+    elif model_all and ci_upper < 0 and p_holm < ALPHA:
+        verdict = f"{model_name} anlamlı düzeyde daha iyi"
     elif excludes_zero or p_holm < ALPHA:
         verdict = "Kısmi kanıt (tüm ölçütler sağlanmadı); anlamlı fark iddia edilmez"
     else:
@@ -615,6 +618,29 @@ def protocol_decision(
         verdict += " (uyarı: tüm seed'ler bütçe içinde yakınsamadı)"
 
     return verdict
+
+
+# (reference arch, compared arch, comparison family). Holm correction is
+# applied within each family.
+MULTISEED_COMPARISONS = (
+    ("vgg16", "resnet50", "architecture"),
+    ("resnet50", "resnet50_cbam", "resnet50_attention"),
+    ("resnet50", "resnet50_se", "resnet50_attention"),
+)
+
+ARCH_DISPLAY_NAMES = {
+    "vgg16": "VGG16",
+    "resnet50": "ResNet50",
+    "resnet50_cbam": "ResNet50 + CBAM",
+    "resnet50_se": "ResNet50 + SE",
+}
+
+
+def _group_arch(group: str, summaries: list[dict]) -> str:
+    arch = summaries[0].get("arch") if summaries else None
+    if arch:
+        return arch
+    return group.split("_e", 1)[0]
 
 
 def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
@@ -648,103 +674,130 @@ def analyse_multiseed(groups: dict[str, list[dict]]) -> dict:
 
     comparisons = []
 
-    vgg_groups = [g for g in groups if g.startswith("vgg16_")]
-    resnet_groups = [g for g in groups if g.startswith("resnet50_")]
-
     def _patience_suffix(group: str) -> str:
         return group.rsplit("_p", 1)[1] if "_p" in group else ""
 
-    for vgg_group in vgg_groups:
-        for resnet_group in resnet_groups:
-            # Compare early-stopping groups only with the same patience,
-            # and fixed-budget groups only with fixed-budget groups.
-            if _patience_suffix(vgg_group) != _patience_suffix(resnet_group):
-                continue
+    archs = {group: _group_arch(group, summaries) for group, summaries in groups.items()}
 
-            vgg = {s["training_seed"]: s["test_mae_m"] for s in groups[vgg_group]}
-            resnet = {
-                s["training_seed"]: s["test_mae_m"] for s in groups[resnet_group]
-            }
-            seeds = sorted(set(vgg) & set(resnet))
+    for reference_arch, model_arch, family in MULTISEED_COMPARISONS:
+        reference_groups = [g for g in groups if archs[g] == reference_arch]
+        model_groups = [g for g in groups if archs[g] == model_arch]
 
-            if not seeds:
-                continue
+        for reference_group in reference_groups:
+            for model_group in model_groups:
+                # Early-stopping groups are compared only with the same
+                # patience; fixed-budget groups only with fixed-budget ones.
+                if _patience_suffix(reference_group) != _patience_suffix(model_group):
+                    continue
 
-            differences = np.array([resnet[s] - vgg[s] for s in seeds])
+                # Attention variants are compared only with a backbone run
+                # trained under exactly the same budget.
+                if family != "architecture" and (
+                    reference_group.split("_e", 1)[1] != model_group.split("_e", 1)[1]
+                ):
+                    continue
 
-            pooled = None
-            vgg_errors = seed_averaged_errors(groups[vgg_group], seeds)
-            resnet_errors = seed_averaged_errors(groups[resnet_group], seeds)
+                reference = {
+                    s["training_seed"]: s["test_mae_m"] for s in groups[reference_group]
+                }
+                model = {s["training_seed"]: s["test_mae_m"] for s in groups[model_group]}
+                seeds = sorted(set(reference) & set(model))
 
-            if vgg_errors is not None and resnet_errors is not None:
-                resnet_errors = resnet_errors.loc[vgg_errors.index]
-                clusters = vgg_errors["scene_key"].to_numpy()
-                image_difference = (
-                    resnet_errors["error"].to_numpy() - vgg_errors["error"].to_numpy()
-                )
-                scene = pd.DataFrame(
-                    {
-                        "scene_key": clusters,
-                        "vgg": vgg_errors["error"].to_numpy(),
-                        "resnet": resnet_errors["error"].to_numpy(),
+                if not seeds:
+                    continue
+
+                differences = np.array([model[s] - reference[s] for s in seeds])
+
+                pooled = None
+                reference_errors = seed_averaged_errors(groups[reference_group], seeds)
+                model_errors = seed_averaged_errors(groups[model_group], seeds)
+
+                if reference_errors is not None and model_errors is not None:
+                    model_errors = model_errors.loc[reference_errors.index]
+                    clusters = reference_errors["scene_key"].to_numpy()
+                    image_difference = (
+                        model_errors["error"].to_numpy()
+                        - reference_errors["error"].to_numpy()
+                    )
+                    scene = pd.DataFrame(
+                        {
+                            "scene_key": clusters,
+                            "reference": reference_errors["error"].to_numpy(),
+                            "model": model_errors["error"].to_numpy(),
+                        }
+                    ).groupby("scene_key").mean()
+
+                    pooled = {
+                        "description": (
+                            "per-image errors averaged over paired seeds; "
+                            "scene is the unit of analysis"
+                        ),
+                        "n_scenes": int(len(scene)),
+                        "mae_difference_m": cluster_bootstrap_mean(
+                            image_difference, clusters
+                        ).as_dict(),
+                        "scenes_where_reference_is_better": int(
+                            (scene["model"] > scene["reference"]).sum()
+                        ),
+                        "scene_level_wilcoxon": paired_wilcoxon(
+                            scene["reference"].to_numpy(), scene["model"].to_numpy()
+                        ),
                     }
-                ).groupby("scene_key").mean()
+                    # Backwards-compatible key name for the VGG16 vs ResNet50 family.
+                    pooled["scenes_where_vgg16_is_better"] = (
+                        pooled["scenes_where_reference_is_better"]
+                    )
 
-                pooled = {
-                    "description": (
-                        "per-image errors averaged over paired seeds; "
-                        "scene is the unit of analysis"
-                    ),
-                    "n_scenes": int(len(scene)),
-                    "mae_difference_m": cluster_bootstrap_mean(
-                        image_difference, clusters
-                    ).as_dict(),
-                    "scenes_where_vgg16_is_better": int(
-                        (scene["resnet"] > scene["vgg"]).sum()
-                    ),
-                    "scene_level_wilcoxon": paired_wilcoxon(
-                        scene["vgg"].to_numpy(), scene["resnet"].to_numpy()
-                    ),
-                }
+                converged = all(
+                    s.get("converged_within_budget", s["best_epoch"] < s["epochs"])
+                    for s in groups[reference_group] + groups[model_group]
+                    if s["training_seed"] in seeds
+                )
 
-            converged = all(
-                s.get("converged_within_budget", s["best_epoch"] < s["epochs"])
-                for s in groups[vgg_group] + groups[resnet_group]
-                if s["training_seed"] in seeds
-            )
+                reference_better = int((differences > 0).sum())
 
-            comparisons.append(
-                {
-                    "all_seeds_converged_within_budget": converged,
-                    "pooled_scene_level": pooled,
-                    "reference": vgg_group,
-                    "model": resnet_group,
-                    "paired_seeds": seeds,
-                    "difference_definition": (
-                        f"test MAE({resnet_group}) - test MAE({vgg_group}), "
-                        "per training seed"
-                    ),
-                    "mae_difference_per_seed_m": differences.tolist(),
-                    "mae_difference_mean_m": float(differences.mean()),
-                    "seeds_where_vgg16_is_better": int((differences > 0).sum()),
-                }
-            )
+                comparisons.append(
+                    {
+                        "family": family,
+                        "reference": reference_group,
+                        "model": model_group,
+                        "reference_arch": reference_arch,
+                        "model_arch": model_arch,
+                        "all_seeds_converged_within_budget": converged,
+                        "pooled_scene_level": pooled,
+                        "paired_seeds": seeds,
+                        "difference_definition": (
+                            f"test MAE({model_group}) - test MAE({reference_group}), "
+                            "per training seed"
+                        ),
+                        "mae_difference_per_seed_m": differences.tolist(),
+                        "mae_difference_mean_m": float(differences.mean()),
+                        "seeds_where_reference_is_better": reference_better,
+                        "seeds_where_vgg16_is_better": reference_better,
+                    }
+                )
 
-    tested = [c for c in comparisons if c["pooled_scene_level"] is not None]
-    adjusted = holm_correction(
-        [c["pooled_scene_level"]["scene_level_wilcoxon"]["p_value"] for c in tested]
-    )
-
-    for comparison, p_adjusted in zip(tested, adjusted):
-        pooled = comparison["pooled_scene_level"]
-        pooled["scene_level_wilcoxon"]["p_value_holm"] = p_adjusted
-        comparison["protocol_decision"] = protocol_decision(
-            comparison["mae_difference_per_seed_m"],
-            pooled["mae_difference_m"]["ci95_lower"],
-            pooled["mae_difference_m"]["ci95_upper"],
-            p_adjusted,
-            comparison["all_seeds_converged_within_budget"],
+    for family in sorted({c["family"] for c in comparisons}):
+        tested = [
+            c for c in comparisons
+            if c["family"] == family and c["pooled_scene_level"] is not None
+        ]
+        adjusted = holm_correction(
+            [c["pooled_scene_level"]["scene_level_wilcoxon"]["p_value"] for c in tested]
         )
+
+        for comparison, p_adjusted in zip(tested, adjusted):
+            pooled = comparison["pooled_scene_level"]
+            pooled["scene_level_wilcoxon"]["p_value_holm"] = p_adjusted
+            comparison["protocol_decision"] = protocol_decision(
+                comparison["mae_difference_per_seed_m"],
+                pooled["mae_difference_m"]["ci95_lower"],
+                pooled["mae_difference_m"]["ci95_upper"],
+                p_adjusted,
+                comparison["all_seeds_converged_within_budget"],
+                ARCH_DISPLAY_NAMES[comparison["reference_arch"]],
+                ARCH_DISPLAY_NAMES[comparison["model_arch"]],
+            )
 
     return {"groups": output, "paired_by_seed": comparisons}
 
@@ -926,14 +979,16 @@ def write_markdown(results: dict, path: Path) -> None:
         if multiseed["paired_by_seed"]:
             lines += [
                 "",
-                "Seed bazında eşleştirilmiş karşılaştırma "
-                "(fark = ResNet50 − VGG16):",
+                "Seed bazında eşleştirilmiş karşılaştırmalar. Fark = MAE(karşılaştırılan) "
+                "− MAE(referans); pozitif değer referans lehinedir. Holm düzeltmesi "
+                "her aile (mimari: VGG16 ↔ ResNet50; dikkat: ResNet50 ↔ ResNet50 + "
+                "CBAM/SE) içinde ayrı uygulanır.",
                 "",
-                "| VGG16 grubu | ResNet50 grubu | Ortak seed | Ortalama fark "
-                "(m) | VGG16'nın daha iyi olduğu seed | Fark [95% GA] (sahne, "
-                "seed ortalaması) | VGG16'nın daha iyi olduğu sahne | Holm p "
-                "| Protokol kararı |",
-                "|---|---|---:|---:|---:|---:|---:|---:|---|",
+                "| Aile | Referans grubu | Karşılaştırılan grup | Ortak seed | "
+                "Ortalama fark (m) | Referansın daha iyi olduğu seed | Fark [95% GA] "
+                "(sahne, seed ortalaması) | Referansın daha iyi olduğu sahne | "
+                "Holm p | Protokol kararı |",
+                "|---|---|---|---:|---:|---:|---:|---:|---:|---|",
             ]
 
             for c in multiseed["paired_by_seed"]:
@@ -941,18 +996,19 @@ def write_markdown(results: dict, path: Path) -> None:
                 if pooled:
                     extra = (
                         f"{_ci(pooled['mae_difference_m'])} | "
-                        f"{pooled['scenes_where_vgg16_is_better']}/"
+                        f"{pooled['scenes_where_reference_is_better']}/"
                         f"{pooled['n_scenes']} | "
                         f"{_fmt_p(pooled['scene_level_wilcoxon']['p_value_holm'])} | "
                         f"{c['protocol_decision']}"
                     )
                 else:
                     extra = "– | – | – | tahmin dosyası yok"
+                family = "Mimari" if c.get("family", "architecture") == "architecture" else "Dikkat"
                 lines.append(
-                    f"| {c['reference']} | {c['model']} | "
+                    f"| {family} | {c['reference']} | {c['model']} | "
                     f"{len(c['paired_seeds'])} | "
                     f"{c['mae_difference_mean_m']:.2f} | "
-                    f"{c['seeds_where_vgg16_is_better']}/"
+                    f"{c['seeds_where_reference_is_better']}/"
                     f"{len(c['paired_seeds'])} | {extra} |"
                 )
 
